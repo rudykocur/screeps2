@@ -10,10 +10,33 @@ class RoomManager {
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
-        this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
-        this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), 'resourceType', RESOURCE_ENERGY);
-
         this.storage = new StorageWrapper(this, Game.flags.STORAGE);
+        this.meetingPoint = Game.flags.IDLE;
+
+        this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
+        this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
+            if(res.resourceType != RESOURCE_ENERGY) {
+                return false;
+            }
+
+            return !res.pos.isEqualTo(this.storage.target.pos);
+        });
+
+        this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+
+        let towers = _.filter(Game.structures, (struct) => {
+            if(struct.room != this.room) {
+                return false;
+            }
+
+            return struct.structureType == STRUCTURE_TOWER;
+        });
+
+        this.towers = towers.map(tower => {
+            let mind = new minds.available.tower(tower, this);
+            this.minds.push(mind);
+            return mind;
+        })
     }
 
     getCreepName(name) {
@@ -55,27 +78,29 @@ class RoomManager {
     }
 
     update() {
+        if(this.towers.length < 1 && this.enemies.length > 0 && !this.room.controller.safeMode) {
+            console.log('Activating SAFE MODE!!!!');
+            Game.notify('ATTACK. SAFE MODE ACTIVATED');
+            this.room.controller.activateSafeMode();
+        }
+
         let spawn = this.getFreeSpawn();
 
         if(spawn) {
-            if (this.getCreepCount(minds.available.harvester) < 2) {
-                // console.log('free spawn', spawn);
-                let body = [MOVE, WORK, WORK];
-                let memo = {'mind': 'harvester'};
-
-                this.doSpawn(spawn, body, 'test1', memo);
+            if (this.getCreepCount(minds.available.harvester) < 1) {
+                this.spawnHarvester(spawn);
             }
             else if(this.getCreepCount(minds.available.transfer) < 2) {
-                let body = [MOVE, MOVE, CARRY, CARRY];
-                let memo = {'mind': 'transfer'};
-
-                this.doSpawn(spawn, body, 'transfer', memo);
+                this.spawnTransfer(spawn);
             }
-            else if(this.getCreepCount(minds.available.upgrader) < 4) {
-                let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-                let memo = {'mind': 'upgrader'};
-
-                this.doSpawn(spawn, body, 'upgrader', memo);
+            else if(this.getCreepCount(minds.available.harvester) < 2) {
+                this.spawnHarvester(spawn);
+            }
+            else if(this.getCreepCount(minds.available.transfer) < 3) {
+                this.spawnTransfer(spawn);
+            }
+            else if(this.getCreepCount(minds.available.upgrader) < 3) {
+                this.spawnUpgrader(spawn)
             }
             else if(this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
                 let body = [MOVE, MOVE, CARRY, CARRY, WORK];
@@ -85,6 +110,10 @@ class RoomManager {
             }
         }
     }
+
+    spawnHarvester(spawn) {this.doSpawn(spawn, [MOVE, WORK, WORK], 'harvester', {'mind': 'harvester'})}
+    spawnTransfer(spawn) {this.doSpawn(spawn, [MOVE, MOVE, CARRY, CARRY], 'transfer', {'mind': 'transfer'});}
+    spawnUpgrader(spawn) {this.doSpawn(spawn, [MOVE, MOVE, CARRY, CARRY, WORK], 'upgrader', {'mind': 'upgrader'})}
 
     doSpawn(spawn, body,name, memo) {
         name = this.getCreepName(name);
@@ -120,6 +149,15 @@ class StorageWrapper {
         }
     }
 
+    getStoredEnergy() {
+        if(this.isFlag) {
+            if(!this.resource) {
+                return 0;
+            }
+            return this.resource.amount;
+        }
+    }
+
     isNear(creep) {
         if(this.isFlag) {
             return this.target.pos.isEqualTo(creep.pos);
@@ -128,13 +166,13 @@ class StorageWrapper {
 
     deposit(fromCreep) {
         if(this.isFlag) {
-            creep.drop(RESOURCE_ENERGY);
+            fromCreep.drop(RESOURCE_ENERGY);
         }
     }
 
     withdraw(toCreep) {
         if(this.isFlag) {
-            toCreep.withdraw(this.resource);
+            toCreep.pickup(this.resource);
         }
     }
 }

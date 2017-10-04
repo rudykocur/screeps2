@@ -11,7 +11,7 @@ class UpgraderMind extends MindBase {
 
         let fsm = {
             [STATE_REFILL]: {
-                onEnter: () => this.pickEnergyTarget(),
+                onEnter: () => {},
                 onTick: ()=> this.doRefill(),
             },
             [STATE_UPGRADE]: {
@@ -27,52 +27,35 @@ class UpgraderMind extends MindBase {
     }
 
     doCheckStatus() {
-        if(this.creep.room.energyAvailable < this.creep.room.energyCapacityAvailable) {
-            return;
-        }
-
         if(_.sum(this.creep.carry) > 0) {
             this.enterState(STATE_UPGRADE);
             return;
         }
 
-        let test = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity/2);
-
-        if(test) {
-            this.enterState(STATE_REFILL, {targetId: test.id});
+        if(this.isEnoughStoredEnergy()) {
+            this.enterState(STATE_REFILL);
+            return;
         }
+
+        this.actions.gotoMeetingPoint();
     }
 
-    pickEnergyTarget() {
-        let resources = this.creep.room.find(FIND_DROPPED_RESOURCES);
-        let target = _.first(_.sortByOrder(resources, ['amount'], ['desc']));
-
-        if(!target) {
-            this.enterState(STATE_IDLE);
-        }
-
-        this.localState.targetId = target.id;
+    isEnoughStoredEnergy() {
+        return this.room.storage.getStoredEnergy() > this.creep.carryCapacity/2;
     }
 
     doRefill() {
-        if(this.creep.room.energyAvailable < this.creep.room.energyCapacityAvailable) {
+        if(!this.isEnoughStoredEnergy()) {
             this.enterState(STATE_IDLE);
             return;
         }
 
-        let target = Game.getObjectById(this.localState.targetId);
-
-        if(!target) {
-            this.enterState(STATE_IDLE);
-            return;
-        }
-
-        if(target.pos.isNearTo(this.creep)) {
-            this.creep.pickup(target);
+        if(this.room.storage.isNear(this.creep)) {
+            this.room.storage.withdraw(this.creep);
             this.enterState(STATE_UPGRADE);
         }
         else {
-            this.creep.moveTo(target);
+            this.creep.moveTo(this.room.storage.target);
         }
     }
 

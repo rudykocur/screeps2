@@ -4,6 +4,7 @@ const availableMinds = {
     'transfer': require('mind.transfer').TransferMind,
     'upgrader': require('mind.upgrader').UpgraderMind,
     'builder': require('mind.builder').BuilderMind,
+    'tower': require('mind.tower').TowerMind,
 };
 
 module.exports = {

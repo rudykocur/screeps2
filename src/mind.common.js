@@ -12,6 +12,8 @@ class MindBase {
         this.localState = this.creep.memory.localState;
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;
+
+        this.actions = new MindCommonActions(this, this.creep, this.room);
     }
 
     setStateMachine(fsm, initalState) {
@@ -66,6 +68,44 @@ class MindBase {
             else {
                 return result;
             }
+        }
+    }
+}
+
+class MindCommonActions {
+
+    constructor(mind, creep, room) {
+        this.mind = mind;
+        this.creep = creep;
+        this.room = room;
+    }
+
+    isEnoughStoredEnergy() {
+        return this.room.storage.getStoredEnergy() > this.creep.carryCapacity/2;
+    }
+
+    refillFromStorage(nextState, idleState) {
+        if(!this.isEnoughStoredEnergy()) {
+            this.mind.enterState(idleState);
+            return;
+        }
+
+        if(this.room.storage.isNear(this.creep)) {
+            this.room.storage.withdraw(this.creep);
+            this.mind.enterState(nextState);
+        }
+        else {
+            this.creep.moveTo(this.room.storage.target);
+        }
+    }
+
+    gotoMeetingPoint() {
+        if(!this.room.meetingPoint) {
+            return;
+        }
+
+        if(!this.room.meetingPoint.pos.inRangeTo(this.creep, 3)) {
+            this.creep.moveTo(this.room.meetingPoint);
         }
     }
 }
