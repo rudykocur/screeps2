@@ -5,12 +5,22 @@ class RoomManager {
     constructor(room) {
         this.room = room;
 
+        if(!this.room.memory.lastSpawnTick) {
+            this.room.memory.lastSpawnTick = {}
+        }
+
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
-        this.storage = new StorageWrapper(this, Game.flags.STORAGE);
+        if(Game.flags.STORAGE) {
+            this.storage = new FlagStorageWrapper(this, Game.flags.STORAGE);
+        }
+        else {
+            console.log('OMG NO LOGIC FOR STORAGE !!!');
+        }
+
         this.meetingPoint = Game.flags.IDLE;
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
@@ -110,10 +120,10 @@ class RoomManager {
 
                 this.doSpawn(spawn, body, 'builder', memo);
             }
-            else if(_.sum(this.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown() > 200) {
+            else if(_.sum(this.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
-            else if(this.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown() > 400) {
+            else if(this.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown('upgrader') > 300) {
                 this.spawnUpgrader(spawn)
             }
         }
@@ -139,7 +149,6 @@ class RoomManager {
             body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
         }
         this.doSpawn(spawn, body, 'transfer', {'mind': 'transfer'});
-
     }
     spawnUpgrader(spawn) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
@@ -162,70 +171,58 @@ class RoomManager {
             console.log('Failed to spawn', name, '::', body, '::',result);
         }
         else {
-            this.room.memory.lastSpawnTick = Game.time;
+            this.room.memory.lastSpawnTick[memo.mind] = Game.time;
             console.log('Spawned new creep', name, 'with body:', body);
         }
     }
 
-    getSpawnCooldown() {
-        if(this.room.memory.lastSpawnTick) {
-            return Game.time - this.room.memory.lastSpawnTick;
-        }
-
-        return 9999;
+    getSpawnCooldown(mindType) {
+        return (Game.time - this.room.memory.lastSpawnTick[mindType]) || 9999;
     }
 
     getFreeSpawn() {
-        let spawns = _.filter(_.filter(Game.structures, "room", this.room), (s) => {return s instanceof StructureSpawn});
+        return _.first(_.filter(Game.structures, (struct) => {
+            if(!(struct instanceof StructureSpawn)) {
+                return false;
+            }
 
-        // console.log('spawns', spawns);
+            if(struct.room != this.room) {
+                return false;
+            }
 
-        return _.first(_.filter(spawns, "spawning", null));
+            return !struct.spawning;
+        }));
     }
 }
 
-class StorageWrapper {
-    constructor(room, target) {
+class FlagStorageWrapper {
+    constructor(room, flag) {
         this.room = room;
-        this.target = target;
-        this.isFlag = target instanceof Flag;
-        this.resource = null;
-        if(this.isFlag) {
-            this.resource =  _.first(this.target.pos.lookFor(LOOK_RESOURCES));
-        }
+        this.target = flag;
+        this.resource =  _.first(this.target.pos.lookFor(LOOK_RESOURCES));
     }
 
     getStoredEnergy() {
-        if(this.isFlag) {
-            if(!this.resource) {
-                return 0;
-            }
-            return this.resource.amount;
+        if(!this.resource) {
+            return 0;
         }
+        return this.resource.amount;
     }
 
     isNear(creep) {
-        if(this.isFlag) {
-            return this.target.pos.isNearTo(creep.pos);
-        }
+        return this.target.pos.isNearTo(creep.pos);
     }
 
     canDeposit(creep) {
-        if(this.isFlag) {
-            return this.target.pos.isEqualTo(creep.pos);
-        }
+        return this.target.pos.isEqualTo(creep.pos);
     }
 
     deposit(fromCreep) {
-        if(this.isFlag) {
-            fromCreep.drop(RESOURCE_ENERGY);
-        }
+        fromCreep.drop(RESOURCE_ENERGY);
     }
 
     withdraw(toCreep) {
-        if(this.isFlag) {
-            toCreep.pickup(this.resource);
-        }
+        toCreep.pickup(this.resource);
     }
 }
 
