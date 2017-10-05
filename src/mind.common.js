@@ -1,5 +1,6 @@
-
-
+/**
+ * @property {Room} room
+ */
 class CreepMindBase {
     /**
      *
@@ -7,13 +8,14 @@ class CreepMindBase {
      * @param {RoomManager} roomManager
      */
     constructor(creep, roomManager) {
-        this.room = roomManager;
+        this.roomMgr = roomManager;
+        this.room = this.roomMgr.room;
         this.creep = creep;
         this.localState = this.creep.memory.localState;
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;
 
-        this.actions = new MindCommonActions(this, this.creep, this.room);
+        this.actions = new MindCommonActions(this, this.creep, this.roomMgr);
     }
 
     setStateMachine(fsm, initalState) {
@@ -74,14 +76,14 @@ class CreepMindBase {
 
 class MindCommonActions {
 
-    constructor(mind, creep, room) {
+    constructor(mind, creep, roomManager) {
         this.mind = mind;
         this.creep = creep;
-        this.room = room;
+        this.roomMgr = roomManager;
     }
 
     isEnoughStoredEnergy() {
-        return this.room.storage.getStoredEnergy() > this.creep.carryCapacity/2;
+        return this.roomMgr.storage.getStoredEnergy() > this.creep.carryCapacity/2;
     }
 
     refillFromStorage(nextState, idleState) {
@@ -90,22 +92,22 @@ class MindCommonActions {
             return;
         }
 
-        if(this.room.storage.isNear(this.creep)) {
-            this.room.storage.withdraw(this.creep);
+        if(this.roomMgr.storage.isNear(this.creep)) {
+            this.roomMgr.storage.withdraw(this.creep);
             this.mind.enterState(nextState);
         }
         else {
-            this.creep.moveTo(this.room.storage.target);
+            this.creep.moveTo(this.roomMgr.storage.target);
         }
     }
 
     gotoMeetingPoint() {
-        if(!this.room.meetingPoint) {
+        if(!this.roomMgr.meetingPoint) {
             return;
         }
 
-        if(!this.room.meetingPoint.pos.inRangeTo(this.creep, 3)) {
-            this.creep.moveTo(this.room.meetingPoint);
+        if(!this.roomMgr.meetingPoint.pos.inRangeTo(this.creep, 3)) {
+            this.creep.moveTo(this.roomMgr.meetingPoint);
         }
     }
 }

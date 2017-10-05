@@ -28,7 +28,7 @@ class BuilderMind extends mind.CreepMindBase {
 
     doCheckStatus() {
         if(_.sum(this.creep.carry) > 0) {
-            if(this.room.constructionSites.length > 0) {
+            if(this.roomMgr.constructionSites.length > 0) {
                 this.enterState(STATE_BUILD);
                 return;
             }
@@ -44,7 +44,7 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     pickBuildTarget() {
-        let site = _.first(this.room.constructionSites);
+        let site = _.first(this.roomMgr.constructionSites);
 
         if(!site) {
             this.enterState(STATE_IDLE);

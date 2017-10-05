@@ -7,7 +7,7 @@ class TowerMind {
     constructor(tower, roomManager) {
         //super(creep, roomManager);
         this.tower = tower;
-        this.room = roomManager;
+        this.roomMgr = roomManager;
     }
 
     get id() {
@@ -15,7 +15,7 @@ class TowerMind {
     }
 
     update() {
-        let enemy = _.first(this.room.room.find(FIND_HOSTILE_CREEPS));
+        let enemy = _.first(this.roomMgr.room.find(FIND_HOSTILE_CREEPS));
 
         if(enemy) {
             this.tower.attack(enemy);

@@ -30,18 +30,18 @@ class TransferMind extends mind.CreepMindBase {
 
     setPickupTarget() {
         let result;
-        if(this.room.room.energyCapacity < this.room.room.energyCapacityAvailable) {
-            if(this.room.storage.getStoredEnergy() > this.creep.carryCapacity / 2) {
-                result = this.room.storage.target;
+        if(this.room.energyCapacity < this.room.energyCapacityAvailable) {
+            if(this.roomMgr.storage.getStoredEnergy() > this.creep.carryCapacity / 2) {
+                result = this.roomMgr.storage.target;
             }
         }
 
         if(!result) {
-            result = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity);
+            result = this.roomMgr.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity);
         }
 
         if(!result) {
-            result = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity * 0.25 );
+            result = this.roomMgr.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity * 0.25 );
         }
 
         if(!result) {
@@ -87,7 +87,7 @@ class TransferMind extends mind.CreepMindBase {
     setTransferTarget() {
         let result;
 
-        if(this.creep.room.energyAvailable < this.creep.room.energyCapacityAvailable) {
+        if(this.room.energyAvailable < this.room.energyCapacityAvailable) {
             result = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
                 filter: (spawn) => spawn.energy < spawn.energyCapacity
             });
@@ -106,7 +106,7 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         if(!result) {
-            result = _.first(this.room.towers.filter((tower) => {
+            result = _.first(this.roomMgr.towers.filter((tower) => {
                 return tower.needsEnergy()
             }));
         }
@@ -121,13 +121,13 @@ class TransferMind extends mind.CreepMindBase {
 
     doTransferEnergy() {
         if(this.localState.transferToStorage) {
-            if(this.room.storage.canDeposit(this.creep)) {
-                this.room.storage.deposit(this.creep);
+            if(this.roomMgr.storage.canDeposit(this.creep)) {
+                this.roomMgr.storage.deposit(this.creep);
                 this.enterState(STATE_SEEK)
 
             }
             else {
-                this.creep.moveTo(this.room.storage.target);
+                this.creep.moveTo(this.roomMgr.storage.target);
             }
             return;
         }

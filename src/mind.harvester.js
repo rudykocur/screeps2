@@ -24,7 +24,7 @@ class HarvesterMind extends mind.CreepMindBase {
 
     doSeekTarget() {
         let target = this.getLocalTarget('targetId', () => {
-            return this.room.getFreeEnergySource();
+            return this.roomMgr.getFreeEnergySource();
         });
 
         if(target.pos.isNearTo(this.creep)) {
