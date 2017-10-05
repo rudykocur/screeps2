@@ -3,7 +3,7 @@ const job_common = require('job.common');
 
 const JOB_TYPE = 'energy-pickup';
 
-class PickupEnergyJobHandler {
+class PickupEnergyJobHandler extends job_common.JobHandlerBase {
 
     /**
      * @param {RoomManager} manager
@@ -11,19 +11,19 @@ class PickupEnergyJobHandler {
      */
     static generateJobs(manager) {
         return manager.droppedEnergy.map((energy) => {
-            return new EnergyJobDTO(energy.id, energy.amount);
+            return new EnergyJobDTO('energy-'+energy.id, energy.amount, 1, {});
         });
     }
 
     static deserializeJob(data) {
-        return new EnergyJobDTO(data.id, data.available);
+        return new EnergyJobDTO(data.id, data.available, data.claims);
     }
 }
 
 class EnergyJobDTO extends job_common.JobDTO {
-    constructor(id, available) {
-        super('energy-'+id, JOB_TYPE, minds.available.transfer);
-        this.available = available;
+    constructor(id, available, claims) {
+        super(id, JOB_TYPE, minds.available.transfer, available, claims);
+        // this.available = available;
     }
 
     merge(data) {

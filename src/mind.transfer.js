@@ -1,6 +1,8 @@
+const _ = require('lodash');
 
 let mind = require('mind.common');
 let throttle = require('utils').throttle;
+// let jobs = require('job.board');
 
 const STATE_SEEK = 'seekEnergy';
 const STATE_TRANSPORT = 'move_energy';
@@ -26,6 +28,71 @@ class TransferMind extends mind.CreepMindBase {
         };
 
         this.setStateMachine(fsm, STATE_SEEK);
+    }
+
+    // update() {
+    //
+    //     let job = this.getJob();
+    //
+    //     if(job) {
+    //         console.log('OMG ', this.creep, 'HAS JOB', job.data.id, '::', job.constructor.name);
+    //     }
+    //
+    //     super.update();
+    // }
+
+    getJob() {
+        let jobId = this.creep.memory.jobId;
+        let result;
+        let claimAmount = 1;
+
+        // console.log(this.creep, ':: OMG GET JOB', jobId);
+
+        if(!jobId) {
+            let newJob;
+
+            if((this.room.energyAvailable < this.room.energyCapacityAvailable) && this.roomMgr.storage.getStoredEnergy() > 100) {
+                newJob = this.findJob({
+                    // type: jobs.jobTypes.JOB_EXTENSIONS
+                    type: 'refill-extensions'
+                });
+
+                if(!newJob) {
+                    newJob = this.findJob({
+                        // type: jobs.jobTypes.JOB_SPAWN
+                        type: 'refill-spawns'
+                    });
+                }
+            }
+
+            if(!newJob) {
+                newJob = this.findJob({
+                    // type: jobs.jobTypes.JOB_SPAWN
+                    type: 'energy-pickup',
+                    minAmount: this.creep.carryCapacity / 2
+                });
+                claimAmount = this.creep.carryCapacity;
+            }
+
+            console.log(this.creep, ':: new job', newJob);
+
+            if(newJob) {
+                jobId = newJob.id;
+                this.roomMgr.jobManager.claim(this.creep, newJob, claimAmount);
+            }
+        }
+
+        if(jobId) {
+            this.creep.memory.jobId = jobId;
+            return this.roomMgr.jobManager.getJobHandler(this.creep);
+        }
+    }
+
+    findJob(options) {
+        options.room = this.room;
+        options.mind = this;
+
+        return _.first(this.roomMgr.jobManager.find(options));
     }
 
     setPickupTarget() {

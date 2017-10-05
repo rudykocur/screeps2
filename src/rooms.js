@@ -4,14 +4,13 @@ const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 
 class RoomManager {
-    constructor(room) {
+    constructor(room, jobManager) {
         this.room = room;
+        room.manager = this;
 
-        if(!this.room.memory.lastSpawnTick) {
-            this.room.memory.lastSpawnTick = {}
-        }
+        this.initMemory();
 
-        this.jobs = new jobs.JobBoard(this);
+        this.jobManager = jobManager;
 
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
@@ -41,16 +40,9 @@ class RoomManager {
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
         this.structures = _.filter(Game.structures, 'room', this.room);
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
+        this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
 
-        let towers = _.filter(Game.structures, (struct) => {
-            if(struct.room != this.room) {
-                return false;
-            }
-
-            return struct.structureType == STRUCTURE_TOWER;
-        });
-
-        this.towers = [];
+        let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
         this.towers = towers.map(tower => {
             let mind = new minds.available.tower(tower, this);
@@ -59,6 +51,16 @@ class RoomManager {
         });
 
         this.extensionsClusters = this.getExtensionsClusters();
+    }
+
+    initMemory() {
+        if(!this.room.memory.lastSpawnTick) {
+            this.room.memory.lastSpawnTick = {}
+        }
+
+        if(!this.room.memory.counter) {
+            this.room.memory.counter = 0;
+        }
     }
 
     getCreepName(name) {
@@ -100,13 +102,17 @@ class RoomManager {
     }
 
     update() {
-        if(this.towers.length < 1 && this.enemies.length > 0 && !this.room.controller.safeMode) {
+        let damageToSpawns = _.sum(this.spawns, /**StructureSpawn*/spawn => {
+            return spawn.hitsMax - spawn.hits;
+        });
+
+        if((this.towers.length < 1 || damageToSpawns > 1000) && this.enemies.length > 0 && !this.room.controller.safeMode) {
             console.log('Activating SAFE MODE!!!!');
             Game.notify('ATTACK. SAFE MODE ACTIVATED');
             this.room.controller.activateSafeMode();
         }
 
-        this.jobs.update();
+        this.jobManager.update(this);
     }
 
     getExtensionsClusters() {
@@ -168,5 +174,5 @@ class ExtensionCluster {
 }
 
 module.exports = {
-    RoomManager: RoomManager
+    RoomManager
 };

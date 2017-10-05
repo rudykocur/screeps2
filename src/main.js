@@ -1,21 +1,33 @@
-const RoomManager = require("rooms").RoomManager;
+const _ = require("lodash");
+const rooms = require("rooms");
 const minds = require('mind');
+const job_board = require('job.board');
 
 module.exports.loop = function () {
+    let jobBoard = new job_board.JobBoard();
+
+    _.each(Memory.creeps, (creepData, creepName) => {
+        if(!Game.creeps[creepName]) {
+            jobBoard.handleDeadCreep(creepData);
+
+            delete Memory.creeps[creepName];
+        }
+    });
+
     for(let name in Memory.creeps) {
         if(!Game.creeps[name]) {
             delete Memory.creeps[name];
         }
     }
 
-    let rooms = [];
+    let managers = [];
     for(let i in Game.rooms) {
-        let mgr = new RoomManager(Game.rooms[i]);
+        let mgr = new rooms.RoomManager(Game.rooms[i], jobBoard);
         mgr.update();
-        rooms.push(mgr);
+        managers.push(mgr);
     }
 
-    rooms.forEach((manager) => {
+    managers.forEach((manager) => {
         manager.minds.forEach((mind) => {
             try{
                 mind.update();
@@ -26,4 +38,5 @@ module.exports.loop = function () {
         })
     });
 
+    jobBoard.cleanup();
 };
