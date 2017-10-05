@@ -1,0 +1,9 @@
+{
+  "name": "screeps",
+  "version": "0.0.1",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "lodash": "latest"
+  }
+}

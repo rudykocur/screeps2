@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const minds = require('mind');
+const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 
 class RoomManager {
@@ -9,6 +10,8 @@ class RoomManager {
         if(!this.room.memory.lastSpawnTick) {
             this.room.memory.lastSpawnTick = {}
         }
+
+        this.jobs = new jobs.JobBoard(this);
 
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
@@ -37,6 +40,7 @@ class RoomManager {
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
         this.structures = _.filter(Game.structures, 'room', this.room);
+        this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
 
         let towers = _.filter(Game.structures, (struct) => {
             if(struct.room != this.room) {
@@ -53,6 +57,8 @@ class RoomManager {
             this.minds.push(mind);
             return mind;
         });
+
+        this.extensionsClusters = this.getExtensionsClusters();
     }
 
     getCreepName(name) {
@@ -100,6 +106,15 @@ class RoomManager {
             this.room.controller.activateSafeMode();
         }
 
+        this.jobs.update();
+    }
+
+    getExtensionsClusters() {
+        let flags = _.filter(Game.flags, /**Flag*/ flag => {
+            return flag.color == COLOR_YELLOW && flag.secondaryColor == COLOR_YELLOW;
+        });
+
+        return flags.map(f => new ExtensionCluster(f.pos, this));
     }
 }
 
@@ -131,6 +146,24 @@ class FlagStorageWrapper {
 
     withdraw(toCreep) {
         toCreep.pickup(this.resource);
+    }
+}
+
+class ExtensionCluster {
+    /**
+     * @param {RoomPosition} centerPoint
+     * @param {RoomManager} manager
+     */
+    constructor(centerPoint, manager) {
+        this.id = 'extcluster-' + centerPoint.toString();
+
+        this.center = centerPoint;
+        this.extensions = this.center.findInRange(manager.extensions, 1);
+
+        let capacity = _.size(this.extensions) * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
+        let storedEnergy = _.sum(this.extensions, 'energy');
+
+        this.needsEnergy = (storedEnergy < capacity);
     }
 }
 

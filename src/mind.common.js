@@ -9,6 +9,7 @@ class CreepMindBase {
      */
     constructor(creep, roomManager) {
         this.roomMgr = roomManager;
+        /** type RoomManager */
         this.room = this.roomMgr.room;
         this.creep = creep;
         this.localState = this.creep.memory.localState;

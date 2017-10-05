@@ -39,7 +39,7 @@ class RoomPopulationMind {
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
-            else if(this.manager.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown('upgrader') > 300) {
+            else if(this.manager.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown('upgrader') > 200) {
                 this.spawnUpgrader(spawn)
             }
         }
