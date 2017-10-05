@@ -32,11 +32,13 @@ class RoomManager {
             return struct.structureType == STRUCTURE_TOWER;
         });
 
+        this.towers = [];
+
         this.towers = towers.map(tower => {
             let mind = new minds.available.tower(tower, this);
             this.minds.push(mind);
             return mind;
-        })
+        });
     }
 
     getCreepName(name) {
@@ -108,12 +110,44 @@ class RoomManager {
 
                 this.doSpawn(spawn, body, 'builder', memo);
             }
+            else if(_.sum(this.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown() > 200) {
+                this.spawnTransfer(spawn);
+            }
+            else if(this.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown() > 400) {
+                this.spawnUpgrader(spawn)
+            }
         }
     }
 
-    spawnHarvester(spawn) {this.doSpawn(spawn, [MOVE, WORK, WORK], 'harvester', {'mind': 'harvester'})}
-    spawnTransfer(spawn) {this.doSpawn(spawn, [MOVE, MOVE, CARRY, CARRY], 'transfer', {'mind': 'transfer'});}
-    spawnUpgrader(spawn) {this.doSpawn(spawn, [MOVE, MOVE, CARRY, CARRY, WORK], 'upgrader', {'mind': 'upgrader'})}
+    spawnHarvester(spawn) {
+        let body = [MOVE, WORK, WORK];
+        if(this.room.energyCapacityAvailable > 500) {
+            body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
+        }
+        if(this.room.energyCapacityAvailable > 750) {
+            body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+        }
+        this.doSpawn(spawn, body, 'harvester', {'mind': 'harvester'})
+    }
+    spawnTransfer(spawn) {
+        let body = [MOVE, MOVE, CARRY, CARRY];
+        if(this.room.energyCapacityAvailable > 500) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+        }
+
+        if(this.room.energyCapacityAvailable > 700) {
+            body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+        }
+        this.doSpawn(spawn, body, 'transfer', {'mind': 'transfer'});
+
+    }
+    spawnUpgrader(spawn) {
+        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+        if(this.room.energyCapacityAvailable > 600) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
+        }
+        this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
+    }
 
     doSpawn(spawn, body,name, memo) {
         name = this.getCreepName(name);
@@ -127,6 +161,18 @@ class RoomManager {
             }
             console.log('Failed to spawn', name, '::', body, '::',result);
         }
+        else {
+            this.room.memory.lastSpawnTick = Game.time;
+            console.log('Spawned new creep', name, 'with body:', body);
+        }
+    }
+
+    getSpawnCooldown() {
+        if(this.room.memory.lastSpawnTick) {
+            return Game.time - this.room.memory.lastSpawnTick;
+        }
+
+        return 9999;
     }
 
     getFreeSpawn() {
@@ -159,6 +205,12 @@ class StorageWrapper {
     }
 
     isNear(creep) {
+        if(this.isFlag) {
+            return this.target.pos.isNearTo(creep.pos);
+        }
+    }
+
+    canDeposit(creep) {
         if(this.isFlag) {
             return this.target.pos.isEqualTo(creep.pos);
         }

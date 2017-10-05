@@ -29,7 +29,16 @@ class TransferMind extends MindBase {
     }
 
     setPickupTarget() {
-        let result = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity);
+        let result;
+        if(this.room.room.energyCapacity < this.room.room.energyCapacityAvailable) {
+            if(this.room.storage.getStoredEnergy() > this.creep.carryCapacity / 2) {
+                result = this.room.storage.target;
+            }
+        }
+
+        if(!result) {
+            result = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity);
+        }
 
         if(!result) {
             result = this.room.getDroppedEnergy(this.creep.pos, this.creep.carryCapacity * 0.25 );
@@ -59,7 +68,7 @@ class TransferMind extends MindBase {
                 this.creep.withdraw(target);
             }
 
-            this.enterState(STATE_TRANSPORT);
+            this.checkStatus();
         }
         else {
             this.creep.moveTo(target);
@@ -76,8 +85,10 @@ class TransferMind extends MindBase {
     }
 
     setTransferTarget() {
+        let result;
+
         if(this.creep.room.energyAvailable < this.creep.room.energyCapacityAvailable) {
-            let result = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
+            result = this.creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
                 filter: (spawn) => spawn.energy < spawn.energyCapacity
             });
 
@@ -92,7 +103,15 @@ class TransferMind extends MindBase {
                     }
                 });
             }
+        }
 
+        if(!result) {
+            result = _.first(this.room.towers.filter((tower) => {
+                return tower.needsEnergy()
+            }));
+        }
+
+        if(result) {
             this.localState.transferId = result.id;
             return;
         }
@@ -102,12 +121,13 @@ class TransferMind extends MindBase {
 
     doTransferEnergy() {
         if(this.localState.transferToStorage) {
-            if(!this.room.storage.isNear(this.creep)) {
-                this.creep.moveTo(this.room.storage.target);
-            }
-            else {
+            if(this.room.storage.canDeposit(this.creep)) {
                 this.room.storage.deposit(this.creep);
                 this.enterState(STATE_SEEK)
+
+            }
+            else {
+                this.creep.moveTo(this.room.storage.target);
             }
             return;
         }
@@ -122,7 +142,7 @@ class TransferMind extends MindBase {
         if(target.pos.isNearTo(this.creep)) {
             this.creep.transfer(target, RESOURCE_ENERGY);
 
-            this.enterState(STATE_SEEK);
+            this.checkStatus();
         }
         else {
             this.creep.moveTo(target);

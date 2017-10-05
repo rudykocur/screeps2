@@ -52,7 +52,7 @@ class UpgraderMind extends MindBase {
 
         if(this.room.storage.isNear(this.creep)) {
             this.room.storage.withdraw(this.creep);
-            this.enterState(STATE_UPGRADE);
+            this.doCheckStatus();
         }
         else {
             this.creep.moveTo(this.room.storage.target);
@@ -66,7 +66,7 @@ class UpgraderMind extends MindBase {
             this.creep.upgradeController(target);
 
             if(_.sum(this.creep.carry) < 1) {
-                this.enterState(STATE_IDLE);
+                this.doCheckStatus();
             }
         }
         else {

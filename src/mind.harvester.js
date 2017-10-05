@@ -39,7 +39,7 @@ class HarvesterMind extends MindBase {
     doHarvest() {
         let result = this.creep.harvest(Game.getObjectById(this.globalState['harvestId']));
 
-        if(result != OK) {
+        if(result != OK && result != ERR_NOT_ENOUGH_RESOURCES) {
             console.log('HARVEST FAIL', result);
         }
     }

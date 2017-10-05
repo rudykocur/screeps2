@@ -19,7 +19,7 @@ class BuilderMind extends MindBase {
                 onTick: this.doBuild.bind(this),
             },
             [STATE_IDLE]: {
-                onTick: () => throttle(5, () => this.doCheckStatus()),
+                onTick: this.doCheckStatus.bind(this),
             }
         };
 
@@ -28,11 +28,14 @@ class BuilderMind extends MindBase {
 
     doCheckStatus() {
         if(_.sum(this.creep.carry) > 0) {
-            this.enterState(STATE_BUILD);
-            return;
+            if(this.room.constructionSites.length > 0) {
+                this.enterState(STATE_BUILD);
+                return;
+            }
+
         }
 
-        if(this.actions.isEnoughStoredEnergy()) {
+        if(this.actions.isEnoughStoredEnergy() && _.sum(this.creep.carry) < this.creep.carryCapacity) {
             this.enterState(STATE_REFILL);
             return;
         }
@@ -42,6 +45,11 @@ class BuilderMind extends MindBase {
 
     pickBuildTarget() {
         let site = _.first(this.room.constructionSites);
+
+        if(!site) {
+            this.enterState(STATE_IDLE);
+            return;
+        }
 
         this.localState.buildSiteId = site.id;
     }
