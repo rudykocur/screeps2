@@ -1,11 +1,11 @@
-let MindBase = require('mind.common').MindBase;
+let mind = require('mind.common');
 let throttle = require('utils').throttle;
 
 const STATE_REFILL = 'refill';
 const STATE_UPGRADE = 'upgrade';
 const STATE_IDLE = 'idle';
 
-class UpgraderMind extends MindBase {
+class UpgraderMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
 

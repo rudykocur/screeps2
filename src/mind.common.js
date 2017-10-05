@@ -1,6 +1,6 @@
 
 
-class MindBase {
+class CreepMindBase {
     /**
      *
      * @param creep
@@ -111,5 +111,5 @@ class MindCommonActions {
 }
 
 module.exports = {
-    MindBase
+    CreepMindBase
 };

@@ -1,12 +1,12 @@
 
-let MindBase = require('mind.common').MindBase;
+let mind = require('mind.common');
 let throttle = require('utils').throttle;
 
 const STATE_SEEK = 'seekEnergy';
 const STATE_TRANSPORT = 'move_energy';
 const STATE_IDLE = 'idle';
 
-class TransferMind extends MindBase {
+class TransferMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
 

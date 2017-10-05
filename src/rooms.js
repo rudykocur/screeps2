@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const minds = require('mind');
+const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 
 class RoomManager {
     constructor(room) {
@@ -11,6 +12,8 @@ class RoomManager {
 
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
+
+        this.minds.push(new RoomPopulationMind(this));
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
@@ -33,6 +36,7 @@ class RoomManager {
         });
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+        this.structures = _.filter(Game.structures, 'room', this.room);
 
         let towers = _.filter(Game.structures, (struct) => {
             if(struct.room != this.room) {
@@ -96,102 +100,6 @@ class RoomManager {
             this.room.controller.activateSafeMode();
         }
 
-        let spawn = this.getFreeSpawn();
-
-        if(spawn) {
-            if (this.getCreepCount(minds.available.harvester) < 1) {
-                this.spawnHarvester(spawn);
-            }
-            else if(this.getCreepCount(minds.available.transfer) < 2) {
-                this.spawnTransfer(spawn);
-            }
-            else if(this.getCreepCount(minds.available.harvester) < 2) {
-                this.spawnHarvester(spawn);
-            }
-            else if(this.getCreepCount(minds.available.transfer) < 3) {
-                this.spawnTransfer(spawn);
-            }
-            else if(this.getCreepCount(minds.available.upgrader) < 3) {
-                this.spawnUpgrader(spawn)
-            }
-            else if(this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
-                let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-                let memo = {'mind': 'builder'};
-
-                this.doSpawn(spawn, body, 'builder', memo);
-            }
-            else if(_.sum(this.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
-                this.spawnTransfer(spawn);
-            }
-            else if(this.storage.getStoredEnergy() > 2000 && this.getSpawnCooldown('upgrader') > 300) {
-                this.spawnUpgrader(spawn)
-            }
-        }
-    }
-
-    spawnHarvester(spawn) {
-        let body = [MOVE, WORK, WORK];
-        if(this.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
-        }
-        if(this.room.energyCapacityAvailable > 750) {
-            body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
-        }
-        this.doSpawn(spawn, body, 'harvester', {'mind': 'harvester'})
-    }
-    spawnTransfer(spawn) {
-        let body = [MOVE, MOVE, CARRY, CARRY];
-        if(this.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
-        }
-
-        if(this.room.energyCapacityAvailable > 700) {
-            body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
-        }
-        this.doSpawn(spawn, body, 'transfer', {'mind': 'transfer'});
-    }
-    spawnUpgrader(spawn) {
-        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-        if(this.room.energyCapacityAvailable > 600) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
-        }
-        this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
-    }
-
-    doSpawn(spawn, body,name, memo) {
-        name = this.getCreepName(name);
-
-        let result = spawn.spawnCreep(body, name, {memory: memo});
-
-        if(result != OK) {
-            if(result == ERR_NOT_ENOUGH_ENERGY) {
-                this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
-                return;
-            }
-            console.log('Failed to spawn', name, '::', body, '::',result);
-        }
-        else {
-            this.room.memory.lastSpawnTick[memo.mind] = Game.time;
-            console.log('Spawned new creep', name, 'with body:', body);
-        }
-    }
-
-    getSpawnCooldown(mindType) {
-        return (Game.time - this.room.memory.lastSpawnTick[mindType]) || 9999;
-    }
-
-    getFreeSpawn() {
-        return _.first(_.filter(Game.structures, (struct) => {
-            if(!(struct instanceof StructureSpawn)) {
-                return false;
-            }
-
-            if(struct.room != this.room) {
-                return false;
-            }
-
-            return !struct.spawning;
-        }));
     }
 }
 

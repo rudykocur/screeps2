@@ -1,6 +1,6 @@
-let MindBase = require('mind.common').MindBase;
+let mind = require('mind.common');
 
-class HarvesterMind extends MindBase {
+class HarvesterMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
     }

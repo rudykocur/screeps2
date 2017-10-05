@@ -1,5 +1,3 @@
-let MindBase = require('mind.common').MindBase;
-let throttle = require('utils').throttle;
 
 // const STATE_REFILL = 'refill';
 // const STATE_UPGRADE = 'upgrade';
