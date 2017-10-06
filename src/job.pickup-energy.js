@@ -25,6 +25,11 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
     getEnergy() {
         let resource = Game.getObjectById(this.data.targetId);
 
+        if(!resource) {
+            this.completeJob();
+            return;
+        }
+
         if(!this.creep.pos.isNearTo(resource)) {
             this.creep.moveTo(resource);
         }

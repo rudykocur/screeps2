@@ -44,7 +44,7 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     pickBuildTarget() {
-        let site = _.first(this.roomMgr.constructionSites);
+        let site = this.creep.pos.findClosestByRange(this.roomMgr.constructionSites);
 
         if(!site) {
             this.enterState(STATE_IDLE);

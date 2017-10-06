@@ -52,7 +52,9 @@ class JobBoard {
         // console.log('INCOMING SEARCH', JSON.stringify(options));
 
         return _.filter(this.memory, jobData => {
-
+            if(jobData.deleted) {
+                return false;
+            }
 
             // console.log('Searching 1: ', jobData.id, options.room.name, jobData.room)
             if(options.room && options.room != jobData.room) {
@@ -82,6 +84,11 @@ class JobBoard {
 
     claim(creep, jobData, claimAmount) {
         claimAmount = claimAmount || 1;
+
+        if(creep.memory.jobId && creep.memory.jobId == jobData.id) {
+            console.log('OMG CREEP ALREADY HAS JOB', creep, '::', creep.memory.jobId, '::', jobData.id);
+            return false;
+        }
 
         if(creep.memory.jobId == jobData.id) {
             console.log('[JOB BOARD] ',creep,' already has job:', jobData.id);
@@ -162,6 +169,12 @@ class JobBoard {
 
         _.each(this.memory, jobData => {
             if(!this.generatedJobs[jobData.id]) {
+
+                if(_.size(jobData.takenBy) > 0) {
+                    jobData.deleted = true;
+                    return;
+                }
+
                 toDelete.push(jobData.id);
             }
         });
@@ -171,7 +184,7 @@ class JobBoard {
                 delete this.memory[jobId];
             });
             // console.log('Deleted', toDelete.length, 'jobs:', toDelete);
-        }
+        }   
     }
 }
 

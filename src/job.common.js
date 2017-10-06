@@ -38,6 +38,7 @@ class JobHandlerBase {
     completeJob() {
         delete this.creep.memory.jobId;
         delete this.data.claims[this.creep.name];
+        delete this.data.takenBy[this.creep.name];
         delete this.creep.memory.jobStateData;
         delete this.creep.memory.jobState;
 

@@ -14,6 +14,7 @@ class TransferMind extends mind.CreepMindBase {
     }
 
     update() {
+        if(this.creep.spawning) {return}
 
         let job = this.getJob();
 
