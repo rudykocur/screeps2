@@ -23,19 +23,10 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         if(_.sum(this.creep.carry)) {
-            if(this.roomMgr.storage.canDeposit(this.creep)) {
-                this.roomMgr.storage.deposit(this.creep);
-            }
-            else {
-                this.creep.moveTo(this.roomMgr.storage.target);
-            }
-
-            return;
+            return this.dropResourcesToStorage();
         }
 
-        if(!this.creep.pos.isNearTo(this.roomMgr.meetingPoint)) {
-            this.creep.moveTo(this.roomMgr.meetingPoint);
-        }
+        this.chillAtMeetingPoint();
     }
 
     *findNewJob() {
@@ -55,6 +46,21 @@ class TransferMind extends mind.CreepMindBase {
             type: 'energy-pickup',
             minAmount: Math.max(availableCapacity / 2, 50)
         })
+    }
+
+    dropResourcesToStorage() {
+        if(this.roomMgr.storage.canDeposit(this.creep)) {
+            this.roomMgr.storage.deposit(this.creep);
+        }
+        else {
+            this.creep.moveTo(this.roomMgr.storage.target);
+        }
+    }
+
+    chillAtMeetingPoint() {
+        if(!this.creep.pos.isNearTo(this.roomMgr.meetingPoint)) {
+            this.creep.moveTo(this.roomMgr.meetingPoint);
+        }
     }
 
 }
