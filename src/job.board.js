@@ -95,7 +95,7 @@ class JobBoard {
             creep.memory.jobId = jobData.id;
             jobData.claims[creep.name] = claimAmount;
 
-            console.log('[JOB BOARD] ',creep,'Claimed new job', jobData.id, '::', jobData.type);
+            // console.log('[JOB BOARD] ',creep,'Claimed new job', jobData.id, '::', jobData.type);
 
             creep.memory.jobStateData = {};
             creep.memory.jobState = null;

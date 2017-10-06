@@ -73,6 +73,55 @@ class CreepMindBase {
             }
         }
     }
+
+    /**
+     * To be overriden. Use `yield this.tryClaimJob` to return viable job.
+     *
+     * @override
+     */
+    *findNewJob() {}
+
+    /**
+     * Returns existing job handler or find new job for given mind.
+     */
+    getJob() {
+        if(this.creep.memory.jobId) {
+            let job = this.roomMgr.jobManager.getJobHandler(this.creep);
+            if(job) {
+                return job;
+            }
+        }
+
+        for(let jobId of this.findNewJob()) {
+            if(jobId) {
+                console.log(this.creep, '- claimed new job', jobId);
+                this.creep.memory.jobId = jobId;
+                return this.roomMgr.jobManager.getJobHandler(this.creep);
+            }
+        }
+    }
+
+    /**
+     * Run given job search query and claim given amount from this job
+     */
+    tryClaimJob(amount, query) {
+        let job = this.findJob(query);
+
+        if(job) {
+            this.roomMgr.jobManager.claim(this.creep, job, amount);
+            return job.id;
+        }
+    }
+
+    /**
+     * Do job search and return first found job
+     */
+    findJob(options) {
+        options.room = this.room;
+        options.mind = this;
+
+        return _.first(this.roomMgr.jobManager.find(options));
+    }
 }
 
 class MindCommonActions {
