@@ -14,6 +14,10 @@ class FiniteStateMachine {
         this.memory.state = value;
     }
 
+    get localState() {
+        return this.memory.localState;
+    }
+
     update() {
         if(!this.state) {
             this.enter(this.initialState);

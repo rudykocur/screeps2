@@ -3,7 +3,9 @@ const _ = require('lodash');
 // const minds = require('mind');
 const jobModules = {};
 
-['job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions'].forEach(modName => {
+[
+    'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower'
+].forEach(modName => {
     let mod = require(modName);
     jobModules[mod.JOB_TYPE] = mod.getHandler();
 });
@@ -184,7 +186,7 @@ class JobBoard {
                 delete this.memory[jobId];
             });
             // console.log('Deleted', toDelete.length, 'jobs:', toDelete);
-        }   
+        }
     }
 }
 

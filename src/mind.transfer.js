@@ -31,14 +31,20 @@ class TransferMind extends mind.CreepMindBase {
     }
 
     *findNewJob() {
-        if(this.room.energyMissing > 100 && this.roomMgr.storage.getStoredEnergy() > 100) {
-            yield this.tryClaimJob(1, {
-                type: 'refill-extensions'
-            });
+        if(this.roomMgr.storage.getStoredEnergy() > 100) {
+            if (this.room.energyMissing > 100) {
+                yield this.tryClaimJob(1, {
+                    type: 'refill-extensions'
+                });
+
+                yield this.tryClaimJob(1, {
+                    type: 'refill-spawns'
+                });
+            }
 
             yield this.tryClaimJob(1, {
-                type: 'refill-spawns'
-            });
+                    type: 'refill-tower'
+                });
         }
 
         let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);
