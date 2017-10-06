@@ -31,10 +31,7 @@ class RoomPopulationMind {
                 this.spawnUpgrader(spawn)
             }
             else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
-                let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-                let memo = {'mind': 'builder'};
-
-                this.doSpawn(spawn, body, 'builder', memo);
+                this.spawnBuilder(spawn);
             }
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
@@ -104,6 +101,13 @@ class RoomPopulationMind {
             body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
         }
         this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
+    }
+    spawnBuilder(spawn) {
+        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+        if(this.room.energyCapacityAvailable > 600) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
+        }
+        this.doSpawn(spawn, body, 'builder', {'mind': 'builder'})
     }
 }
 
