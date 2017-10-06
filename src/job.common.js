@@ -59,6 +59,8 @@ class JobDTO {
 
         this.available = available || 1;
         this.claims = {};
+        this.takenBy = {};
+        this.deleted = false;
     }
 
     merge(data) {

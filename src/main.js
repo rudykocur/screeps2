@@ -2,6 +2,9 @@ const _ = require("lodash");
 const rooms = require("rooms");
 const minds = require('mind');
 const job_board = require('job.board');
+const proto = require('prototypes');
+
+proto.installPrototypes();
 
 module.exports.loop = function () {
     let jobBoard = new job_board.JobBoard();

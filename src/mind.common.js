@@ -108,8 +108,9 @@ class CreepMindBase {
         let job = this.findJob(query);
 
         if(job) {
-            this.roomMgr.jobManager.claim(this.creep, job, amount);
-            return job.id;
+            if(this.roomMgr.jobManager.claim(this.creep, job, amount)) {
+                return job.id;
+            }
         }
     }
 

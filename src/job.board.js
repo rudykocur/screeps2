@@ -30,8 +30,8 @@ class JobBoard {
      *
      * @param {Object} options
      * @param {Object} options.type
-     * @param {Object} options.mind
-     * @param {Object} options.room
+     * @param {CreepMindBase} options.mind
+     * @param {Room} options.room
      * @param {Object} options.minAmount
      * @param {Object} options.filter
      * @return {Array}
@@ -84,9 +84,8 @@ class JobBoard {
         claimAmount = claimAmount || 1;
 
         if(creep.memory.jobId == jobData.id) {
-            console.log('[JOB BOARD] ',this.creep,'Returning existing job', jobData.id);
-
-            // return new jobModules[jobData.type](creep, jobData);
+            console.log('[JOB BOARD] ',creep,' already has job:', jobData.id);
+            return true;
         }
 
         let claimed = _.sum(jobData.claims);
@@ -94,17 +93,17 @@ class JobBoard {
         if(claimed < jobData.available) {
             creep.memory.jobId = jobData.id;
             jobData.claims[creep.name] = claimAmount;
-
-            // console.log('[JOB BOARD] ',creep,'Claimed new job', jobData.id, '::', jobData.type);
+            if(jobData.takenBy)
+                jobData.takenBy[creep.name] = true;
 
             creep.memory.jobStateData = {};
             creep.memory.jobState = null;
 
-            return;
+            return true;
             // return new jobModules[jobData.type](creep, jobData);
         }
 
-        throw creep + " : Unable to claim job " + jobData.id
+        return false;
     }
 
     getJobHandler(creep) {
@@ -154,6 +153,7 @@ class JobBoard {
                 this.memory[memo.jobId].claims[name]);
 
             delete this.memory[memo.jobId].claims[name];
+            delete this.memory[memo.jobId].takenBy[name];
         }
     }
 
