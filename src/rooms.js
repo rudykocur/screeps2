@@ -4,6 +4,10 @@ const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 
 class RoomManager {
+    /**
+     * @param {Room} room
+     * @param jobManager
+     */
     constructor(room, jobManager) {
         this.room = room;
         room.manager = this;
@@ -19,7 +23,10 @@ class RoomManager {
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
-        if(Game.flags.STORAGE) {
+        if(this.room.storage) {
+            this.storage = new StorageWrapper(this, this.room.storage);
+        }
+        else if(Game.flags.STORAGE) {
             this.storage = new FlagStorageWrapper(this, Game.flags.STORAGE);
         }
         else {
@@ -34,7 +41,11 @@ class RoomManager {
                 return false;
             }
 
-            return !res.pos.isEqualTo(this.storage.target.pos);
+            if(!this.room.storage) {
+                return !res.pos.isEqualTo(this.storage.target.pos);
+            }
+
+            return true;
         });
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
@@ -152,6 +163,44 @@ class FlagStorageWrapper {
 
     withdraw(toCreep) {
         toCreep.pickup(this.resource);
+    }
+}
+
+class StorageWrapper {
+    /**
+     *
+     * @param room
+     * @param {StructureStorage} storage
+     */
+    constructor(room, storage) {
+        this.room = room;
+        this.target = storage;
+    }
+
+    getStoredEnergy() {
+        return this.target.store[RESOURCE_ENERGY];
+    }
+
+    isNear(creep) {
+        return this.target.pos.isNearTo(creep.pos);
+    }
+
+    canDeposit(creep) {
+        return this.target.pos.isNearTo(creep.pos);
+    }
+
+    /**
+     * @param {Creep} fromCreep
+     */
+    deposit(fromCreep) {
+        fromCreep.transfer(this.target, RESOURCE_ENERGY);
+    }
+
+    /**
+     * @param {Creep} toCreep
+     */
+    withdraw(toCreep) {
+        toCreep.withdraw(this.target, RESOURCE_ENERGY);
     }
 }
 
