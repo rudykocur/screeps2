@@ -72,16 +72,11 @@ class JobBoard {
                 return false;
             }
 
-            let job = jobModules[jobData.type].deserializeJob(jobData);
-
-            if(options.filter && !options.filter(job)) {
+            if(options.filter && !options.filter(jobData)) {
                 return false;
             }
 
             return true;
-        }).map(jobData => {
-            // console.log('searching returns', jobData.id, '::');
-            return jobModules[jobData.type].deserializeJob(jobData);
         });
     }
 
@@ -96,13 +91,16 @@ class JobBoard {
 
         let claimed = _.sum(jobData.claims);
 
-        console.log('creep', creep, 'will try to claim', jobData.id, '::', claimed, '::', claimAmount, jobData.available);
-
-        if(claimed + claimAmount <= jobData.available) {
+        if(claimed < jobData.available) {
             creep.memory.jobId = jobData.id;
-            jobData.claims[creep.id] = claimAmount;
+            jobData.claims[creep.name] = claimAmount;
 
             console.log('[JOB BOARD] ',creep,'Claimed new job', jobData.id, '::', jobData.type);
+
+            creep.memory.jobStateData = {};
+            creep.memory.jobState = null;
+
+            return;
             // return new jobModules[jobData.type](creep, jobData);
         }
 
@@ -150,8 +148,13 @@ class JobBoard {
         });
     }
 
-    handleDeadCreep(creepData) {
+    handleDeadCreep(name, memo) {
+        if(memo.jobId) {
+            console.log('!!!!! Cleaned claim for dead creep', name, '::', memo.jobId, '::',
+                this.memory[memo.jobId].claims[name]);
 
+            delete this.memory[memo.jobId].claims[name];
+        }
     }
 
     cleanup() {

@@ -3,7 +3,57 @@ const job_common = require('job.common');
 
 const JOB_TYPE = 'refill-extensions';
 
+const STATE_GET_ENERGY = 'get-energy';
+const STATE_REFILL = 'refill-ext';
+
 class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
+
+    constructor(creep, jobData) {
+        super(creep, jobData);
+
+        this.cluster = _.first(this.roomMgr.extensionsClusters.filter(cluster => cluster.id == this.data.id));
+
+        this.configureFSM(STATE_GET_ENERGY, {
+            [STATE_GET_ENERGY]: {
+                onTick: this.getEnergy.bind(this)
+            },
+            [STATE_REFILL]: {
+                onTick: this.refillExtensions.bind(this)
+            }
+        })
+    }
+
+    getEnergy() {
+        if(this.roomMgr.storage.isNear(this.creep)) {
+            this.roomMgr.storage.withdraw(this.creep);
+            this.fsm.enter(STATE_REFILL);
+        }
+        else {
+            this.creep.moveTo(this.roomMgr.storage.target);
+        }
+    }
+
+    refillExtensions() {
+        if(!this.cluster.needsEnergy) {
+            this.completeJob();
+            return;
+        }
+
+        if(_.sum(this.creep.carry) < 1) {
+            this.completeJob();
+            return;
+        }
+
+        if(this.creep.pos.isEqualTo(this.cluster.center)) {
+            let ext = _.first(this.cluster.extensions.filter(
+                /**StructureExtension*/e => e.energy < e.energyCapacity));
+
+            this.creep.transfer(ext, RESOURCE_ENERGY);
+        }
+        else {
+            this.creep.moveTo(this.cluster.center);
+        }
+    }
 
     /**
      * @param {RoomManager} manager
@@ -13,18 +63,14 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
         return manager.extensionsClusters.filter(
             /**ExtensionCluster*/cluster => cluster.needsEnergy
         ).map((cluster) => {
-            return new RefillExtensionsDTO(cluster.id, 1, {});
+            return new RefillExtensionsDTO(cluster.id);
         });
-    }
-
-    static deserializeJob(data) {
-        return new RefillExtensionsDTO(data.id, data.available, data.claims);
     }
 }
 
 class RefillExtensionsDTO extends job_common.JobDTO {
-    constructor(id, available, claims) {
-        super(id, JOB_TYPE, minds.available.transfer, available, claims);
+    constructor(id) {
+        super(id, JOB_TYPE, minds.available.transfer);
     }
 }
 

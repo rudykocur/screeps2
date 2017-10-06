@@ -8,7 +8,7 @@ module.exports.loop = function () {
 
     _.each(Memory.creeps, (creepData, creepName) => {
         if(!Game.creeps[creepName]) {
-            jobBoard.handleDeadCreep(creepData);
+            jobBoard.handleDeadCreep(creepName, creepData);
 
             delete Memory.creeps[creepName];
         }

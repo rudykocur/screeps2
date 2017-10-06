@@ -3,7 +3,45 @@ const job_common = require('job.common');
 
 const JOB_TYPE = 'refill-spawns';
 
+const STATE_GET_ENERGY = 'get-energy';
+const STATE_REFILL = 'refill-ext';
+
 class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
+
+    constructor(creep, jobData) {
+        super(creep, jobData);
+
+        this.configureFSM(STATE_GET_ENERGY, {
+            [STATE_GET_ENERGY]: {
+                onTick: this.getEnergy.bind(this)
+            },
+            [STATE_REFILL]: {
+                onTick: this.refillSpawn.bind(this)
+            }
+        })
+    }
+
+    getEnergy() {
+        if(this.roomMgr.storage.isNear(this.creep)) {
+            this.roomMgr.storage.withdraw(this.creep);
+            this.fsm.enter(STATE_REFILL);
+        }
+        else {
+            this.creep.moveTo(this.roomMgr.storage.target);
+        }
+    }
+
+    refillSpawn() {
+        let spawn = Game.getObjectById(this.data.targetId);
+
+        if(this.creep.pos.isNearTo(spawn)) {
+            this.creep.transfer(spawn, RESOURCE_ENERGY);
+            this.completeJob();
+        }
+        else {
+            this.creep.moveTo(spawn);
+        }
+    }
 
     /**
      * @param {RoomManager} manager
@@ -13,12 +51,16 @@ class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
         return manager.spawns.filter(
             /**StructureSpawn*/spawn => spawn.energy < spawn.energyCapacity
         ).map((spawn) => {
-            return new job_common.JobDTO('spawn-'+spawn.id, JOB_TYPE, minds.available.transfer, 1, {});
+            return new RefillSpawnJobDTO(spawn);
         });
     }
+}
 
-    static deserializeJob(data) {
-        return new job_common.JobDTO(data.id, JOB_TYPE, minds.available.transfer, data.available, data.claims);
+class RefillSpawnJobDTO extends job_common.JobDTO {
+    constructor(target) {
+        super('spawn-'+target.id, JOB_TYPE, minds.available.transfer);
+
+        this.targetId = target.id;
     }
 }
 

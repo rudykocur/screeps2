@@ -30,16 +30,33 @@ class TransferMind extends mind.CreepMindBase {
         this.setStateMachine(fsm, STATE_SEEK);
     }
 
-    // update() {
-    //
-    //     let job = this.getJob();
-    //
-    //     if(job) {
-    //         console.log('OMG ', this.creep, 'HAS JOB', job.data.id, '::', job.constructor.name);
-    //     }
-    //
-    //     super.update();
-    // }
+    update() {
+
+        let job = this.getJob();
+
+        if(job) {
+            job.execute();
+            return;
+        }
+
+        if(_.sum(this.creep.carry)) {
+            if(this.roomMgr.storage.canDeposit(this.creep)) {
+                this.roomMgr.storage.deposit(this.creep);
+            }
+            else {
+                this.creep.moveTo(this.roomMgr.storage.target);
+            }
+
+            return;
+        }
+
+        if(!this.creep.pos.isNearTo(this.roomMgr.meetingPoint)) {
+            this.creep.moveTo(this.roomMgr.meetingPoint);
+        }
+
+        // console.log('Creep', this.creep, 'has no job - running mind');
+        // super.update();
+    }
 
     getJob() {
         let jobId = this.creep.memory.jobId;
@@ -74,9 +91,10 @@ class TransferMind extends mind.CreepMindBase {
                 claimAmount = this.creep.carryCapacity;
             }
 
-            console.log(this.creep, ':: new job', newJob);
+
 
             if(newJob) {
+                console.log(this.creep, ':: new job', newJob.id);
                 jobId = newJob.id;
                 this.roomMgr.jobManager.claim(this.creep, newJob, claimAmount);
             }

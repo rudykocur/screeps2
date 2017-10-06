@@ -3,7 +3,47 @@ const job_common = require('job.common');
 
 const JOB_TYPE = 'energy-pickup';
 
+const STATE_GET_ENERGY = 'get-energy';
+const STATE_DEPOSIT = 'deposit-energy';
+
 class PickupEnergyJobHandler extends job_common.JobHandlerBase {
+
+    constructor(creep, jobData) {
+        super(creep, jobData);
+
+        this.configureFSM(STATE_GET_ENERGY, {
+            [STATE_GET_ENERGY]: {
+                onTick: this.getEnergy.bind(this)
+            },
+            [STATE_DEPOSIT]: {
+                onTick: this.depositEnergy.bind(this)
+            }
+        });
+
+    }
+
+    getEnergy() {
+        let resource = Game.getObjectById(this.data.targetId);
+
+        if(!this.creep.pos.isNearTo(resource)) {
+            this.creep.moveTo(resource);
+        }
+        else {
+            this.creep.pickup(resource);
+            this.unclaim();
+            this.fsm.enter(STATE_DEPOSIT);
+        }
+    }
+
+    depositEnergy() {
+        if(!this.roomMgr.storage.canDeposit(this.creep)) {
+            this.creep.moveTo(this.roomMgr.storage.target);
+        }
+        else {
+            this.roomMgr.storage.deposit(this.creep);
+            this.completeJob();
+        }
+    }
 
     /**
      * @param {RoomManager} manager
@@ -11,19 +51,19 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
      */
     static generateJobs(manager) {
         return manager.droppedEnergy.map((energy) => {
-            return new EnergyJobDTO('energy-'+energy.id, energy.amount, 1, {});
+            return new EnergyJobDTO(energy);
         });
-    }
-
-    static deserializeJob(data) {
-        return new EnergyJobDTO(data.id, data.available, data.claims);
     }
 }
 
 class EnergyJobDTO extends job_common.JobDTO {
-    constructor(id, available, claims) {
-        super(id, JOB_TYPE, minds.available.transfer, available, claims);
-        // this.available = available;
+    /**
+     * @param {Resource} resource
+     */
+    constructor(resource) {
+        super('energy-'+resource.id, JOB_TYPE, minds.available.transfer, resource.amount);
+
+        this.targetId = resource.id;
     }
 
     merge(data) {
