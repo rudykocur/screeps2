@@ -2,6 +2,7 @@ const _ = require("lodash");
 const minds = require('mind');
 const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
+const room_architect = require('room.architect');
 
 class RoomManager {
     /**
@@ -15,6 +16,7 @@ class RoomManager {
         this.initMemory();
 
         this.jobManager = jobManager;
+        this.architect = new room_architect.RoomArchitect(this);
 
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
@@ -52,6 +54,7 @@ class RoomManager {
         this.structures = _.filter(Game.structures, 'room', this.room);
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
         this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
+        this.sources = this.room.find(FIND_SOURCES);
 
         let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
@@ -124,6 +127,8 @@ class RoomManager {
         }
 
         this.jobManager.update(this);
+
+        this.architect.update();
     }
 
     getExtensionsClusters() {
