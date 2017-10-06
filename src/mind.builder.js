@@ -12,7 +12,7 @@ class BuilderMind extends mind.CreepMindBase {
         let fsm = {
             [STATE_REFILL]: {
                 onEnter: () => {},
-                onTick: ()=> this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE),
+                onTick: ()=> this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1000),
             },
             [STATE_BUILD]: {
                 onEnter: this.pickBuildTarget.bind(this),
@@ -35,7 +35,7 @@ class BuilderMind extends mind.CreepMindBase {
 
         }
 
-        if(this.actions.isEnoughStoredEnergy() && _.sum(this.creep.carry) < this.creep.carryCapacity) {
+        if(this.actions.isEnoughStoredEnergy(1000) && _.sum(this.creep.carry) < this.creep.carryCapacity) {
             this.enterState(STATE_REFILL);
             return;
         }

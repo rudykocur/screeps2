@@ -41,7 +41,7 @@ class UpgraderMind extends mind.CreepMindBase {
     }
 
     isEnoughStoredEnergy() {
-        return this.roomMgr.storage.getStoredEnergy() > this.creep.carryCapacity/2;
+        return (this.roomMgr.storage.getStoredEnergy() - 1000) > this.creep.carryCapacity/2;
     }
 
     doRefill() {
@@ -52,7 +52,7 @@ class UpgraderMind extends mind.CreepMindBase {
 
         if(this.roomMgr.storage.isNear(this.creep)) {
             this.roomMgr.storage.withdraw(this.creep);
-            this.doCheckStatus();
+            this.enterState(STATE_IDLE);
         }
         else {
             this.creep.moveTo(this.roomMgr.storage.target);
@@ -66,7 +66,7 @@ class UpgraderMind extends mind.CreepMindBase {
             this.creep.upgradeController(target);
 
             if(_.sum(this.creep.carry) < 1) {
-                this.doCheckStatus();
+                this.enterState(STATE_IDLE);
             }
         }
         else {

@@ -133,12 +133,13 @@ class MindCommonActions {
         this.roomMgr = roomManager;
     }
 
-    isEnoughStoredEnergy() {
-        return this.roomMgr.storage.getStoredEnergy() > this.creep.carryCapacity/2;
+    isEnoughStoredEnergy(minThreshold) {
+        minThreshold = minThreshold || 0;
+        return (this.roomMgr.storage.getStoredEnergy() - minThreshold) > this.creep.carryCapacity/2;
     }
 
-    refillFromStorage(nextState, idleState) {
-        if(!this.isEnoughStoredEnergy()) {
+    refillFromStorage(nextState, idleState, minThreshold) {
+        if(!this.isEnoughStoredEnergy(minThreshold)) {
             this.mind.enterState(idleState);
             return;
         }
