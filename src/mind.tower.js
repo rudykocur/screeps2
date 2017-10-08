@@ -60,6 +60,12 @@ class TowerMind {
             return (struct.hits / struct.hitsMax) < 0.5;
         }));
 
+        if(!repairTarget) {
+            repairTarget = _.first(this.roomMgr.roads.filter(road => {
+                return (road.hits / road.hitsMax) < 0.5;
+            }));
+        }
+
         if(repairTarget) {
             this.fsm.enter(STATE_REPAIR, {repairId: repairTarget.id});
             return;
@@ -99,7 +105,7 @@ class TowerMind {
     }
 
     get needsEnergy() {
-        return this.tower.energy < 500;
+        return this.tower.energy < this.tower.energyCapacity - 150;
     }
 }
 

@@ -9,6 +9,8 @@ class RoomPopulationMind {
     constructor(manager) {
         this.manager = manager;
         this.room = this.manager.room;
+
+        this.freeSpawns = this.manager.spawns.filter(spawn => !spawn.spawning);
     }
 
     update() {
@@ -43,13 +45,32 @@ class RoomPopulationMind {
     }
 
     getFreeSpawn() {
-        return _.first(this.manager.structures.filter((struct) => {
-            if(!(struct instanceof StructureSpawn)) {
-                return false;
-            }
+        return _.first(this.freeSpawns);
+    }
 
-            return !struct.spawning;
-        }));
+    spawn(spawn, options) {
+
+        console.log('SPAWN MIND', JSON.stringify(options));
+
+        let name = this.manager.getCreepName(options.name);
+
+        let result = spawn.spawnCreep(options.body, name, {memory: options.memo});
+
+        if(result != OK) {
+            if(result == ERR_NOT_ENOUGH_ENERGY) {
+                this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
+                return;
+            }
+            console.log('Failed to spawn', name, '::', body, '::',result);
+        }
+        else {
+            this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
+
+            this.room.memory.lastSpawnTick[options.memo.mind] = Game.time;
+            console.log('Spawned new creep', name, 'with body:', options.body);
+
+            return name;
+        }
     }
 
     doSpawn(spawn, body,name, memo) {
@@ -65,6 +86,8 @@ class RoomPopulationMind {
             console.log('Failed to spawn', name, '::', body, '::',result);
         }
         else {
+            this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
+
             this.room.memory.lastSpawnTick[memo.mind] = Game.time;
             console.log('Spawned new creep', name, 'with body:', body);
         }

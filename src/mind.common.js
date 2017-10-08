@@ -28,6 +28,14 @@ class CreepMindBase {
     }
 
     update() {
+        if(this.creep.spawning) {
+            return;
+        }
+
+        if(!this._fsm) {
+            return
+        }
+
         if(this._fsm[this.state].onTick) {
             this._fsm[this.state].onTick();
         }

@@ -24,11 +24,15 @@ module.exports.loop = function () {
     }
 
     let managers = [];
-    for(let i in Game.rooms) {
-        let mgr = new rooms.RoomManager(Game.rooms[i], jobBoard);
+    _.each(Game.rooms, room => {
+        if(!room.controller.my) {
+            return;
+        }
+
+        let mgr = new rooms.RoomManager(room, jobBoard);
         mgr.update();
         managers.push(mgr);
-    }
+    });
 
     managers.forEach((manager) => {
         manager.minds.forEach((mind) => {

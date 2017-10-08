@@ -3,6 +3,7 @@ const minds = require('mind');
 const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 const room_architect = require('room.architect');
+const room_remote = require('room.remote');
 
 class RoomManager {
     /**
@@ -16,12 +17,10 @@ class RoomManager {
         this.initMemory();
 
         this.jobManager = jobManager;
-        this.architect = new room_architect.RoomArchitect(this);
+
 
         this.creeps = _.filter(Game.creeps, "room", this.room);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
-
-        this.minds.push(new RoomPopulationMind(this));
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
@@ -55,6 +54,7 @@ class RoomManager {
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
         this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
         this.sources = this.room.find(FIND_SOURCES);
+        this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
 
         let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
@@ -65,6 +65,10 @@ class RoomManager {
         });
 
         this.extensionsClusters = this.getExtensionsClusters();
+
+        this.architect = new room_architect.RoomArchitect(this);
+        this.remote = new room_remote.RemoteRoomsManager(this);
+        this.spawner = new RoomPopulationMind(this);
     }
 
     initMemory() {
@@ -128,11 +132,17 @@ class RoomManager {
 
         this.jobManager.update(this);
 
+        this.spawner.update();
+        this.remote.update();
         this.architect.update();
     }
 
     getExtensionsClusters() {
         let flags = _.filter(Game.flags, /**Flag*/ flag => {
+            if(flag.room != this.room) {
+                return;
+            }
+
             return flag.color == COLOR_YELLOW && flag.secondaryColor == COLOR_YELLOW;
         });
 
