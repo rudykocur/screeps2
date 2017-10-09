@@ -12,14 +12,14 @@ class RoomManager {
      */
     constructor(room, jobManager) {
         this.room = room;
+        this.roomName = room.name;
         room.manager = this;
 
         this.initMemory();
 
         this.jobManager = jobManager;
 
-
-        this.creeps = _.filter(Game.creeps, "room", this.room);
+        this.creeps = _.filter(Game.creeps, "memory.roomName", this.room.name);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
@@ -50,6 +50,10 @@ class RoomManager {
         });
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+        this.enemiesInside = this.enemies.filter(/**Creep*/creep => {
+            return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
+        });
+
         this.structures = _.filter(Game.structures, 'room', this.room);
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
         this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);

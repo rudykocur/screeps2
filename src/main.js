@@ -7,6 +7,10 @@ const proto = require('prototypes');
 proto.installPrototypes();
 
 module.exports.loop = function () {
+    if(!Memory.counters) {
+        Memory.counters = {squad: 1};
+    }
+
     let jobBoard = new job_board.JobBoard();
 
     _.each(Memory.creeps, (creepData, creepName) => {

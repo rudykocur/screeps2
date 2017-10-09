@@ -41,8 +41,6 @@ class JobHandlerBase {
         delete this.data.takenBy[this.creep.name];
         delete this.creep.memory.jobStateData;
         delete this.creep.memory.jobState;
-
-        console.log('JOB', this.data.id, 'COMPLETED FOR', this.creep);
     }
 
     execute() {

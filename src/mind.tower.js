@@ -41,7 +41,7 @@ class TowerMind {
     }
 
     lookAround() {
-        let enemy = this.tower.pos.findClosestByRange(this.roomMgr.enemies);
+        let enemy = this.tower.pos.findClosestByRange(this.roomMgr.enemiesInside);
 
         if(enemy) {
             this.fsm.enter(STATE_ATTACK, {enemyId: enemy.id});

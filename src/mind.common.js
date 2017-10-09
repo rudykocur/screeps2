@@ -82,6 +82,13 @@ class CreepMindBase {
         }
     }
 
+    get workRoom() {
+        let workRoom = Game.rooms[this.creep.memory.roomName];
+        if(workRoom) {
+            return workRoom.manager;
+        }
+    }
+
     /**
      * To be overriden. Use `yield this.tryClaimJob` to return viable job.
      *
@@ -102,7 +109,6 @@ class CreepMindBase {
 
         for(let jobId of this.findNewJob()) {
             if(jobId) {
-                console.log(this.creep, '- claimed new job', jobId);
                 this.creep.memory.jobId = jobId;
                 return this.roomMgr.jobManager.getJobHandler(this.creep);
             }

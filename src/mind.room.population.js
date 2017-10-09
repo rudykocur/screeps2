@@ -38,7 +38,7 @@ class RoomPopulationMind {
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
-            else if(this.manager.storage.getStoredEnergy() > 4000 && this.getSpawnCooldown('upgrader') > 200) {
+            else if(this.manager.storage.getStoredEnergy() > 40000 && this.getSpawnCooldown('upgrader') > 200) {
                 this.spawnUpgrader(spawn)
             }
         }
@@ -48,7 +48,18 @@ class RoomPopulationMind {
         return _.first(this.freeSpawns);
     }
 
-    spawn(spawn, options) {
+    /**
+     * @param {RoomManager} targetRoom
+     * @param options
+     */
+    spawn(targetRoom, options) {
+        let spawn = this.getFreeSpawn();
+
+        if(!spawn) {
+            return;
+        }
+
+        options.memo.roomName = targetRoom.roomName;
 
         console.log('SPAWN MIND', JSON.stringify(options));
 
@@ -73,8 +84,10 @@ class RoomPopulationMind {
         }
     }
 
-    doSpawn(spawn, body,name, memo) {
+    doSpawn(spawn, body, name, memo) {
         name = this.manager.getCreepName(name);
+
+        memo.roomName = spawn.room.name;
 
         let result = spawn.spawnCreep(body, name, {memory: memo});
 

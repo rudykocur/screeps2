@@ -158,8 +158,7 @@ class JobBoard {
 
     handleDeadCreep(name, memo) {
         if(memo.jobId) {
-            console.log('!!!!! Cleaned claim for dead creep', name, '::', memo.jobId, '::',
-                this.memory[memo.jobId].claims[name]);
+            console.log('!!!!! Cleaned claim for dead creep', name, '::', memo.jobId);
 
             delete this.memory[memo.jobId].claims[name];
             delete this.memory[memo.jobId].takenBy[name];

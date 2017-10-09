@@ -6,6 +6,9 @@ const availableMinds = {
     'builder': require('mind.builder').BuilderMind,
     'tower': require('mind.tower').TowerMind,
     'scout': require('mind.scout').ScoutMind,
+    'defender': require('mind.defender').DefenderMind,
+    'rangedDefender': require('mind.rangedDefender').RangedDefenderMind,
+    'claimer': require('mind.claimer').ClaimerMind,
 };
 
 module.exports = {
