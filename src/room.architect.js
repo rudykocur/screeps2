@@ -10,7 +10,7 @@ class RoomArchitect {
     }
 
     update() {
-        utils.throttle(2000, () => this.planRoads());
+        utils.throttle(1000, () => this.planRoads())();
     }
 
     planRoads() {
@@ -31,6 +31,12 @@ class RoomArchitect {
         }
 
         this.generateRoad(this.manager.room.controller.pos, storagePos);
+
+        for(let handler of this.manager.remote.handlers) {
+            for(let source of handler.sources) {
+                this.generateRoad(source.pos, storagePos);
+            }
+        }
     }
 
     /**
@@ -39,17 +45,39 @@ class RoomArchitect {
      */
     generateRoad(from, to) {
 
-        let path = from.findPathTo(to, {
-            ignoreCreeps: true,
+        let path = PathFinder.search(from, {pos: to, range: 1}, {
+            plainCost: 2,
+            swampCost: 5,
+            roomCallback: (roomName) => {
+                let room = Game.rooms[roomName];
+                if(!room) {
+                    return;
+                }
+
+                let costs = new PathFinder.CostMatrix;
+
+                room.find(FIND_STRUCTURES).forEach(function(struct) {
+                  if (struct.structureType === STRUCTURE_ROAD) {
+                    // Favor roads over plain tiles
+                    costs.set(struct.pos.x, struct.pos.y, 1);
+                  } else if (OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType) >= 0) {
+                    // Can't walk through non-walkable buildings
+                    costs.set(struct.pos.x, struct.pos.y, 0xff);
+                  }
+                });
+
+                return costs;
+            }
         });
 
-        for(let step of path) {
-            this.manager.room.visual.circle(step, {
+        for(let step of path.path) {
+            let room = Game.rooms[step.roomName];
+            room.visual.circle(step, {
                 fill: "red",
                 opacity: 0.3
             });
 
-            this.manager.room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD);
+            room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD);
         }
     }
 }

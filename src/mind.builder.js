@@ -11,8 +11,8 @@ class BuilderMind extends mind.CreepMindBase {
 
         let fsm = {
             [STATE_REFILL]: {
-                onEnter: () => {},
-                onTick: ()=> this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1000),
+                onEnter: this.pickRefillSource.bind(this),
+                onTick: this.doRefill.bind(this),
             },
             [STATE_BUILD]: {
                 onEnter: this.pickBuildTarget.bind(this),
@@ -28,23 +28,68 @@ class BuilderMind extends mind.CreepMindBase {
 
     doCheckStatus() {
         if(_.sum(this.creep.carry) > 0) {
-            if(this.roomMgr.constructionSites.length > 0) {
+
+            if(this.workRoom.constructionSites.length > 0) {
                 this.enterState(STATE_BUILD);
                 return;
             }
-
         }
 
-        if(this.actions.isEnoughStoredEnergy(1000) && _.sum(this.creep.carry) < this.creep.carryCapacity) {
-            this.enterState(STATE_REFILL);
-            return;
+        if(_.sum(this.creep.carry) < this.creep.carryCapacity) {
+            if(this.workRoom.storage && this.actions.isEnoughStoredEnergy(1000)) {
+                this.enterState(STATE_REFILL);
+                return;
+            }
+
+            if(this.workRoom.droppedEnergy.length > 0) {
+                this.enterState(STATE_REFILL);
+                return;
+            }
         }
 
         this.actions.gotoMeetingPoint();
     }
 
+    pickRefillSource() {
+        if(this.workRoom.storage) {
+            return;
+        }
+        let target;
+
+        if(this.creep.room != this.workRoom.room) {
+            target = _.first(this.workRoom.droppedEnergy);
+        }
+        else {
+            target = this.creep.pos.findClosestByPath(this.workRoom.droppedEnergy);
+        }
+
+        this.localState.refillId = target.id;
+    }
+
+    doRefill() {
+        if(this.workRoom.storage) {
+            this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1000);
+            return;
+        }
+
+        let target = Game.getObjectById(this.localState.refillId);
+
+        if(!target) {
+            this.enterState(STATE_IDLE);
+            return;
+        }
+
+        if(!this.creep.pos.isNearTo(target)) {
+            this.creep.moveTo(target);
+        }
+        else {
+            this.creep.pickup(target);
+            this.enterState(STATE_BUILD);
+        }
+    }
+
     pickBuildTarget() {
-        let site = this.creep.pos.findClosestByRange(this.roomMgr.constructionSites);
+        let site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
 
         if(!site) {
             this.enterState(STATE_IDLE);
@@ -70,8 +115,29 @@ class BuilderMind extends mind.CreepMindBase {
             }
         }
         else {
+            this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
             this.creep.moveTo(target);
         }
+    }
+
+    /**
+     * @param {RoomManager} manager
+     * @param roomName
+     */
+    static getSpawnParams(manager, roomName) {
+        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+        if(manager.room.energyCapacityAvailable > 600) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
+        }
+        if(manager.room.energyCapacityAvailable > 1000) {
+            body = [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, WORK, MOVE, WORK, CARRY, MOVE];
+        }
+
+        return {
+            body: body,
+            name: 'builder',
+            memo: {'mind': 'builder'}
+        };
     }
 }
 

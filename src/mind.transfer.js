@@ -30,8 +30,16 @@ class TransferMind extends mind.CreepMindBase {
         this.chillAtMeetingPoint();
     }
 
+    get storage() {
+        if(this.workRoom.isRemote) {
+            return this.workRoom.parent.storage;
+        }
+
+        return this.workRoom.storage;
+    }
+
     *findNewJob() {
-        if(this.roomMgr.storage.getStoredEnergy() > 100) {
+        if(this.storage.getStoredEnergy() > 100) {
             if (this.room.energyMissing > 100) {
                 yield this.tryClaimJob(1, {
                     type: 'refill-extensions'
@@ -56,11 +64,11 @@ class TransferMind extends mind.CreepMindBase {
     }
 
     dropResourcesToStorage() {
-        if(this.roomMgr.storage.canDeposit(this.creep)) {
-            this.roomMgr.storage.deposit(this.creep);
+        if(this.storage.canDeposit(this.creep)) {
+            this.storage.deposit(this.creep);
         }
         else {
-            this.creep.moveTo(this.roomMgr.storage.target);
+            this.creep.moveTo(this.storage.target);
         }
     }
 
@@ -68,6 +76,31 @@ class TransferMind extends mind.CreepMindBase {
         if(!this.creep.pos.isNearTo(this.roomMgr.meetingPoint)) {
             this.creep.moveTo(this.roomMgr.meetingPoint);
         }
+    }
+
+    /**
+     * @param {RoomManager} manager
+     * @param roomName
+     */
+    static getSpawnParams(manager, roomName) {
+        let body = [MOVE, MOVE, CARRY, CARRY];
+        if(manager.room.energyCapacityAvailable > 500) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+        }
+
+        if(manager.room.energyCapacityAvailable > 700) {
+            body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+        }
+
+        if(manager.room.energyCapacityAvailable > 1000) {
+            body = [WORK, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE];
+        }
+
+        return {
+            body: body,
+            name: 'transfer',
+            memo: {'mind': 'transfer'}
+        };
     }
 
 }

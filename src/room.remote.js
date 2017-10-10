@@ -15,8 +15,11 @@ class RemoteRoomsManager {
      */
     constructor(manager) {
         this.manager = manager;
+        this.jobManager = manager.jobManager;
 
         this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
+
+        this.handlers = this.getHandlers();
     }
 
     get memory(){
@@ -28,8 +31,8 @@ class RemoteRoomsManager {
     }
 
     update() {
-        for(let handler of this.getHandlers()) {
-            handler.update();
+        for(let handler of this.handlers) {
+            handler.update(this.jobManager);
         }
 
         this.memory.roomNames = this.getRemoteRoomNames();
@@ -91,6 +94,9 @@ class RemoteRoomHandler {
     constructor(roomName, parentManager) {
         this.roomName = roomName;
         this.parent = parentManager;
+        this.jobManager = parentManager.jobManager;
+
+        this.isRemote = true;
 
         this.room = Game.rooms[this.roomName];
 
@@ -119,6 +125,19 @@ class RemoteRoomHandler {
             this.room.manager = this;
 
             this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+            this.sources = this.room.find(FIND_SOURCES);
+            this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
+                if(res.resourceType != RESOURCE_ENERGY) {
+                    return false;
+                }
+
+                return true;
+            });
+            this.spawns = [];
+            this.extensions = [];
+            this.extensionsClusters = [];
+            this.towers = [];
+            this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         }
 
         for(let name of ['scoutName', 'defenderName', 'claimerName']) {
@@ -130,6 +149,14 @@ class RemoteRoomHandler {
 
     get memory() {
         return Memory.rooms[this.roomName];
+    }
+
+    getCreepCount(type) {
+        if(!this.mindsByType[type.name]) {
+            return 0;
+        }
+
+        return this.mindsByType[type.name].length;
     }
 
     update() {
@@ -168,10 +195,29 @@ class RemoteRoomHandler {
             if (this.enemies.length === 0) {
                 this.trySpawnClaimer();
             }
+
+            if(this.getCreepCount(minds.available.harvester) < 2) {
+                this.trySpawnHarvester();
+            }
+            else if(this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
+                this.spawnMind(minds.available.builder);
+            }
+            else if(this.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 4) {
+                this.spawnMind(minds.available.transfer);
+            }
+
+            this.jobManager.update(this);
         }
 
+
+
         for(let mind of this.minds) {
-            mind.update();
+            try{
+                mind.update();
+            }
+            catch(e) {
+                console.log('MIND FAILED:', e, 'Stack trace:', e.stack);
+            }
         }
     }
 
@@ -201,6 +247,10 @@ class RemoteRoomHandler {
                 console.log(this, 'claimer', claimerName, 'sent');
             }
         }
+    }
+
+    trySpawnHarvester() {
+        this.spawnMind(minds.available.harvester);
     }
 
     findRemoteStructures(room) {

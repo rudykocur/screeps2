@@ -3,6 +3,7 @@ const fsm = require('fsm');
 
 const STATE_IDLE = 'idle';
 const STATE_REPAIR = 'repair';
+const STATE_HEAL = 'heal';
 const STATE_ATTACK = 'attack';
 
 class TowerMind {
@@ -26,6 +27,9 @@ class TowerMind {
             [STATE_REPAIR]: {
                 onTick: this.repairTarget.bind(this)
             },
+            [STATE_HEAL]: {
+                onTick: this.healCreep.bind(this)
+            },
             [STATE_ATTACK]: {
                 onTick: this.attackTarget.bind(this)
             },
@@ -45,6 +49,19 @@ class TowerMind {
 
         if(enemy) {
             this.fsm.enter(STATE_ATTACK, {enemyId: enemy.id});
+            return;
+        }
+
+        let wounded = _.first(_.filter(Game.creeps, c => {
+            if(c.room != this.roomMgr.room) {
+                return false;
+            }
+
+            return c.hits < c.hitsMax;
+        }));
+
+        if(wounded) {
+            this.fsm.enter(STATE_HEAL, {healId: wounded.id});
             return;
         }
 
@@ -86,6 +103,16 @@ class TowerMind {
         if(this.fsm.localState.repairCounter > 6) {
             this.fsm.enter(STATE_IDLE);
         }
+    }
+
+    healCreep() {
+        let target = Game.getObjectById(this.fsm.localState.healId);
+
+        if(!target || target.hits == target.hitsMax) {
+            this.fsm.enter(STATE_IDLE);
+        }
+
+        this.tower.heal(target);
     }
 
     attackTarget() {

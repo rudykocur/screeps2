@@ -152,6 +152,10 @@ class RoomManager {
 
         return flags.map(f => new ExtensionCluster(f.pos, this));
     }
+
+    toString() {
+        return `[RoomManager ${this.room}]`;
+    }
 }
 
 class FlagStorageWrapper {

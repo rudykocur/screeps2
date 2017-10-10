@@ -6,6 +6,15 @@ class HarvesterMind extends mind.CreepMindBase {
     }
 
     update() {
+        if(this.creep.spawning) {return}
+
+        let job = this.getJob();
+
+        if(job) {
+            job.execute();
+            return;
+        }
+
         switch(this.state) {
             case 'seek':
                 this.doSeekTarget();
@@ -16,6 +25,12 @@ class HarvesterMind extends mind.CreepMindBase {
             default:
                 this.enterState('seek');
         }
+    }
+
+    *findNewJob() {
+        yield this.tryClaimJob(1, {
+            type: 'harvest-source',
+        })
     }
 
     getHarvestTarget() {
@@ -42,6 +57,29 @@ class HarvesterMind extends mind.CreepMindBase {
         if(result != OK && result != ERR_NOT_ENOUGH_RESOURCES) {
             console.log('HARVEST FAIL', result);
         }
+    }
+
+    /**
+     * @param {RoomManager} manager
+     * @param roomName
+     */
+    static getSpawnParams(manager, roomName) {
+        let body = [MOVE, WORK, WORK];
+        if(manager.room.energyCapacityAvailable > 500) {
+            body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
+        }
+        if(manager.room.energyCapacityAvailable > 750) {
+            body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+        }
+        if(manager.room.energyCapacityAvailable > 1000) {
+            body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+        }
+
+        return {
+            body: body,
+            name: 'harvester',
+            memo: {'mind': 'harvester'}
+        };
     }
 }
 

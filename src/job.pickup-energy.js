@@ -41,11 +41,22 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
     }
 
     depositEnergy() {
-        if(!this.roomMgr.storage.canDeposit(this.creep)) {
-            this.creep.moveTo(this.roomMgr.storage.target);
+        let storage;
+
+        if(this.roomMgr.isRemote) {
+            storage = this.roomMgr.parent.storage;
         }
         else {
-            this.roomMgr.storage.deposit(this.creep);
+            storage = this.roomMgr.storage;
+        }
+
+        this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
+
+        if(!storage.canDeposit(this.creep)) {
+            this.creep.moveTo(storage.target);
+        }
+        else {
+            storage.deposit(this.creep);
             this.completeJob();
         }
     }

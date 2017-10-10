@@ -9,14 +9,13 @@ class CreepMindBase {
      */
     constructor(creep, roomManager) {
         this.roomMgr = roomManager;
-        /** type RoomManager */
         this.room = this.roomMgr.room;
         this.creep = creep;
         this.localState = this.creep.memory.localState;
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;
 
-        this.actions = new MindCommonActions(this, this.creep, this.roomMgr);
+        this.actions = new MindCommonActions(this, this.creep, this.workRoom);
     }
 
     setStateMachine(fsm, initalState) {
@@ -144,12 +143,12 @@ class MindCommonActions {
     constructor(mind, creep, roomManager) {
         this.mind = mind;
         this.creep = creep;
-        this.roomMgr = roomManager;
+        this.workRoom = roomManager;
     }
 
     isEnoughStoredEnergy(minThreshold) {
         minThreshold = minThreshold || 0;
-        return (this.roomMgr.storage.getStoredEnergy() - minThreshold) > this.creep.carryCapacity/2;
+        return (this.workRoom.storage.getStoredEnergy() - minThreshold) > this.creep.carryCapacity/2;
     }
 
     refillFromStorage(nextState, idleState, minThreshold) {
@@ -158,22 +157,22 @@ class MindCommonActions {
             return;
         }
 
-        if(this.roomMgr.storage.isNear(this.creep)) {
-            this.roomMgr.storage.withdraw(this.creep);
+        if(this.workRoom.storage.isNear(this.creep)) {
+            this.workRoom.storage.withdraw(this.creep);
             this.mind.enterState(nextState);
         }
         else {
-            this.creep.moveTo(this.roomMgr.storage.target);
+            this.creep.moveTo(this.workRoom.storage.target);
         }
     }
 
     gotoMeetingPoint() {
-        if(!this.roomMgr.meetingPoint) {
+        if(!this.mind.workRoom.meetingPoint) {
             return;
         }
 
-        if(!this.roomMgr.meetingPoint.pos.inRangeTo(this.creep, 3)) {
-            this.creep.moveTo(this.roomMgr.meetingPoint);
+        if(!this.mind.workRoom.meetingPoint.pos.inRangeTo(this.creep, 3)) {
+            this.creep.moveTo(this.mind.workRoom.meetingPoint);
         }
     }
 }

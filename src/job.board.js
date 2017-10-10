@@ -4,7 +4,8 @@ const _ = require('lodash');
 const jobModules = {};
 
 [
-    'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower'
+    'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower',
+    'job.harvest',
 ].forEach(modName => {
     let mod = require(modName);
     jobModules[mod.JOB_TYPE] = mod.getHandler();
@@ -53,7 +54,7 @@ class JobBoard {
 
         // console.log('INCOMING SEARCH', JSON.stringify(options));
 
-        return _.filter(this.memory, jobData => {
+        return _.sortByOrder(_.filter(this.memory, jobData => {
             if(jobData.deleted) {
                 return false;
             }
@@ -81,7 +82,7 @@ class JobBoard {
             }
 
             return true;
-        });
+        }), ['available'], ['desc']);
     }
 
     claim(creep, jobData, claimAmount) {

@@ -4,7 +4,7 @@ class JobHandlerBase {
     constructor(creep, jobData) {
         this.creep = creep;
         this.room =  this.creep.room;
-        this.roomMgr = this.room.manager;
+        this.roomMgr = this.creep.workRoom;
         this.data = jobData;
         this.fsm = null;
 

@@ -136,12 +136,18 @@ class RoomPopulationMind {
         if(this.room.energyCapacityAvailable > 600) {
             body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
         }
+        if(this.room.energyCapacityAvailable > 1000) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK];
+        }
         this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
     }
     spawnBuilder(spawn) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
         if(this.room.energyCapacityAvailable > 600) {
             body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
+        }
+        if(this.room.energyCapacityAvailable > 1000) {
+            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK];
         }
         this.doSpawn(spawn, body, 'builder', {'mind': 'builder'})
     }
