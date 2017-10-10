@@ -35,9 +35,6 @@ class RoomPopulationMind {
             else if(this.manager.getCreepCount(minds.available.harvester) < 2) {
                 this.spawnHarvester(spawn);
             }
-            else if(this.manager.getCreepCount(minds.available.transfer) < 3) {
-                this.spawnTransfer(spawn);
-            }
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }

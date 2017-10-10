@@ -19,7 +19,7 @@ class UpgraderMind extends mind.CreepMindBase {
                 onTick: () => this.doUpgrade(),
             },
             [STATE_IDLE]: {
-                onTick: () => throttle(5, () => this.doCheckStatus()),
+                onTick: throttle(5, () => this.doCheckStatus()),
             }
         };
 
