@@ -63,6 +63,7 @@ class DefenderMind extends mind.CreepMindBase {
         }
 
         this.creep.attack(target);
+        this.creep.rangedAttack(target);
     }
 
     /**
@@ -70,8 +71,13 @@ class DefenderMind extends mind.CreepMindBase {
      * @param roomName
      */
     static getSpawnParams(manager, roomName) {
+        let body = [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK];
+        if(manager.room.energyCapacityAvailable > 1000) {
+            body = [TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK];
+        }
+
         return {
-            body: [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK],
+            body: body,
             name: 'defender',
             memo: {'mind': 'defender', roomName: roomName}
         };

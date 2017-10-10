@@ -11,6 +11,15 @@ class RoomPopulationMind {
         this.room = this.manager.room;
 
         this.freeSpawns = this.manager.spawns.filter(spawn => !spawn.spawning);
+
+        this.energyStructures = [];
+        let clusters = _.sortByOrder(this.manager.extensionsClusters, ['needsEnergy'], ['desc']);
+        clusters.forEach(cluster => {
+            this.energyStructures.push.apply(this.energyStructures, cluster.extensions);
+        });
+
+
+        this.energyStructures.push.apply(this.energyStructures, this.manager.spawns);
     }
 
     update() {
@@ -29,10 +38,10 @@ class RoomPopulationMind {
             else if(this.manager.getCreepCount(minds.available.transfer) < 3) {
                 this.spawnTransfer(spawn);
             }
-            else if(this.manager.getCreepCount(minds.available.upgrader) < 3) {
+            else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }
-            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
+            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 1) {
                 this.spawnBuilder(spawn);
             }
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
@@ -63,7 +72,10 @@ class RoomPopulationMind {
 
         let name = this.manager.getCreepName(options.name);
 
-        let result = spawn.spawnCreep(options.body, name, {memory: options.memo});
+        let result = spawn.spawnCreep(options.body, name, {
+            memory: options.memo,
+            energyStructures: this.energyStructures,
+        });
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
@@ -75,7 +87,7 @@ class RoomPopulationMind {
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
-            this.room.memory.lastSpawnTick[options.memo.mind] = Game.time;
+            this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + options.memo.mind] = Game.time;
             console.log('Spawned new creep', name, 'with body:', options.body);
 
             return name;
@@ -87,7 +99,10 @@ class RoomPopulationMind {
 
         memo.roomName = spawn.room.name;
 
-        let result = spawn.spawnCreep(body, name, {memory: memo});
+        let result = spawn.spawnCreep(body, name, {
+            memory: memo,
+            energyStructures: this.energyStructures,
+        });
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {

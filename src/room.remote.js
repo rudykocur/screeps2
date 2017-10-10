@@ -140,6 +140,10 @@ class RemoteRoomHandler {
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         }
 
+        if(this.enemies.length > 0) {
+            this.danger = true;
+        }
+
         for(let name of ['scoutName', 'defenderName', 'claimerName']) {
             if(this.memory[name] && !Game.creeps[this.memory[name]]) {
                 delete this.memory[name];
@@ -159,6 +163,10 @@ class RemoteRoomHandler {
         return this.mindsByType[type.name].length;
     }
 
+    /**
+     *
+     * @return {RoomPopulationMind}
+     */
     get spawner() {
         return this.parent.spawner;
     }
@@ -200,14 +208,21 @@ class RemoteRoomHandler {
                 this.trySpawnClaimer();
             }
 
-            if(this.getCreepCount(minds.available.harvester) < 2) {
-                this.spawnMind(minds.available.harvester);
-            }
-            else if(this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
-                this.spawnMind(minds.available.builder);
-            }
-            else if(this.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 4) {
-                this.spawnMind(minds.available.transfer);
+            if(!this.danger) {
+                if (this.getCreepCount(minds.available.harvester) < 2) {
+                    this.spawnMind(minds.available.harvester);
+                }
+                else if (this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
+                    this.spawnMind(minds.available.builder);
+                }
+                else if (this.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 2) {
+                    this.spawnMind(minds.available.transfer);
+                }
+                else if (_.sum(this.droppedEnergy, 'amount') > 2000 &&
+                    this.getSpawnCooldown(minds.available.transfer) > 200 &&
+                    this.getCreepCount(minds.available.transfer) < 5) {
+                    this.spawnMind(minds.available.transfer);
+                }
             }
 
             this.jobManager.update(this);
@@ -231,9 +246,14 @@ class RemoteRoomHandler {
         }
     }
 
+    getSpawnCooldown(mind) {
+        return this.spawner.getSpawnCooldown(`${this.room.name}-${mind.name}`);
+    }
+
     trySpawnDefender() {
         if (!this.memory.defenderName) {
-            let defenderName = this.spawnMind(mind_defender_ranged.RangedDefenderMind);
+            // let defenderName = this.spawnMind(mind_defender_ranged.RangedDefenderMind);
+            let defenderName = this.spawnMind(minds.available.defender);
             if (defenderName) {
                 this.memory.defenderName = defenderName;
                 console.log(this, 'defender', defenderName, 'sent')

@@ -167,12 +167,20 @@ class MindCommonActions {
     }
 
     gotoMeetingPoint() {
-        if(!this.mind.workRoom.meetingPoint) {
+        let point;
+        if(this.mind.workRoom.isRemote) {
+            point = this.mind.workRoom.parent.meetingPoint.pos;
+        }
+        else {
+            point = this.mind.workRoom.meetingPoint.pos;
+        }
+
+        if(!point) {
             return;
         }
 
-        if(!this.mind.workRoom.meetingPoint.pos.inRangeTo(this.creep, 3)) {
-            this.creep.moveTo(this.mind.workRoom.meetingPoint);
+        if(!point.inRangeTo(this.creep, 3)) {
+            this.creep.moveTo(point);
         }
     }
 }

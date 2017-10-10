@@ -16,9 +16,11 @@ class TransferMind extends mind.CreepMindBase {
     update() {
         if(this.creep.spawning) {return}
 
+        if(!this.creep.workRoom) {return}
+
         let job = this.getJob();
 
-        if(job) {
+        if(job && !this.creep.workRoom.danger) {
             job.execute();
             return;
         }
@@ -27,7 +29,7 @@ class TransferMind extends mind.CreepMindBase {
             return this.dropResourcesToStorage();
         }
 
-        this.chillAtMeetingPoint();
+        this.actions.gotoMeetingPoint();
     }
 
     get storage() {

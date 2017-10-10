@@ -7,56 +7,23 @@ class HarvesterMind extends mind.CreepMindBase {
 
     update() {
         if(this.creep.spawning) {return}
+        if(!this.creep.workRoom) {return}
 
         let job = this.getJob();
 
-        if(job) {
+        if(job && !this.creep.workRoom.danger) {
             job.execute();
             return;
         }
 
-        switch(this.state) {
-            case 'seek':
-                this.doSeekTarget();
-                break;
-            case 'harvest':
-                this.doHarvest();
-                break;
-            default:
-                this.enterState('seek');
-        }
+        this.actions.gotoMeetingPoint();
+
     }
 
     *findNewJob() {
         yield this.tryClaimJob(1, {
             type: 'harvest-source',
         })
-    }
-
-    getHarvestTarget() {
-        return this.globalState['harvestId'];
-    }
-
-    doSeekTarget() {
-        let target = this.getLocalTarget('targetId', () => {
-            return this.roomMgr.getFreeEnergySource();
-        });
-
-        if(target.pos.isNearTo(this.creep)) {
-            this.globalState['harvestId'] = target.id;
-            this.enterState('harvest');
-        }
-        else {
-            this.creep.moveTo(target);
-        }
-    }
-
-    doHarvest() {
-        let result = this.creep.harvest(Game.getObjectById(this.globalState['harvestId']));
-
-        if(result != OK && result != ERR_NOT_ENOUGH_RESOURCES) {
-            console.log('HARVEST FAIL', result);
-        }
     }
 
     /**

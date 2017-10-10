@@ -25,8 +25,10 @@ class RangedDefenderMind extends mind.CreepMindBase {
 
         this.creep.heal();
 
-        if(this.roomMgr.enemies.length > 0) {
+        if(this.workRoom && this.workRoom.enemies.length > 0) {
+            this.creep.moveTo(_.first(this.workRoom.enemies));
             this.enterState(STATE.ATTACK);
+
             return;
         }
 
@@ -46,7 +48,7 @@ class RangedDefenderMind extends mind.CreepMindBase {
     }
 
     attackTarget() {
-        let target = this.creep.pos.findClosestByRange(this.roomMgr.enemies);
+        let target = this.creep.pos.findClosestByRange(this.workRoom.enemies);
 
         if(!target) {
             this.enterState(STATE.IDLE);
@@ -55,13 +57,12 @@ class RangedDefenderMind extends mind.CreepMindBase {
         let result = this.creep.rangedAttack(target);
 
         if(result == ERR_NOT_IN_RANGE) {
-
+            this.creep.moveTo(target);
+        }
+        else {
             if(this.creep.pos.getRangeTo(target) < 3) {
                 let dir = this.getReverseDirection(this.creep, target);
                 this.creep.move(dir);
-            }
-            else {
-                this.creep.moveTo(target);
             }
         }
 
