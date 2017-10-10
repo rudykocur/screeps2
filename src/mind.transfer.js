@@ -93,7 +93,8 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = [WORK, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE, CARRY, MOVE];
+            body = [WORK, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE,
+                    CARRY, CARRY, MOVE, CARRY, CARRY, MOVE];
         }
 
         return {

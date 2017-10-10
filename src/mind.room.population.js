@@ -61,8 +61,6 @@ class RoomPopulationMind {
 
         options.memo.roomName = targetRoom.roomName;
 
-        console.log('SPAWN MIND', JSON.stringify(options));
-
         let name = this.manager.getCreepName(options.name);
 
         let result = spawn.spawnCreep(options.body, name, {memory: options.memo});
@@ -121,15 +119,8 @@ class RoomPopulationMind {
         this.doSpawn(spawn, body, 'harvester', {'mind': 'harvester'})
     }
     spawnTransfer(spawn) {
-        let body = [MOVE, MOVE, CARRY, CARRY];
-        if(this.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
-        }
-
-        if(this.room.energyCapacityAvailable > 700) {
-            body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
-        }
-        this.doSpawn(spawn, body, 'transfer', {'mind': 'transfer'});
+        let options = minds.available.transfer.getSpawnParams(this.manager, spawn.room.name);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
     }
     spawnUpgrader(spawn) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];

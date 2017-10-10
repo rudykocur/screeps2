@@ -51,6 +51,15 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
             this.creep.transfer(ext, RESOURCE_ENERGY);
         }
         else {
+            if(this.creep.pos.getRangeTo(this.cluster.center) < 3) {
+                let ext = _.first(this.cluster.extensions.filter(
+                    e => e.energy < e.energyCapacity && this.creep.pos.isNearTo(e.pos)
+                ));
+
+                if(ext) {
+                    this.creep.transfer(ext, RESOURCE_ENERGY);
+                }
+            }
             this.creep.moveTo(this.cluster.center);
         }
     }

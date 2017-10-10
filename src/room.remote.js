@@ -159,6 +159,10 @@ class RemoteRoomHandler {
         return this.mindsByType[type.name].length;
     }
 
+    get spawner() {
+        return this.parent.spawner;
+    }
+
     update() {
         // console.log(this, 'updating ...');
 
@@ -197,7 +201,7 @@ class RemoteRoomHandler {
             }
 
             if(this.getCreepCount(minds.available.harvester) < 2) {
-                this.trySpawnHarvester();
+                this.spawnMind(minds.available.harvester);
             }
             else if(this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
                 this.spawnMind(minds.available.builder);
@@ -208,8 +212,6 @@ class RemoteRoomHandler {
 
             this.jobManager.update(this);
         }
-
-
 
         for(let mind of this.minds) {
             try{
@@ -222,10 +224,10 @@ class RemoteRoomHandler {
     }
 
     spawnMind(mind) {
-        let spawn = this.parent.spawner.getFreeSpawn();
+        let spawn = this.spawner.getFreeSpawn();
 
         if(spawn) {
-            return this.parent.spawner.spawn(this, mind.getSpawnParams(this.parent, this.roomName));
+            return this.spawner.spawn(this, mind.getSpawnParams(this.parent, this.roomName));
         }
     }
 
@@ -247,10 +249,6 @@ class RemoteRoomHandler {
                 console.log(this, 'claimer', claimerName, 'sent');
             }
         }
-    }
-
-    trySpawnHarvester() {
-        this.spawnMind(minds.available.harvester);
     }
 
     findRemoteStructures(room) {

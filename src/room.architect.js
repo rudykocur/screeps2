@@ -71,6 +71,10 @@ class RoomArchitect {
         });
 
         for(let step of path.path) {
+            if(from.isEqualTo(step) || to.isEqualTo(step)) {
+                continue;
+            }
+
             let room = Game.rooms[step.roomName];
             room.visual.circle(step, {
                 fill: "red",
