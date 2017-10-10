@@ -179,6 +179,11 @@ class JobBoard {
 
                 toDelete.push(jobData.id);
             }
+            else {
+                if(jobData.deleted && _.size(jobData.takenBy) == 0) {
+                    toDelete.push(jobData.id);
+                }
+            }
         });
 
         if(toDelete.length > 0) {
