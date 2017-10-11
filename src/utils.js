@@ -23,5 +23,59 @@ module.exports = {
 
     isExtensionClusterFlag() {
 
+    },
+
+    debugPath(path) {
+        for(let step of path) {
+
+            let visual = new RoomVisual(step.roomName);
+            visual.circle(step, {
+                fill: "yellow",
+                opacity: 0.3
+            });
+        }
+    },
+
+    getPathTarget(targets, path) {
+        let last = path[path.length - 1];
+
+        for(let target of targets) {
+            if(target.pos.isNearTo(last)) {
+                return target;
+            }
+        }
+    },
+
+    debugFun() {
+        // let from = maps.getRoomCache('W27N53').controller;
+        let from = maps.getRoomCache('W27N53').controller.pos;
+        let to = maps.getRoomCache('W28N54').findStructures(STRUCTURE_TOWER);
+
+        let path = PathFinder.search(from, to.map(s=>s.pos), {
+            plainCost: 2,
+            swampCost: 5,
+            roomCallback: maps.getCostMatrix
+        });
+
+        utils.debugPath(path.path);
+
+        let target = utils.getPathTarget(to, path.path);
+
+        for(let step of path.path) {
+            if(step.roomName != target.pos.roomName) {
+                continue;
+            }
+
+            if(step.getRangeTo(target.pos) <= TOWER_FALLOFF_RANGE) {
+                let visual = new RoomVisual(step.roomName);
+                visual.circle(step, {
+                    fill: "red",
+                    opacity: 0.6,
+                    radius: 0.5,
+                });
+            }
+        }
+
+        // console.log(JSON.stringify(target));
     }
 };

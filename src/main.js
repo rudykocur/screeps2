@@ -1,8 +1,9 @@
 const _ = require("lodash");
 const rooms = require("rooms");
-const minds = require('mind');
+const utils = require('utils');
 const job_board = require('job.board');
 const proto = require('prototypes');
+const maps = require('maps');
 
 proto.installPrototypes();
 
@@ -27,6 +28,10 @@ module.exports.loop = function () {
         }
     }
 
+    _.each(Game.rooms, room => {
+        maps.updateRoomCache(room, 500);
+    });
+
     let managers = [];
     _.each(Game.rooms, room => {
         if(!room.controller.my) {
@@ -50,4 +55,6 @@ module.exports.loop = function () {
     });
 
     jobBoard.cleanup();
+
+    utils.debugFun();
 };
