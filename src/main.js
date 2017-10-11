@@ -56,5 +56,5 @@ module.exports.loop = function () {
 
     jobBoard.cleanup();
 
-    utils.debugFun();
+    utils.debugFun(maps, utils);
 };

@@ -46,7 +46,7 @@ module.exports = {
         }
     },
 
-    debugFun() {
+    debugFun(maps, utils) {
         // let from = maps.getRoomCache('W27N53').controller;
         let from = maps.getRoomCache('W27N53').controller.pos;
         let to = maps.getRoomCache('W28N54').findStructures(STRUCTURE_TOWER);
