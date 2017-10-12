@@ -131,7 +131,7 @@ class RoomPopulationMind {
         let totalBuilders = this.manager.getCreepCount(minds.available.builder);
         let pointsLeft = _.sum(this.manager.constructionSites, site => site.progressTotal - site.progress);
 
-        let spawnOpts = minds.available.builder.getSpawnParams(this.manager, this.manager.roomName);
+        let spawnOpts = minds.available.builder.getSpawnParams(this.manager);
         let builderLifetimePower = spawnOpts.body.filter(part => part == WORK).length * BUILD_POWER * CREEP_LIFE_TIME / 2;
 
         let buildersNeeded = pointsLeft / builderLifetimePower;
@@ -150,7 +150,7 @@ class RoomPopulationMind {
         this.doSpawn(spawn, body, 'harvester', {'mind': 'harvester'})
     }
     spawnTransfer(spawn) {
-        let options = minds.available.transfer.getSpawnParams(this.manager, spawn.room.name);
+        let options = minds.available.transfer.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
     spawnUpgrader(spawn) {

@@ -87,9 +87,8 @@ class TransferMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param roomName
      */
-    static getSpawnParams(manager, roomName) {
+    static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY];
         if(manager.room.energyCapacityAvailable > 500) {
             body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];

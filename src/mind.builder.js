@@ -122,9 +122,8 @@ class BuilderMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param roomName
      */
-    static getSpawnParams(manager, roomName) {
+    static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
         if(manager.room.energyCapacityAvailable > 600) {
             body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];

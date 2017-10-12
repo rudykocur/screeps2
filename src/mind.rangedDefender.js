@@ -84,14 +84,13 @@ class RangedDefenderMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param roomName
      */
-    static getSpawnParams(manager, roomName) {
+    static getSpawnParams(manager) {
         return {
             body: [RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK,
                 MOVE, MOVE, HEAL],
             name: 'rangedDefender',
-            memo: {'mind': 'rangedDefender', roomName: roomName}
+            memo: {'mind': 'rangedDefender'}
         };
     }
 }

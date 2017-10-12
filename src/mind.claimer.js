@@ -39,13 +39,12 @@ class ClaimerMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param roomName
      */
-    static getSpawnParams(manager, roomName) {
+    static getSpawnParams(manager) {
         return {
             body: [CLAIM, MOVE, CLAIM, MOVE],
             name: 'claimer',
-            memo: {'mind': 'claimer', roomName: roomName}
+            memo: {'mind': 'claimer'}
         };
     }
 }

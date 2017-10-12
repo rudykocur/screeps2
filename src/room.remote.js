@@ -179,8 +179,8 @@ class RemoteRoomHandler {
             let newSquad = squads.CombatSquad.createSquad();
             this.memory.squads.push(newSquad.squadId);
 
-            newSquad.addRequiredCreeps(this.parent, 3, mind_scout.ScoutMind.getSpawnParams(this.parent, this.roomName));
-            newSquad.addRequiredCreeps(this.parent, 1, mind_defender.DefenderMind.getSpawnParams(this.parent, this.roomName));
+            newSquad.addRequiredCreeps(this.parent, 3, mind_scout.ScoutMind.getSpawnParams(this.parent));
+            newSquad.addRequiredCreeps(this.parent, 1, mind_defender.DefenderMind.getSpawnParams(this.parent));
 
             newSquad.setMission(missions.DefendRoomMission.createMission(newSquad, this));
 
@@ -243,7 +243,7 @@ class RemoteRoomHandler {
         let spawn = this.spawner.getFreeSpawn();
 
         if(spawn) {
-            return this.spawner.spawn(this, mind.getSpawnParams(this.parent, this.roomName));
+            return this.spawner.spawn(this, mind.getSpawnParams(this.parent));
         }
     }
 

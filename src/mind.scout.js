@@ -37,13 +37,12 @@ class ScoutMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param roomName
      */
-    static getSpawnParams(manager, roomName) {
+    static getSpawnParams(manager) {
         return {
             body: [MOVE],
             name: 'scout',
-            memo: {'mind': 'scout', roomName: roomName}
+            memo: {'mind': 'scout'}
         };
     }
 }
