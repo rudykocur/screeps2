@@ -92,7 +92,8 @@ class RoomPopulationMind {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
             this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + options.memo.mind] = Game.time;
-            console.log('Spawned new creep', name, 'with body:', options.body);
+
+            console.log(`Spawned for room ${targetRoom.roomName} new creep ${name} with body: ${options.body}`);
 
             return name;
         }
@@ -119,7 +120,7 @@ class RoomPopulationMind {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
             this.room.memory.lastSpawnTick[memo.mind] = Game.time;
-            console.log('Spawned new creep', name, 'with body:', body);
+            console.log(`Spawned for room ${spawn.room.name} new creep ${name} with body: ${body}`);
         }
     }
 
