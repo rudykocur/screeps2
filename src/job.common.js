@@ -5,6 +5,7 @@ class JobHandlerBase {
         this.creep = creep;
         this.room =  this.creep.room;
         this.roomMgr = this.creep.workRoom;
+        this.workRoom = this.creep.workRoom;
         this.data = jobData;
         this.fsm = null;
 

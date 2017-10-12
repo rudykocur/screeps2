@@ -38,7 +38,10 @@ class RoomPopulationMind {
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }
-            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 1) {
+            else if(this.manager.extractor && this.manager.getCreepCount(minds.available.harvester) < 3) {
+                this.spawnHarvester(spawn);
+            }
+            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
                 this.spawnBuilder(spawn);
             }
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
@@ -46,6 +49,9 @@ class RoomPopulationMind {
             }
             else if(this.manager.storage.getStoredEnergy() > 40000 && this.getSpawnCooldown('upgrader') > 200) {
                 this.spawnUpgrader(spawn)
+            }
+            else if(this.manager.constructionSites.length > 0 && this.needBuilders()) {
+                this.spawnBuilder(spawn);
             }
         }
     }
@@ -118,6 +124,18 @@ class RoomPopulationMind {
 
     getSpawnCooldown(mindType) {
         return (Game.time - this.room.memory.lastSpawnTick[mindType]) || 9999;
+    }
+
+    needBuilders() {
+        let totalBuilders = this.manager.getCreepCount(minds.available.builder);
+        let pointsLeft = _.sum(this.manager.constructionSites, site => site.progressTotal - site.progress);
+
+        let spawnOpts = minds.available.builder.getSpawnParams(this.manager, this.manager.roomName);
+        let builderLifetimePower = spawnOpts.body.filter(part => part == WORK).length * BUILD_POWER * CREEP_LIFE_TIME / 2;
+
+        let buildersNeeded = pointsLeft / builderLifetimePower;
+
+        return totalBuilders < buildersNeeded;
     }
 
     spawnHarvester(spawn) {

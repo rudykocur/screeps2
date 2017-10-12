@@ -7,6 +7,10 @@ const maps = require('maps');
 
 proto.installPrototypes();
 
+if(!('REACTIONS_REVERSE' in global)) {
+    global.REACTIONS_REVERSE = utils.reverseReactions(REACTIONS);
+}
+
 module.exports.loop = function () {
     if(!Memory.counters) {
         Memory.counters = {squad: 1};

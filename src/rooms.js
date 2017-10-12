@@ -4,6 +4,7 @@ const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 const room_architect = require('room.architect');
 const room_remote = require('room.remote');
+const room_labs = require('room.labs');
 
 class RoomManager {
     /**
@@ -35,6 +36,7 @@ class RoomManager {
         }
 
         this.meetingPoint = Game.flags.IDLE;
+        this.flags = _.filter(Game.flags, 'room', this.room);
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
@@ -54,9 +56,13 @@ class RoomManager {
             return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
         });
 
+        this.terminal = this.room.terminal;
         this.structures = _.filter(Game.structures, 'room', this.room);
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
         this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
+        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
+        this.extractor = _.first(_.filter(this.structures, 'structureType', STRUCTURE_EXTRACTOR));
+        this.mineral = _.first(this.room.find(FIND_MINERALS));
         this.sources = this.room.find(FIND_SOURCES);
         this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
 
@@ -73,6 +79,7 @@ class RoomManager {
         this.architect = new room_architect.RoomArchitect(this);
         this.remote = new room_remote.RemoteRoomsManager(this);
         this.spawner = new RoomPopulationMind(this);
+        this.labs  = new room_labs.LabManager(this);
     }
 
     initMemory() {
@@ -137,6 +144,7 @@ class RoomManager {
         this.jobManager.update(this);
 
         this.spawner.update();
+        this.labs.update();
         this.remote.update();
         this.architect.update();
     }
@@ -216,7 +224,7 @@ class StorageWrapper {
      * @param {Creep} fromCreep
      */
     deposit(fromCreep) {
-        fromCreep.transfer(this.target, RESOURCE_ENERGY);
+        fromCreep.transfer(this.target, _.first(_.keys(fromCreep.carry)));
     }
 
     /**

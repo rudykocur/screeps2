@@ -137,6 +137,7 @@ class RemoteRoomHandler {
             this.extensions = [];
             this.extensionsClusters = [];
             this.towers = [];
+            this.containers = [];
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         }
 

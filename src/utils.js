@@ -1,4 +1,4 @@
-
+const _ = require("lodash");
 
 module.exports = {
     throttle(ticks, callback) {
@@ -23,6 +23,48 @@ module.exports = {
 
     isExtensionClusterFlag() {
 
+    },
+
+    reverseReactions(reactions) {
+        let results = {};
+
+        _.each(reactions, (other, firstResource) => {
+            _.each(other, (finalResource, secondResource) => {
+                if(finalResource in results) {
+                    return;
+                }
+                results[finalResource] = [firstResource, secondResource];
+            })
+        });
+
+        return results;
+    },
+
+    getNextReaction(resource, amount, store) {
+
+        store = _.omit(store, resource);
+
+        if((store[resource] || 0) > amount) {
+            return null;
+        }
+
+        let toCheck = [REACTIONS_REVERSE[resource]];
+
+        while(toCheck.length > 0) {
+            let reaction = toCheck.pop();
+
+            if((store[reaction[0]] || 0) < amount && RESOURCES_BASE.indexOf(reaction[0]) < 0) {
+                toCheck.push(REACTIONS_REVERSE[reaction[0]]);
+                continue;
+            }
+
+            if((store[reaction[1]] || 0) < amount && RESOURCES_BASE.indexOf(reaction[1]) < 0) {
+                toCheck.push(REACTIONS_REVERSE[reaction[1]]);
+                continue;
+            }
+
+            return reaction;
+        }
     },
 
     debugPath(path) {

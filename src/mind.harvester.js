@@ -23,7 +23,11 @@ class HarvesterMind extends mind.CreepMindBase {
     *findNewJob() {
         yield this.tryClaimJob(1, {
             type: 'harvest-source',
-        })
+        });
+
+        yield this.tryClaimJob(1, {
+            type: 'harvest-mineral',
+        });
     }
 
     /**

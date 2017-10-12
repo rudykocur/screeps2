@@ -24,7 +24,7 @@ class FiniteStateMachine {
         }
 
         if(this.config[this.state].onTick) {
-            this.config[this.state].onTick();
+            this.config[this.state].onTick(this.localState);
         }
     }
 
@@ -33,7 +33,7 @@ class FiniteStateMachine {
         this.memory.localState = (localState || {});
 
         if(this.config[name].onEnter) {
-            this.config[name].onEnter();
+            this.config[name].onEnter(this.localState);
         }
     }
 }
