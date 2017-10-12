@@ -40,7 +40,7 @@ class RoomPopulationMind {
             }
             else if(this.manager.extractor && this.manager.mineral.mineralAmount > 0 &&
                 this.manager.getCreepCount(minds.available.harvester) < 3) {
-                this.spawnHarvester(spawn);
+                this.spawnMineralHarvester(spawn);
             }
             else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
                 this.spawnBuilder(spawn);
@@ -140,15 +140,15 @@ class RoomPopulationMind {
     }
 
     spawnHarvester(spawn) {
-        let body = [MOVE, WORK, WORK];
-        if(this.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
-        }
-        if(this.room.energyCapacityAvailable > 750) {
-            body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
-        }
-        this.doSpawn(spawn, body, 'harvester', {'mind': 'harvester'})
+        let options = minds.available.harvester.getSpawnParams(this.manager, false);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
     }
+
+    spawnMineralHarvester(spawn) {
+        let options = minds.available.harvester.getSpawnParams(this.manager, true);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
     spawnTransfer(spawn) {
         let options = minds.available.transfer.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);

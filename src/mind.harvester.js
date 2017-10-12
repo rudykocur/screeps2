@@ -21,19 +21,23 @@ class HarvesterMind extends mind.CreepMindBase {
     }
 
     *findNewJob() {
-        yield this.tryClaimJob(1, {
-            type: 'harvest-source',
-        });
+        if(this.creep.memory.mineral) {
+            yield this.tryClaimJob(1, {
+                type: 'harvest-mineral',
+            });
+        }
+        else {
+            yield this.tryClaimJob(1, {
+                type: 'harvest-source',
+            });
 
-        yield this.tryClaimJob(1, {
-            type: 'harvest-mineral',
-        });
+        }
     }
 
     /**
      * @param {RoomManager} manager
      */
-    static getSpawnParams(manager) {
+    static getSpawnParams(manager, mineralHarvester) {
         let body = [MOVE, WORK, WORK];
         if(manager.room.energyCapacityAvailable > 500) {
             body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
@@ -45,10 +49,19 @@ class HarvesterMind extends mind.CreepMindBase {
             body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
         }
 
+        if(mineralHarvester) {
+            body = [WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE];
+
+            if(manager.room.energyCapacityAvailable > 2000) {
+                body = [WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE,
+                        WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE];
+            }
+        }
+
         return {
             body: body,
             name: 'harvester',
-            memo: {'mind': 'harvester'}
+            memo: {'mind': 'harvester', mineral: !!mineralHarvester}
         };
     }
 }
