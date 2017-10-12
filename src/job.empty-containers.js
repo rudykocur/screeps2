@@ -14,7 +14,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
     constructor(creep, jobData) {
         super(creep, jobData);
 
-        this.configureFSM(STATE.DEPOSIT, {
+        this.configureFSM(STATE.PICKUP, {
             [STATE.PICKUP]: {
                 onTick: this.pickupFromContainer.bind(this)
             },
@@ -33,7 +33,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         }
 
         if(this.creep.pos.isNearTo(container)) {
-            this.creep.withdraw(container, _.first(_.keys(container.store)));
+            this.creep.withdraw(container, _.findKey(container.store));
             this.fsm.enter(STATE.DEPOSIT);
         }
         else {
@@ -55,8 +55,12 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
             this.creep.moveTo(storage.target);
         }
         else {
-            storage.deposit(this.creep);
-            this.completeJob();
+            if(_.sum(this.creep.carry) > 0) {
+                storage.deposit(this.creep);
+            }
+            else {
+                this.completeJob();
+            }
         }
     }
 
@@ -65,9 +69,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.containers.filter(
-            /**StructureContainer*/cnt => _.sum(cnt.store) > 0
-        ).map(/**StructureContainer*/cnt=> {
+        return manager.containers.map(/**StructureContainer*/cnt=> {
             return new EmptyContainerJobDTO(cnt);
         });
     }
@@ -84,6 +86,7 @@ class EmptyContainerJobDTO extends job_common.JobDTO {
     }
 
     merge(data) {
+        data.targetId = this.targetId;
         data.available = this.available;
     }
 }

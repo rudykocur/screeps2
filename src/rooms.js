@@ -224,7 +224,7 @@ class StorageWrapper {
      * @param {Creep} fromCreep
      */
     deposit(fromCreep) {
-        fromCreep.transfer(this.target, _.first(_.keys(fromCreep.carry)));
+        fromCreep.transfer(this.target, _.findKey(fromCreep.carry));
     }
 
     /**

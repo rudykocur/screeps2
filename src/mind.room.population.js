@@ -38,7 +38,8 @@ class RoomPopulationMind {
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }
-            else if(this.manager.extractor && this.manager.getCreepCount(minds.available.harvester) < 3) {
+            else if(this.manager.extractor && this.manager.mineral.mineralAmount > 0 &&
+                this.manager.getCreepCount(minds.available.harvester) < 3) {
                 this.spawnHarvester(spawn);
             }
             else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
