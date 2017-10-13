@@ -38,11 +38,10 @@ class RoomPopulationMind {
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }
-            else if(this.manager.extractor && this.manager.mineral.mineralAmount > 0 &&
-                this.manager.getCreepCount(minds.available.harvester) < 3) {
+            else if(this.needMineralHarvester()) {
                 this.spawnMineralHarvester(spawn);
             }
-            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 2) {
+            else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 1) {
                 this.spawnBuilder(spawn);
             }
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
@@ -138,6 +137,18 @@ class RoomPopulationMind {
         let buildersNeeded = pointsLeft / builderLifetimePower;
 
         return totalBuilders < buildersNeeded;
+    }
+
+    needMineralHarvester() {
+        if(!this.manager.extractor) {
+            return false;
+        }
+
+        if(!tis.manager.mineralAmount.mineralAmount < 1) {
+            return false;
+        }
+
+        return this.manager.getMinds(minds.available.harvester).filter(mind => mind.creep.memory.mineral).length < 1;
     }
 
     spawnHarvester(spawn) {
