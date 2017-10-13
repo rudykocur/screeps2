@@ -136,7 +136,7 @@ class RoomPopulationMind {
 
         let buildersNeeded = pointsLeft / builderLifetimePower;
 
-        return totalBuilders < buildersNeeded;
+        return totalBuilders < Math.min(buildersNeeded, 3);
     }
 
     needMineralHarvester() {
@@ -144,7 +144,7 @@ class RoomPopulationMind {
             return false;
         }
 
-        if(!this.manager.mineralAmount < 1) {
+        if(this.manager.mineralAmount < 1) {
             return false;
         }
 
@@ -176,14 +176,8 @@ class RoomPopulationMind {
         this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
     }
     spawnBuilder(spawn) {
-        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-        if(this.room.energyCapacityAvailable > 600) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
-        }
-        if(this.room.energyCapacityAvailable > 1000) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK];
-        }
-        this.doSpawn(spawn, body, 'builder', {'mind': 'builder'})
+        let options = minds.available.builder.getSpawnParams(this.manager);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 }
 

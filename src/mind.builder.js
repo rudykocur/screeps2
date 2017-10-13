@@ -68,7 +68,7 @@ class BuilderMind extends mind.CreepMindBase {
 
     doRefill() {
         if(this.workRoom.storage) {
-            this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1000);
+            this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 600);
             return;
         }
 

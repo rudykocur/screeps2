@@ -1,3 +1,4 @@
+var _ = require('lodash');
 const utils = require('utils');
 
 class RoomArchitect {
@@ -10,7 +11,60 @@ class RoomArchitect {
     }
 
     update() {
+        let availableExtensions = this.getMaxStructuresCount(STRUCTURE_EXTENSION);
+        let availableTowers = this.getMaxStructuresCount(STRUCTURE_TOWER);
+
+        if(this.manager.extensions.length < availableExtensions) {
+            utils.throttle(15, () => this.buildExtensions(this.manager.room))();
+        }
+
+        if(this.manager.towers.length < availableTowers) {
+            utils.throttle(15, () => this.buildTowers(this.manager.room))();
+        }
+
         utils.throttle(1000, () => this.planRoads())();
+    }
+
+    getMaxStructuresCount(type) {
+        return CONTROLLER_STRUCTURES[type][this.manager.room.controller.level]
+    }
+
+    buildExtensions(room) {
+        let cluster = _.first(this.manager.extensionsClusters.filter(
+            c => c.extensions.length < 7
+        ));
+
+        if(cluster) {
+            let storagePath = cluster.center.findPathTo(this.manager.storage.target);
+
+            let pointInPath = _.first(storagePath.filter(
+                pos => cluster.center.getRangeTo(pos.x, pos.y) === 1
+            ));
+
+            for(let point of utils.getPositionsAround(cluster.center)) {
+                if(point.isEqualTo(pointInPath.x, pointInPath.y)) {
+                    continue;
+                }
+
+                room.visual.circle(point, {
+                    fill: "orange",
+                    opacity: 0.6
+                });
+
+                room.createConstructionSite(point.x, point.y, STRUCTURE_EXTENSION)
+            }
+        }
+    }
+
+    /**
+     * @param {Room} room
+     */
+    buildTowers(room) {
+        let flags = this.manager.flags.filter(utils.isTowerFlag);
+
+        for(let flag of flags) {
+            room.createConstructionSite(flag.pos, STRUCTURE_TOWER);
+        }
     }
 
     planRoads() {
@@ -70,6 +124,8 @@ class RoomArchitect {
             }
         });
 
+        let placedStructures = 0;
+
         for(let step of path.path) {
             if(from.isEqualTo(step) || to.isEqualTo(step)) {
                 continue;
@@ -81,8 +137,12 @@ class RoomArchitect {
                 opacity: 0.3
             });
 
-            room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD);
+            if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
+                placedStructures ++;
+            }
         }
+
+        return placedStructures;
     }
 }
 

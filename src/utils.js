@@ -14,15 +14,41 @@ module.exports = {
      * @param {Flag} flag
      */
     isBlockFlag(flag) {
-        return flag.color == COLOR_RED && flag.secondaryColor == COLOR_RED;
+        return flag.color === COLOR_RED && flag.secondaryColor === COLOR_RED;
     },
 
     isMeetingPointFlag() {
 
     },
 
-    isExtensionClusterFlag() {
+    /**
+     * @param {Flag} flag
+     */
+    isExtensionClusterFlag(flag) {
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_YELLOW;
+    },
 
+    /**
+     * @param {Flag} flag
+     */
+    isTowerFlag(flag) {
+        return flag.color === COLOR_RED && flag.secondaryColor === COLOR_YELLOW;
+    },
+
+    /**
+     * @param {RoomPosition} center
+     */
+    getPositionsAround(center) {
+        return [
+            new RoomPosition(center.x -1, center.y -1, center.roomName),
+            new RoomPosition(center.x -1, center.y, center.roomName),
+            new RoomPosition(center.x -1, center.y +1, center.roomName),
+            new RoomPosition(center.x, center.y -1, center.roomName),
+            new RoomPosition(center.x, center.y +1, center.roomName),
+            new RoomPosition(center.x +1, center.y -1, center.roomName),
+            new RoomPosition(center.x +1, center.y, center.roomName),
+            new RoomPosition(center.x +1, center.y +1, center.roomName),
+        ];
     },
 
     reverseReactions(reactions) {

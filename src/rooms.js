@@ -1,4 +1,5 @@
 var _ = require("lodash");
+const utils = require('utils');
 const minds = require('mind');
 const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
@@ -150,13 +151,7 @@ class RoomManager {
     }
 
     getExtensionsClusters() {
-        let flags = _.filter(Game.flags, /**Flag*/ flag => {
-            if(flag.room != this.room) {
-                return;
-            }
-
-            return flag.color == COLOR_YELLOW && flag.secondaryColor == COLOR_YELLOW;
-        });
+        let flags = this.flags.filter(utils.isExtensionClusterFlag);
 
         return flags.map(f => new ExtensionCluster(f.pos, this));
     }
