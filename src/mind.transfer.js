@@ -1,4 +1,4 @@
-const _ = require('lodash');
+var _ = require('lodash');
 
 let mind = require('mind.common');
 let throttle = require('utils').throttle;

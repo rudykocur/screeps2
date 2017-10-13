@@ -25,7 +25,7 @@ module.exports = function(grunt) {
                     branch: 'sim',
                     ptr: false
                 },
-                src: ['sim/*.js']
+                src: ['src/*.js']
             }
         },
         copy: {
@@ -42,5 +42,5 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('screeps-main', ['screeps:dist', 'finished']);
-    grunt.registerTask('screeps-sim', ['copy:toSim','screeps:sim'])
+    grunt.registerTask('screeps-sim', ['screeps:sim', 'finished'])
 };

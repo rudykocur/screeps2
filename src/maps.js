@@ -1,4 +1,4 @@
-const _ = require('lodash');
+var _ = require('lodash');
 
 function hydrate(item) {
     item.pos.__proto__ = RoomPosition.prototype;

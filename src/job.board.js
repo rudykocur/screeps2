@@ -1,4 +1,4 @@
-const _ = require('lodash');
+var _ = require('lodash');
 
 // const minds = require('mind');
 const jobModules = {};

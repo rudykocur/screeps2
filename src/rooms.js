@@ -1,4 +1,4 @@
-const _ = require("lodash");
+var _ = require("lodash");
 const minds = require('mind');
 const jobs = require('job.board');
 const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;

@@ -1,4 +1,4 @@
-const _ = require("lodash");
+var _ = require("lodash");
 const minds = require('mind');
 
 class RoomPopulationMind {
@@ -144,7 +144,7 @@ class RoomPopulationMind {
             return false;
         }
 
-        if(!tis.manager.mineralAmount.mineralAmount < 1) {
+        if(!this.manager.mineralAmount < 1) {
             return false;
         }
 

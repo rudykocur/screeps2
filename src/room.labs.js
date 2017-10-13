@@ -1,4 +1,4 @@
-const _ = require('lodash');
+var _ = require('lodash');
 const fsm = require('fsm');
 
 const STATE = {

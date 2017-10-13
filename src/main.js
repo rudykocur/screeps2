@@ -1,4 +1,4 @@
-const _ = require("lodash");
+var _ = require("lodash");
 const rooms = require("rooms");
 const utils = require('utils');
 const job_board = require('job.board');
@@ -60,5 +60,5 @@ module.exports.loop = function () {
 
     jobBoard.cleanup();
 
-    utils.debugFun(maps, utils);
+    // utils.debugFun(maps, utils);
 };
