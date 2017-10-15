@@ -267,7 +267,7 @@ class RemoteRoomHandler extends utils.Executable {
             return;
         }
 
-        if(this.parent.room.energyCapacityAvailable < 1200) {
+        if(this.parent.room.energyCapacityAvailable < 700) {
             return;
         }
 

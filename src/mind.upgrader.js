@@ -1,5 +1,6 @@
 let mind = require('mind.common');
 let throttle = require('utils').throttle;
+const bb = require('utils.bodybuilder');
 
 const STATE_REFILL = 'refill';
 const STATE_UPGRADE = 'upgrade';
@@ -76,6 +77,24 @@ class UpgraderMind extends mind.CreepMindBase {
         else {
             this.creep.moveTo(target);
         }
+    }
+
+    static getSpawnParams(manager) {
+        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
+
+        if(manager.room.energyCapacityAvailable > 600) {
+            body = bb.build([WORK, CARRY, MOVE], 600);
+        }
+
+        if(manager.room.energyCapacityAvailable > 1000) {
+            body = bb.build([WORK, CARRY, MOVE], 1000);
+        }
+
+        return {
+            body: body,
+            name: 'upgrader',
+            memo: {mind: 'upgrader'}
+        };
     }
 }
 

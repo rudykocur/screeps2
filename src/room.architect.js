@@ -142,6 +142,12 @@ class RoomArchitect extends utils.Executable {
                   }
                 });
 
+                room.find(FIND_CONSTRUCTION_SITES).forEach(/**ConstructionSite*/site => {
+                    if(site.structureType == STRUCTURE_ROAD) {
+                        costs.set(site.pos.x, site.pos.y, 0xff);
+                    }
+                });
+
                 return costs;
             }
         });
