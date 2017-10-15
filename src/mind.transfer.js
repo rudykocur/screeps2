@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 let mind = require('mind.common');
-let throttle = require('utils').throttle;
+let bb = require('utils.bodybuilder');
 // let jobs = require('job.board');
 
 const STATE_SEEK = 'seekEnergy';
@@ -91,16 +91,15 @@ class TransferMind extends mind.CreepMindBase {
     static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY];
         if(manager.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY];
+            body = bb.build([CARRY, MOVE], 400);
         }
 
         if(manager.room.energyCapacityAvailable > 700) {
-            body = [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+            body = bb.build([CARRY, CARRY, MOVE], 600);
         }
 
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = [WORK, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE,
-                    CARRY, CARRY, MOVE, CARRY, CARRY, MOVE];
+            body = bb.build([CARRY, CARRY, MOVE], 1000, [WORK, CARRY, MOVE]);
         }
 
         return {

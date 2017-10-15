@@ -132,10 +132,10 @@ class BuilderMind extends mind.CreepMindBase {
     static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
         if(manager.room.energyCapacityAvailable > 600) {
-            body = bb.build([MOVE, CARRY, WORK], 600);
+            body = bb.build([CARRY, WORK, MOVE], 600);
         }
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, WORK, MOVE, WORK, CARRY, MOVE];
+            body = bb.build([CARRY, WORK, MOVE], 1000);
         }
 
         return {

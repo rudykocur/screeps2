@@ -15,6 +15,7 @@ class RoomArchitect extends utils.Executable {
     update() {
         let availableExtensions = this.getMaxStructuresCount(STRUCTURE_EXTENSION);
         let availableTowers = this.getMaxStructuresCount(STRUCTURE_TOWER);
+        let availableStorages = this.getMaxStructuresCount(STRUCTURE_STORAGE);
 
         if(this.manager.extensions.length < availableExtensions) {
             utils.throttle(15, () => this.buildExtensions(this.manager.room))();
@@ -22,6 +23,10 @@ class RoomArchitect extends utils.Executable {
 
         if(this.manager.towers.length < availableTowers) {
             utils.throttle(15, () => this.buildTowers(this.manager.room))();
+        }
+
+        if(availableStorages > 0 && !this.manager.room.storage) {
+            utils.throttle(25, () => this.buildStorage(this.manager.room))();
         }
 
         if(this.manager.room.controller.level > 2) {
@@ -67,8 +72,21 @@ class RoomArchitect extends utils.Executable {
         let flags = this.manager.flags.filter(utils.isTowerFlag);
 
         for(let flag of flags) {
-            room.createConstructionSite(flag.pos, STRUCTURE_TOWER);
+            if(OK === room.createConstructionSite(flag.pos, STRUCTURE_TOWER)) {
+                flag.remove();
+            }
         }
+    }
+
+    buildStorage(room) {
+        let pos = this.manager.storage.target.pos;
+
+        room.createConstructionSite(pos, STRUCTURE_STORAGE);
+        room.visual.circle(pos, {
+            fill: "red",
+            opacity: 0.8,
+            radius: 1,
+        });
     }
 
     planRoads() {
@@ -147,6 +165,10 @@ class RoomArchitect extends utils.Executable {
         }
 
         return placedStructures;
+    }
+
+    toString() {
+        return `[RoomArchitect for ${this.manager.room}]`;
     }
 }
 
