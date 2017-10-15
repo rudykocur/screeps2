@@ -1,5 +1,6 @@
 let mind = require('mind.common');
 let throttle = require('utils').throttle;
+let bb = require('utils.bodybuilder');
 
 const STATE_REFILL = 'refill';
 const STATE_BUILD = 'build';
@@ -126,7 +127,7 @@ class BuilderMind extends mind.CreepMindBase {
     static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
         if(manager.room.energyCapacityAvailable > 600) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
+            body = bb.build([MOVE, CARRY, WORK], 600);
         }
         if(manager.room.energyCapacityAvailable > 1000) {
             body = [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, WORK, MOVE, WORK, CARRY, MOVE];

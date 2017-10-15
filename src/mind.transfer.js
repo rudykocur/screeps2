@@ -42,7 +42,7 @@ class TransferMind extends mind.CreepMindBase {
 
     *findNewJob() {
         if(this.storage.getStoredEnergy() > 100) {
-            if (this.room.energyMissing > 100) {
+            if (this.room.energyMissing > 50) {
                 yield this.tryClaimJob(1, {
                     type: 'refill-extensions'
                 });

@@ -47,7 +47,7 @@ class RoomPopulationMind {
             else if(_.sum(this.manager.droppedEnergy, 'amount') > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
-            else if(this.manager.storage.getStoredEnergy() > 40000 && this.getSpawnCooldown('upgrader') > 200) {
+            else if(this.needUpgrader()) {
                 this.spawnUpgrader(spawn)
             }
             else if(this.manager.constructionSites.length > 0 && this.needBuilders()) {
@@ -151,8 +151,24 @@ class RoomPopulationMind {
         return this.manager.getMinds(minds.available.harvester).filter(mind => mind.creep.memory.mineral).length < 1;
     }
 
+    needUpgrader() {
+        if(this.getSpawnCooldown('upgrader') < 200) {
+            return false;
+        }
+
+        if(this.manager.room.storage) {
+            return this.manager.storage.getStoredEnergy() > 40000;
+        }
+        else {
+            return this.manager.storage.getStoredEnergy() > 1000;
+        }
+    }
+
     spawnHarvester(spawn) {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
+        if(this.manager.creeps.length < 1) {
+            options.body = [MOVE, WORK, WORK];
+        }
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 
@@ -163,6 +179,9 @@ class RoomPopulationMind {
 
     spawnTransfer(spawn) {
         let options = minds.available.transfer.getSpawnParams(this.manager);
+        if(this.manager.creeps.length < 2) {
+            options.body = [MOVE, MOVE, CARRY, CARRY];
+        }
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
     spawnUpgrader(spawn) {

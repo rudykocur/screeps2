@@ -22,7 +22,9 @@ class RoomArchitect {
             utils.throttle(15, () => this.buildTowers(this.manager.room))();
         }
 
-        utils.throttle(1000, () => this.planRoads())();
+        if(this.manager.room.controller.level > 2) {
+            utils.throttle(1000, () => this.planRoads())();
+        }
     }
 
     getMaxStructuresCount(type) {
