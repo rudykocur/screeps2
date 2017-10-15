@@ -1,4 +1,5 @@
 const minds = require('mind');
+const maps = require('maps');
 const job_common = require('job.common');
 
 const JOB_TYPE = 'harvest-source';
@@ -33,7 +34,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(source)) {
-            this.creep.moveTo(source);
+            this.creep.moveTo(source, {costCallback: maps.blockHostileRooms});
         }
         else {
             this.fsm.enter(STATE.HARVEST);

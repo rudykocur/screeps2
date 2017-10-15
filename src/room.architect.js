@@ -165,9 +165,9 @@ class RoomArchitect extends utils.Executable {
                 opacity: 0.3
             });
 
-            if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
-                placedStructures ++;
-            }
+            // if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
+            //     placedStructures ++;
+            // }
         }
 
         return placedStructures;

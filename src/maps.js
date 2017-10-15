@@ -39,6 +39,14 @@ class CachedRoom {
         this.cache = getCacheForRoom(roomName);
     }
 
+    belongsToUser(username) {
+        return this.cache.owner == username || this.cache.reservedBy == username;
+    }
+
+    isFree() {
+        return !this.cache.owner  && !this.cache.reservedBy;
+    }
+
     get controller() {
         return this.getStructure(STRUCTURE_CONTROLLER);
     }
@@ -83,6 +91,24 @@ module.exports = {
         });
 
         return costs;
+    },
+
+    blockHostileRooms(roomName, costMatrix) {
+        let myRoom = _.first(_.filter(Game.rooms, r => r.controller.my));
+
+        let myUser = myRoom.controller.owner.username;
+
+        let cachedRoom = module.exports.getRoomCache(roomName);
+
+        if(cachedRoom.isFree()) {
+            return costMatrix;
+        }
+
+        if(!cachedRoom.belongsToUser(myUser)) {
+            return null;
+        }
+
+        return costMatrix;
     },
 
     updateRoomCache(room, ttl) {

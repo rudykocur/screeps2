@@ -84,9 +84,13 @@ class RemoteRoomsManager extends utils.Executable {
         if(flag.pos.x === 49) {
             return RIGHT;
         }
-        if(flat.pos.y == 49) {
+        if(flag.pos.y == 49) {
             return BOTTOM;
         }
+    }
+
+    toString() {
+        return `[RemoteRoomsManager for ${this.manager.room}]`;
     }
 }
 

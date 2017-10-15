@@ -42,7 +42,7 @@ class BuilderMind extends mind.CreepMindBase {
                 return;
             }
 
-            if(this.workRoom.droppedEnergy.length > 0) {
+            if(!this.workRoom.storage && this.workRoom.droppedEnergy.length > 0) {
                 this.enterState(STATE_REFILL);
                 return;
             }
