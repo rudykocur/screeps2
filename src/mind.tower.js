@@ -1,18 +1,21 @@
 var _ = require('lodash');
 const fsm = require('fsm');
+const utils = require('utils');
 
 const STATE_IDLE = 'idle';
 const STATE_REPAIR = 'repair';
 const STATE_HEAL = 'heal';
 const STATE_ATTACK = 'attack';
 
-class TowerMind {
+class TowerMind extends utils.Executable {
     /**
      *
      * @param {StructureTower} tower
      * @param roomManager
      */
     constructor(tower, roomManager) {
+        super();
+
         //super(creep, roomManager);
         this.tower = tower;
         this.roomMgr = roomManager;
@@ -128,7 +131,7 @@ class TowerMind {
     }
 
     update() {
-        this.fsm.update();
+        this.fsm.run();
     }
 
     get needsEnergy() {

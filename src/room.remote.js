@@ -1,5 +1,7 @@
 var _ = require("lodash");
 const minds = require('mind');
+const utils = require('utils');
+
 let mind_scout = require('mind.scout');
 let mind_defender = require('mind.defender');
 let mind_defender_ranged = require('mind.rangedDefender');
@@ -8,12 +10,14 @@ let mind_claimer = require('mind.claimer');
 let squads = require('combat.squad');
 let missions = require('combat.missions');
 
-class RemoteRoomsManager {
+class RemoteRoomsManager extends utils.Executable {
 
     /**
      * @param {RoomManager} manager
      */
     constructor(manager) {
+        super();
+
         this.manager = manager;
         this.jobManager = manager.jobManager;
 
@@ -86,12 +90,14 @@ class RemoteRoomsManager {
     }
 }
 
-class RemoteRoomHandler {
+class RemoteRoomHandler extends utils.Executable {
     /**
      * @param roomName
      * @param {RoomManager} parentManager
      */
     constructor(roomName, parentManager) {
+        super();
+
         this.roomName = roomName;
         this.parent = parentManager;
         this.jobManager = parentManager.jobManager;
@@ -175,17 +181,17 @@ class RemoteRoomHandler {
     update() {
         // console.log(this, 'updating ...');
 
-        if(this.memory.squads.length < 1) {
-            let newSquad = squads.CombatSquad.createSquad();
-            this.memory.squads.push(newSquad.squadId);
-
-            newSquad.addRequiredCreeps(this.parent, 3, mind_scout.ScoutMind.getSpawnParams(this.parent));
-            newSquad.addRequiredCreeps(this.parent, 1, mind_defender.DefenderMind.getSpawnParams(this.parent));
-
-            newSquad.setMission(missions.DefendRoomMission.createMission(newSquad, this));
-
-            console.log('New squad added', newSquad);
-        }
+        // if(this.memory.squads.length < 1) {
+        //     let newSquad = squads.CombatSquad.createSquad();
+        //     this.memory.squads.push(newSquad.squadId);
+        //
+        //     newSquad.addRequiredCreeps(this.parent, 3, mind_scout.ScoutMind.getSpawnParams(this.parent));
+        //     newSquad.addRequiredCreeps(this.parent, 1, mind_defender.DefenderMind.getSpawnParams(this.parent));
+        //
+        //     newSquad.setMission(missions.DefendRoomMission.createMission(newSquad, this));
+        //
+        //     console.log('New squad added', newSquad);
+        // }
 
         if(!this.room) {
             if(!this.memory.scoutName) {
@@ -230,12 +236,7 @@ class RemoteRoomHandler {
         }
 
         for(let mind of this.minds) {
-            try{
-                mind.update();
-            }
-            catch(e) {
-                console.log('MIND FAILED:', e, 'Stack trace:', e.stack);
-            }
+            mind.run();
         }
     }
 
@@ -253,7 +254,6 @@ class RemoteRoomHandler {
 
     trySpawnDefender() {
         if (!this.memory.defenderName) {
-            // let defenderName = this.spawnMind(mind_defender_ranged.RangedDefenderMind);
             let defenderName = this.spawnMind(minds.available.defender);
             if (defenderName) {
                 this.memory.defenderName = defenderName;
@@ -263,7 +263,15 @@ class RemoteRoomHandler {
     }
 
     trySpawnClaimer() {
-        if (!this.memory.claimerName && (!this.room.controller.reservation || this.room.controller.reservation.ticksToEnd < 1000)) {
+        if(this.memory.claimerName) {
+            return;
+        }
+
+        if(this.parent.room.energyCapacityAvailable < 1200) {
+            return;
+        }
+
+        if (!this.room.controller.reservation || this.room.controller.reservation.ticksToEnd < 1000) {
             let claimerName = this.spawnMind(mind_claimer.ClaimerMind);
             if (claimerName) {
                 this.memory.claimerName = claimerName;

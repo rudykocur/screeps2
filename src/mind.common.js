@@ -1,13 +1,17 @@
+const utils = require('utils');
+
 /**
  * @property {Room} room
  */
-class CreepMindBase {
+class CreepMindBase extends utils.Executable {
     /**
      *
      * @param creep
      * @param {RoomManager} roomManager
      */
     constructor(creep, roomManager) {
+        super();
+
         this.roomMgr = roomManager;
         this.room = this.roomMgr.room;
         this.creep = creep;
@@ -36,7 +40,7 @@ class CreepMindBase {
         }
 
         if(this._fsm[this.state].onTick) {
-            this._fsm[this.state].onTick();
+            this._fsm[this.state].onTick(this.localState);
         }
     }
 
@@ -56,7 +60,7 @@ class CreepMindBase {
         }
 
         if(this._fsm[name].onEnter) {
-            this._fsm[name].onEnter();
+            this._fsm[name].onEnter(this.localState);
         }
     }
 
@@ -135,6 +139,10 @@ class CreepMindBase {
         options.mind = this;
 
         return _.first(this.roomMgr.jobManager.find(options));
+    }
+
+    toString() {
+        return `[${this.constructor.name} for ${this.creep}]`;
     }
 }
 

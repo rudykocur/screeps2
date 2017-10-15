@@ -43,18 +43,13 @@ module.exports.loop = function () {
         }
 
         let mgr = new rooms.RoomManager(room, jobBoard);
-        mgr.update();
+        mgr.run();
         managers.push(mgr);
     });
 
     managers.forEach((manager) => {
         manager.minds.forEach((mind) => {
-            try{
-                mind.update();
-            }
-            catch(e) {
-                console.log('MIND FAILED:', e, 'Stack trace:', e.stack);
-            }
+            mind.run();
         })
     });
 

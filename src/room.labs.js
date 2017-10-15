@@ -1,5 +1,6 @@
 var _ = require('lodash');
 const fsm = require('fsm');
+const utils = require('utils');
 
 const STATE = {
     IDLE: 'idle',
@@ -8,8 +9,10 @@ const STATE = {
     RUN: 'run',
 };
 
-class LabManager {
+class LabManager extends utils.Executable {
     constructor(manager) {
+        super();
+
         this.manager = manager;
 
         this.manager.room.memory.labs = this.manager.room.memory.labs || {};

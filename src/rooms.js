@@ -7,12 +7,14 @@ const room_architect = require('room.architect');
 const room_remote = require('room.remote');
 const room_labs = require('room.labs');
 
-class RoomManager {
+class RoomManager extends utils.Executable {
     /**
      * @param {Room} room
      * @param jobManager
      */
     constructor(room, jobManager) {
+        super();
+
         this.room = room;
         this.roomName = room.name;
         room.manager = this;
@@ -144,10 +146,10 @@ class RoomManager {
 
         this.jobManager.update(this);
 
-        this.spawner.update();
-        this.labs.update();
-        this.remote.update();
-        this.architect.update();
+        this.spawner.run();
+        this.labs.run();
+        this.remote.run();
+        this.architect.run();
     }
 
     getExtensionsClusters() {

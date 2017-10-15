@@ -1,6 +1,7 @@
 var _ = require('lodash');
 const fsm = require('fsm');
 const missions = require('combat.missions');
+const utils = require('utils');
 
 const STATE = {
     SPAWNING: 'spawning',
@@ -8,8 +9,10 @@ const STATE = {
     MISSION: 'on-mission',
 };
 
-class CombatSquad {
+class CombatSquad extends utils.Executable {
     constructor(squadId) {
+        super();
+
         this.squadId = squadId;
 
         _.defaults(this.memory, {
@@ -78,7 +81,7 @@ class CombatSquad {
 
 
 
-        this.fsm.update();
+        this.fsm.run();
     }
 
     checkAliveMembers() {

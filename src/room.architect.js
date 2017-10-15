@@ -1,12 +1,14 @@
 var _ = require('lodash');
 const utils = require('utils');
 
-class RoomArchitect {
+class RoomArchitect extends utils.Executable {
     /**
      *
      * @param {RoomManager} manager
      */
     constructor(manager) {
+        super();
+
         this.manager = manager;
     }
 

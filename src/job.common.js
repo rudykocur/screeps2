@@ -46,7 +46,7 @@ class JobHandlerBase {
 
     execute() {
         if(this.fsm) {
-            this.fsm.update();
+            this.fsm.run();
         }
     }
 }

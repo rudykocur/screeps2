@@ -1,7 +1,9 @@
+const utils = require('utils');
 
-
-class FiniteStateMachine {
+class FiniteStateMachine extends utils.Executable {
     constructor(config, memory, initialState) {
+        super();
+
         this.config = config;
         this.memory = memory;
         this.initialState = initialState;

@@ -1,6 +1,21 @@
 var _ = require("lodash");
 
+class Executable {
+    update() {}
+
+    run() {
+        try{
+            this.update();
+        }
+        catch(e) {
+            console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
+        }
+    }
+}
+
 module.exports = {
+    Executable,
+
     throttle(ticks, callback) {
         return () => {
             if (Game.time % ticks == 0) {

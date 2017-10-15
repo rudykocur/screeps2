@@ -1,12 +1,15 @@
 var _ = require("lodash");
 const minds = require('mind');
+const utils = require('utils');
 
-class RoomPopulationMind {
+class RoomPopulationMind extends utils.Executable {
     /**
      *
      * @param {RoomManager} manager
      */
     constructor(manager) {
+        super();
+
         this.manager = manager;
         this.room = this.manager.room;
 
@@ -82,10 +85,16 @@ class RoomPopulationMind {
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
-                this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
+                this.room.visual.circle(spawn.pos, {
+                    fill: "transparent",
+                    stroke: "red",
+                    strokeWidth: 0.2,
+                    radius: 0.8,
+                    lineStyle: 'dashed',
+                });
                 return;
             }
-            console.log('Failed to spawn', name, '::', body, '::',result);
+            console.log('Failed to spawn', name, '::', options.bod, '::',result);
         }
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
@@ -160,7 +169,7 @@ class RoomPopulationMind {
             return this.manager.storage.getStoredEnergy() > 40000;
         }
         else {
-            return this.manager.storage.getStoredEnergy() > 1000;
+            return this.manager.storage.getStoredEnergy() > 1700;
         }
     }
 
