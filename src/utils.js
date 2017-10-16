@@ -9,6 +9,7 @@ class Executable {
         }
         catch(e) {
             console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
+            Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 5);
         }
     }
 }

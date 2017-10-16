@@ -26,9 +26,9 @@ class RoomArchitect extends utils.Executable {
             utils.throttle(15, () => this.buildTowers(this.manager.room))();
         }
 
-        if(availableStorages > 0 && !this.manager.room.storage) {
-            utils.throttle(25, () => this.buildStorage(this.manager.room))();
-        }
+        // if(availableStorages > 0 && !this.manager.room.storage) {
+        //     utils.throttle(25, () => this.buildStorage(this.manager.room))();
+        // }
 
         if(this.manager.room.controller.level > 2) {
             utils.throttle(1000, () => this.planRoads())();
