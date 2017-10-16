@@ -1,4 +1,5 @@
 const minds = require('mind');
+const maps = require('maps');
 const job_common = require('job.common');
 
 const JOB_TYPE = 'energy-pickup';
@@ -31,7 +32,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(resource)) {
-            this.creep.moveTo(resource);
+            this.creep.moveTo(resource, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
         }
         else {
             this.creep.pickup(resource);

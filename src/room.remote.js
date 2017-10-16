@@ -152,7 +152,9 @@ class RemoteRoomHandler extends utils.Executable {
         }
 
         if(this.enemies.length > 0) {
-            this.danger = true;
+            this.danger = this.enemies.filter(creep => {
+                return creep.getActiveBodyparts(ATTACK) > 0 || creep.getActiveBodyparts(RANGED_ATTACK) > 0
+            }).length > 0;
         }
 
         for(let name of ['scoutName', 'defenderName', 'claimerName']) {

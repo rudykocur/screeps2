@@ -1,5 +1,6 @@
 var _ = require('lodash');
 const utils = require('utils');
+const maps = require('maps');
 
 class RoomArchitect extends utils.Executable {
     /**
@@ -126,27 +127,25 @@ class RoomArchitect extends utils.Executable {
             swampCost: 5,
             roomCallback: (roomName) => {
                 let room = Game.rooms[roomName];
-                if(!room) {
-                    return;
-                }
 
                 let costs = new PathFinder.CostMatrix;
 
-                room.find(FIND_STRUCTURES).forEach(function(struct) {
-                  if (struct.structureType === STRUCTURE_ROAD) {
-                    // Favor roads over plain tiles
-                    costs.set(struct.pos.x, struct.pos.y, 1);
-                  } else if (OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType) >= 0) {
-                    // Can't walk through non-walkable buildings
-                    costs.set(struct.pos.x, struct.pos.y, 0xff);
-                  }
-                });
+                costs = maps.blockHostileRooms(roomName, costs);
 
-                room.find(FIND_CONSTRUCTION_SITES).forEach(/**ConstructionSite*/site => {
-                    if(site.structureType == STRUCTURE_ROAD) {
-                        costs.set(site.pos.x, site.pos.y, 0xff);
-                    }
-                });
+                if(!costs) {
+                    return false;
+                }
+
+                maps.getCostMatrix(roomName, costs);
+
+                if(room) {
+                    room.find(FIND_CONSTRUCTION_SITES).forEach(/**ConstructionSite*/site => {
+                        if(site.structureType == STRUCTURE_ROAD) {
+                            costs.set(site.pos.x, site.pos.y, 1);
+                        }
+                    });
+                }
+
 
                 return costs;
             }
@@ -160,14 +159,15 @@ class RoomArchitect extends utils.Executable {
             }
 
             let room = Game.rooms[step.roomName];
-            room.visual.circle(step, {
+            let visual = new RoomVisual(step.roomName);
+            visual.circle(step, {
                 fill: "red",
                 opacity: 0.3
             });
 
-            // if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
-            //     placedStructures ++;
-            // }
+            if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
+                placedStructures ++;
+            }
         }
 
         return placedStructures;

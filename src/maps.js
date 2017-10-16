@@ -105,7 +105,7 @@ module.exports = {
         }
 
         if(!cachedRoom.belongsToUser(myUser)) {
-            return null;
+            return false;
         }
 
         return costMatrix;
