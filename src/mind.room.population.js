@@ -194,15 +194,11 @@ class RoomPopulationMind extends utils.Executable {
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
     spawnUpgrader(spawn) {
-        let body = [MOVE, MOVE, CARRY, CARRY, WORK];
-        if(this.room.energyCapacityAvailable > 600) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK];
-        }
-        if(this.room.energyCapacityAvailable > 1000) {
-            body = [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK];
-        }
-        this.doSpawn(spawn, body, 'upgrader', {'mind': 'upgrader'})
+        let options = minds.available.upgrader.getSpawnParams(this.manager);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
+
     }
+
     spawnBuilder(spawn) {
         let options = minds.available.builder.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);
