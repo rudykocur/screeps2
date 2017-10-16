@@ -38,6 +38,8 @@ class RoomManager extends utils.Executable {
             console.log('OMG NO LOGIC FOR STORAGE !!!');
         }
 
+        this.controller = new ControllerWrapper(this, this.room.controller);
+
         this.meetingPoint = Game.flags.IDLE;
         this.flags = _.filter(Game.flags, 'room', this.room);
 
@@ -247,6 +249,34 @@ class ExtensionCluster {
         let storedEnergy = _.sum(this.extensions, 'energy');
 
         this.needsEnergy = (storedEnergy < capacity);
+    }
+}
+
+class ControllerWrapper {
+    constructor(manager, ctrl) {
+        this.controller = ctrl;
+        this.manager = manager;
+
+        let pos = this.controller.pos;
+
+        let around = manager.room.lookAtArea(pos.y - 3, pos.x - 3, pos.y + 3, pos.x + 3, true);
+
+        this.points = around.filter(item => {
+
+            if(item.type != LOOK_TERRAIN) {
+                return false;
+            }
+
+            if(item.terrain != 'plain') {
+                return false;
+            }
+
+            return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
+        }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
+    }
+
+    getStandingPosition() {
+        return this.points.pop();
     }
 }
 

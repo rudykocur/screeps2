@@ -31,11 +31,14 @@ class DefenderMind extends mind.CreepMindBase {
         if(this.creep.room.name != roomName) {
             let direction = this.creep.room.findExitTo(roomName);
             let exit = this.creep.pos.findClosestByRange(direction);
-            this.creep.moveTo(exit);
+            this.creep.mover.moveTo(exit);
         }
         else {
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
-                this.creep.moveTo(this.creep.room.controller);
+                this.creep.mover.moveTo(this.creep.room.controller);
+            }
+            else {
+                this.creep.mover.enterStationary();
             }
         }
     }
@@ -59,7 +62,10 @@ class DefenderMind extends mind.CreepMindBase {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target, {visualizePathStyle: {color: "red"}});
+        }
+        else {
+            this.creep.mover.enterStationary();
         }
 
         this.creep.attack(target);

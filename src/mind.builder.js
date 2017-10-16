@@ -86,7 +86,7 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target);
         }
         else {
             this.creep.pickup(target);
@@ -114,6 +114,8 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         if(target.pos.inRangeTo(this.creep, 3)) {
+            this.creep.mover.enterStationary();
+
             this.creep.build(target);
 
             if(_.sum(this.creep.carry) < 1) {
@@ -122,7 +124,7 @@ class BuilderMind extends mind.CreepMindBase {
         }
         else {
             this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target);
         }
     }
 

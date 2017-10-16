@@ -17,10 +17,10 @@ class UpgraderMind extends mind.CreepMindBase {
             },
             [STATE_UPGRADE]: {
                 onEnter: () => {},
-                onTick: () => this.doUpgrade(),
+                onTick: this.doUpgrade.bind(this),
             },
             [STATE_IDLE]: {
-                onTick: throttle(5, () => this.doCheckStatus()),
+                onTick: this.doCheckStatus.bind(this),
             }
         };
 
@@ -60,23 +60,27 @@ class UpgraderMind extends mind.CreepMindBase {
             this.enterState(STATE_UPGRADE);
         }
         else {
-            this.creep.moveTo(this.roomMgr.storage.target);
+            this.creep.mover.moveTo(this.roomMgr.storage.target);
         }
     }
 
     doUpgrade() {
+        let point = this.workRoom.controller.getStandingPosition();
+
         let target = this.room.controller;
 
         if(_.sum(this.creep.carry) < 1) {
             this.enterState(STATE_IDLE);
         }
 
-        if(target.pos.inRangeTo(this.creep, 3)) {
-            this.creep.upgradeController(target);
+        if(!this.creep.pos.isEqualTo(point)) {
+            this.creep.mover.moveTo(point, {visualizePathStyle: {}});
         }
         else {
-            this.creep.moveTo(target);
+            this.creep.mover.enterStationary();
         }
+
+        this.creep.upgradeController(target);
     }
 
     static getSpawnParams(manager) {

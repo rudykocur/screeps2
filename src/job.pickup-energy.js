@@ -32,7 +32,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(resource)) {
-            this.creep.moveTo(resource, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
+            this.creep.mover.moveTo(resource, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
         }
         else {
             this.creep.pickup(resource);
@@ -54,7 +54,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
         this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
 
         if(!storage.canDeposit(this.creep)) {
-            this.creep.moveTo(storage.target);
+            this.creep.mover.moveTo(storage.target);
         }
         else {
             storage.deposit(this.creep);

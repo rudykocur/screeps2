@@ -37,7 +37,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
             this.fsm.enter(STATE.DEPOSIT);
         }
         else {
-            this.creep.moveTo(container);
+            this.creep.mover.moveTo(container);
         }
     }
 
@@ -52,7 +52,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!storage.canDeposit(this.creep)) {
-            this.creep.moveTo(storage.target);
+            this.creep.mover.moveTo(storage.target);
         }
         else {
             if(_.sum(this.creep.carry) > 0) {

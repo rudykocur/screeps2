@@ -55,5 +55,15 @@ module.exports.loop = function () {
 
     jobBoard.cleanup();
 
+    for(let creep of _.values(Game.creeps)) {
+        if(creep.memory.isStationary) {
+            creep.room.visual.circle(creep.pos, {
+                fill: "green",
+                opacity: 0.5,
+                radius: 0.5,
+            })
+        }
+    }
+
     // utils.debugFun(maps, utils);
 };

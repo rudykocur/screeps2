@@ -39,7 +39,7 @@ class HarvestExtractorJobHandler extends job_common.JobHandlerBase {
         let target = Game.getObjectById(state.containerId);
 
         if(!this.creep.pos.isEqualTo(target)) {
-            this.creep.moveTo(target, {visualizePathStyle: {}});
+            this.creep.mover.moveTo(target, {visualizePathStyle: {}});
         }
         else {
             this.fsm.enter(STATE.HARVEST, {containerId: this.fsm.localState.containerId});
@@ -55,6 +55,7 @@ class HarvestExtractorJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
+        this.creep.mover.enterStationary();
         this.creep.harvest(mineral);
     }
 

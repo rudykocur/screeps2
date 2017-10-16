@@ -34,7 +34,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(source)) {
-            this.creep.moveTo(source, {costCallback: maps.blockHostileRooms});
+            this.creep.mover.moveTo(source, {costCallback: maps.blockHostileRooms});
         }
         else {
             this.fsm.enter(STATE.HARVEST);
@@ -49,6 +49,12 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
+        if(!this.creep.pos.isNearTo(source)) {
+            this.fsm.enter(STATE.GOTO);
+            return;
+        }
+
+        this.creep.mover.enterStationary();
         this.creep.harvest(source);
     }
 

@@ -24,9 +24,10 @@ class ClaimerMind extends mind.CreepMindBase {
             let target = this.workRoom.room.controller;
 
             if(!this.creep.pos.isNearTo(target)) {
-                this.creep.moveTo(target);
+                this.creep.mover.moveTo(target);
                 return;
             }
+            this.creep.mover.enterStationary();
 
             if(target.reservation && target.reservation.username != 'rudykocur') {
                 this.creep.attackController(target);

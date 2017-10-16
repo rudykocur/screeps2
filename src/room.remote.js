@@ -263,7 +263,7 @@ class RemoteRoomHandler extends utils.Executable {
             let defenderName = this.spawnMind(minds.available.defender);
             if (defenderName) {
                 this.memory.defenderName = defenderName;
-                console.log(this, 'defender', defenderName, 'sent')
+                console.log(this, 'defender', defenderName, 'spawned')
             }
         }
     }
@@ -281,7 +281,7 @@ class RemoteRoomHandler extends utils.Executable {
             let claimerName = this.spawnMind(mind_claimer.ClaimerMind);
             if (claimerName) {
                 this.memory.claimerName = claimerName;
-                console.log(this, 'claimer', claimerName, 'sent');
+                console.log(this, 'claimer', claimerName, 'spawned');
             }
         }
     }

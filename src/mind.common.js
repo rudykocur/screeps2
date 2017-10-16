@@ -170,7 +170,7 @@ class MindCommonActions {
             this.mind.enterState(nextState);
         }
         else {
-            this.creep.moveTo(this.workRoom.storage.target);
+            this.creep.mover.moveTo(this.workRoom.storage.target);
         }
     }
 
@@ -188,7 +188,10 @@ class MindCommonActions {
         }
 
         if(!point.inRangeTo(this.creep, 3)) {
-            this.creep.moveTo(point);
+            this.creep.mover.moveTo(point);
+        }
+        else {
+            this.creep.mover.enterStationary();
         }
     }
 }

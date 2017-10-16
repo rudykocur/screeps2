@@ -1,22 +1,37 @@
+const mover = require('move-controller');
+
 module.exports = {
     installPrototypes() {
 
-        if(!Object.hasOwnProperty('energyMissing'))
-        Object.defineProperty(Room.prototype, "energyMissing", {
-            get: function() {
-                return this.energyCapacityAvailable - this.energyAvailable;
-            }
-        });
+        if(!Room.prototype.hasOwnProperty('energyMissing')) {
+            Object.defineProperty(Room.prototype, "energyMissing", {
+                get: function () {
+                    return this.energyCapacityAvailable - this.energyAvailable;
+                }
+            });
+        }
 
-        if(!Object.hasOwnProperty('workRoom'))
+        if(!Creep.prototype.hasOwnProperty('workRoom')) {
             Object.defineProperty(Creep.prototype, "workRoom", {
-                get: function() {
+                get: function () {
                     let workRoom = Game.rooms[this.memory.roomName];
-                    if(workRoom) {
+                    if (workRoom) {
                         return workRoom.manager;
                     }
                 }
             });
+        }
+        if(!Creep.prototype.hasOwnProperty('mover')) {
+            Object.defineProperty(Creep.prototype, "mover", {
+                get: function () {
+                    if (!this._mover) {
+                        this._mover = new mover.CreepMoveController(this);
+                    }
+
+                    return this._mover;
+                }
+            });
+        }
 
         if(!('RESOURCES_BASE' in global)) {
             global.RESOURCES_BASE = [

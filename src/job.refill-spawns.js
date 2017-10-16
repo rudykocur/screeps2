@@ -27,7 +27,7 @@ class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
             this.fsm.enter(STATE_REFILL);
         }
         else {
-            this.creep.moveTo(this.roomMgr.storage.target);
+            this.creep.mover.moveTo(this.roomMgr.storage.target);
         }
     }
 
@@ -39,7 +39,7 @@ class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
             this.completeJob();
         }
         else {
-            this.creep.moveTo(spawn);
+            this.creep.mover.moveTo(spawn);
         }
     }
 
