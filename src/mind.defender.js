@@ -1,4 +1,6 @@
+let _ = require('lodash');
 let mind = require('mind.common');
+let maps = require('maps');
 
 const STATE = {
     IDLE: 'idle',
@@ -29,9 +31,8 @@ class DefenderMind extends mind.CreepMindBase {
         }
 
         if(this.creep.room.name != roomName) {
-            let direction = this.creep.room.findExitTo(roomName);
-            let exit = this.creep.pos.findClosestByRange(direction);
-            this.creep.mover.moveTo(exit);
+            let room = maps.getRoomCache(roomName);
+            this.creep.mover.moveTo(room.controller.pos);
         }
         else {
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
@@ -54,7 +55,7 @@ class DefenderMind extends mind.CreepMindBase {
     }
 
     attackTarget() {
-        let target = Game.getObjectById(this.localState.targetId);
+        let target = this.creep.pos.findClosestByRange(this.roomMgr.enemies);
 
         if(!target) {
             this.enterState(STATE.IDLE);
@@ -62,14 +63,40 @@ class DefenderMind extends mind.CreepMindBase {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target, {visualizePathStyle: {color: "red"}});
+            this.goNearTarget(target);
+
+            // }
+            // else {
+            //     let x = this.creep.mover.moveTo(target, {visualizePathStyle: {color: "red"}, ignoreDestructibleStructures:true});
+            // }
         }
         else {
             this.creep.mover.enterStationary();
         }
 
-        this.creep.attack(target);
+        if(this.creep.pos.isNearTo(target)) {
+            this.creep.attack(target);
+        }
         this.creep.rangedAttack(target);
+    }
+
+    goNearTarget(target) {
+        let path = this.creep.room.findPath(this.creep.pos, target.pos, {
+            maxOps: 400, ignoreDestructibleStructures: true
+        });
+
+        if( path.length ) {
+            let step = path[0];
+            this.creep.room.visual.circle(step.x, step.y, {
+                color: 'blue',
+            });
+            let struct = _.first(new RoomPosition(step.x, step.y, this.creep.room.name).lookFor(LOOK_STRUCTURES));
+            if (struct) {
+                this.creep.attack(struct);
+                return;
+            }
+            this.creep.move(path[0].direction);
+        }
     }
 
     /**

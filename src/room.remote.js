@@ -36,31 +36,47 @@ class RemoteRoomsManager extends utils.Executable {
 
     update() {
         for(let handler of this.handlers) {
-            handler.update(this.jobManager);
+            handler.prioritySpawn();
+        }
+
+        for(let handler of this.handlers) {
+            handler.run();
         }
 
         this.memory.roomNames = this.getRemoteRoomNames();
     }
 
     getRemoteRoomNames() {
-        let rooms = this.getExitRooms(this.manager.room);
-        // console.log('Enabled exits: ', rooms);
-        return rooms;
+        let toCheck = this.getExitRooms(this.manager.room.name);
+
+        let result = [];
+
+        while(toCheck.length > 0) {
+            let roomName = toCheck.pop();
+
+            result.push(roomName);
+
+            let newRooms = this.getExitRooms(roomName);
+
+            toCheck = toCheck.concat(newRooms);
+        }
+
+        return result;
     }
 
     /**
-     * @param {Room} room
+     * @param roomName
      */
-    getExitRooms(room) {
+    getExitRooms(roomName) {
         let exitFlags = _.filter(Game.flags, /**Flag*/ f => {
-            if(f.room != room) {
+            if(f.room.name != roomName) {
                 return;
             }
 
             return f.color == COLOR_PURPLE && f.secondaryColor == COLOR_PURPLE;
         });
 
-        let availableExits = Game.map.describeExits(room.name);
+        let availableExits = Game.map.describeExits(roomName);
         let exits = [];
 
         exitFlags.forEach(/**Flag*/ flag => {
@@ -147,7 +163,7 @@ class RemoteRoomHandler extends utils.Executable {
             this.extensions = [];
             this.extensionsClusters = [];
             this.towers = [];
-            this.containers = [];
+            this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         }
 
@@ -184,6 +200,23 @@ class RemoteRoomHandler extends utils.Executable {
         return this.parent.spawner;
     }
 
+    prioritySpawn() {
+        if(!this.room) {
+            if(!this.memory.scoutName) {
+                let name = this.spawnMind(mind_scout.ScoutMind);
+                if (name) {
+                    this.memory.scoutName = name;
+                    console.log(this, 'Scout ', name, 'is sent');
+                }
+            }
+        }
+        else {
+            if (this.enemies.length > 0) {
+                this.trySpawnDefender();
+            }
+        }
+    }
+
     update() {
         // console.log(this, 'updating ...');
 
@@ -199,29 +232,16 @@ class RemoteRoomHandler extends utils.Executable {
         //     console.log('New squad added', newSquad);
         // }
 
-        if(!this.room) {
-            if(!this.memory.scoutName) {
-                let name = this.spawnMind(mind_scout.ScoutMind);
-                if (name) {
-                    this.memory.scoutName = name;
-                    console.log(this, 'Scout ', name, 'is sent');
-                }
-            }
-        }
-        else {
+        if(this.room) {
             if (!this.memory.remoteStructures) {
                 this.memory.remoteStructures = this.findRemoteStructures(this.room);
-            }
-
-            if (this.enemies.length > 0) {
-                this.trySpawnDefender();
             }
 
             if (this.enemies.length === 0) {
                 this.trySpawnClaimer();
             }
 
-            if(!this.danger) {
+            if(this.enemies.length === 0) {
                 if (this.getCreepCount(minds.available.harvester) < 2) {
                     this.spawnMind(minds.available.harvester);
                 }

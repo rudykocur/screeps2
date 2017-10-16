@@ -187,7 +187,7 @@ class MindCommonActions {
             return;
         }
 
-        if(!point.inRangeTo(this.creep, 3)) {
+        if(!point.inRangeTo(this.creep, 2)) {
             this.creep.mover.moveTo(point);
         }
         else {

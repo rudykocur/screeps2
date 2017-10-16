@@ -1,4 +1,5 @@
 let mind = require('mind.common');
+let maps = require('maps');
 
 const STATE_SCOUT = 'scout';
 const STATE_IDLE = 'idle';
@@ -21,9 +22,8 @@ class ScoutMind extends mind.CreepMindBase {
         let roomName = this.creep.memory.roomName;
 
         if(this.creep.room.name != roomName) {
-            let direction = this.creep.room.findExitTo(roomName);
-            let exit = this.creep.pos.findClosestByRange(direction);
-            this.creep.mover.moveTo(exit);
+            let room = maps.getRoomCache(roomName);
+            this.creep.mover.moveTo(room.controller.pos);
         }
         else {
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {

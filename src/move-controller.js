@@ -14,9 +14,12 @@ class CreepMoveController {
     }
 
     moveTo(target, options) {
-        if(this.creep.moveTo(target, options) == OK) {
+        let result = this.creep.moveTo(target, options);
+        if(result == OK) {
             this.exitStationary();
         }
+
+        return result;
     }
 
     moveByPath() {}
