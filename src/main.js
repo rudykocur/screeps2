@@ -37,16 +37,11 @@ module.exports.loop = function () {
         maps.updateRoomCache(room, 500);
     });
 
-    let managers = [];
-    _.each(Game.rooms, room => {
-        if(!room.controller || !room.controller.my) {
-            return;
-        }
+    let managers = rooms.getHandlers(jobBoard);
 
-        let mgr = new rooms.RoomManager(room, jobBoard);
-        mgr.run();
-        managers.push(mgr);
-    });
+    for(let manager of managers) {
+        manager.run();
+    }
 
     managers.forEach((manager) => {
         manager.minds.forEach((mind) => {
@@ -78,23 +73,4 @@ module.exports.loop = function () {
         spawn.room.visual.text(usage+'%', spawn.pos.x, spawn.pos.y+0.5, {color: 'red', stroke: 'white'});
     });
 
-    let claimFlag = _.first(_.filter(Game.flags, flags.isClaim));
-
-    if(claimFlag) {
-        let wanderer = Game.creeps.wanderer;
-        if(!wanderer) {
-            for(let spawn of _.values(Game.spawns)) {
-                if(spawn.spawnCreep([MOVE], 'wanderer') === OK) {
-                    console.log('spawned wanderer');
-                    break;
-                }
-            }
-        }
-        else {
-
-
-            let claimPath = maps.getMultiRoomPath(wanderer.pos, claimFlag.pos);
-            let x = wanderer.moveByPath(claimPath);
-        }
-    }
 };
