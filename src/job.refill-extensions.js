@@ -24,6 +24,11 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
     }
 
     getEnergy() {
+        if(_.sum(this.creep.carry) >= this.cluster.energyNeeded) {
+            this.fsm.enter(STATE_REFILL);
+            return;
+        }
+
         if(this.roomMgr.storage.isNear(this.creep)) {
             this.roomMgr.storage.withdraw(this.creep);
             this.fsm.enter(STATE_REFILL);

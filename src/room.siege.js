@@ -2,25 +2,14 @@ var _ = require("lodash");
 const utils = require('utils');
 const minds = require('mind');
 const maps = require('maps');
+const base = require('room.base');
 
-class RoomSiege extends utils.Executable {
+class RoomSiege extends base.RoomBase {
     constructor(roomName, flag, regularRooms) {
-        super();
+        super(roomName);
 
-        this.roomName = roomName;
         this.flag = flag;
         this.managers = regularRooms;
-
-        let room = Game.rooms[roomName];
-
-        if(room) {
-            room.manager = this;
-            this.room = room;
-        }
-
-        this.creeps = _.filter(Game.creeps, "memory.roomName", this.roomName);
-        this.minds = this.creeps.map((c) => minds.getMind(c, this));
-        this.mindsByType = _.groupBy(this.minds, 'constructor.name');
     }
 
     getSpawner() {
@@ -42,15 +31,7 @@ class RoomSiege extends utils.Executable {
         }
     }
 
-    getCreepCount(type) {
-        return _.size(this.mindsByType[type.name]);
-    }
-
     update() {
-        // console.log(this, 'updated ...');
-        // let cache = maps.getRoomCache(this.roomName);
-
-        // console.log(this, '::', cache.findStructures(STRUCTURE_SPAWN).length);
 
         if(this.getCreepCount(minds.available.scout) === 0) {
             if(this.spawn(minds.available.scout)) {

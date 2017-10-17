@@ -84,6 +84,7 @@ class ExtensionCluster {
         let storedEnergy = _.sum(this.extensions, 'energy');
 
         this.needsEnergy = (storedEnergy < capacity);
+        this.energyNeeded = capacity - storedEnergy;
     }
 }
 

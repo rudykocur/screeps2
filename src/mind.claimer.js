@@ -31,12 +31,17 @@ class ClaimerMind extends mind.CreepMindBase {
             }
             this.creep.mover.enterStationary();
 
-            if((target.reservation && target.reservation.username != utils.myUsername()) ||
-                (target.owner && target.owner != utils.myUsername())){
-                this.creep.attackController(target);
+            if(this.creep.memory.claim) {
+                this.creep.claimController(target);
             }
             else {
-                this.creep.reserveController(target)
+                if ((target.reservation && target.reservation.username != utils.myUsername()) ||
+                    (target.owner && target.owner != utils.myUsername())) {
+                    this.creep.attackController(target);
+                }
+                else {
+                    this.creep.reserveController(target)
+                }
             }
         }
         else {
@@ -49,17 +54,22 @@ class ClaimerMind extends mind.CreepMindBase {
     /**
      * @param {RoomManager} manager
      */
-    static getSpawnParams(manager) {
+    static getSpawnParams(manager, options) {
+        options = options || {};
+
         let body = [CLAIM, MOVE];
 
-        if(manager.room.energyCapacityAvailable >= 1300) {
+        if(!options.claim && manager.room.energyCapacityAvailable >= 1300) {
             body = [CLAIM, CLAIM, MOVE, MOVE];
         }
 
         return {
             body: body,
             name: 'claimer',
-            memo: {'mind': 'claimer'}
+            memo: {
+                mind: 'claimer',
+                claim: !!options.claim
+            }
         };
     }
 }

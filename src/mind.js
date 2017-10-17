@@ -9,6 +9,7 @@ const availableMinds = {
     'defender': require('mind.defender').DefenderMind,
     'rangedDefender': require('mind.rangedDefender').RangedDefenderMind,
     'claimer': require('mind.claimer').ClaimerMind,
+    'settler': require('mind.settler').SettlerMind,
 };
 
 module.exports = {
