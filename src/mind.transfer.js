@@ -61,7 +61,7 @@ class TransferMind extends mind.CreepMindBase {
 
         yield this.tryClaimJob(availableCapacity, {
             type: 'energy-pickup',
-            minAmount: Math.max(availableCapacity / 2, 50)
+            minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50)
         });
 
         yield this.tryClaimJob(availableCapacity, {

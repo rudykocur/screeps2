@@ -74,7 +74,7 @@ class SettlerMind extends mind.CreepMindBase {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
 
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = bb.build([WORK, CARRY, MOVE], manager.room.energyCapacityAvailable - 200);
+            body = bb.build([WORK, CARRY, MOVE], 700);
         }
 
         return {
