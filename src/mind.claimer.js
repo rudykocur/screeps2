@@ -1,4 +1,6 @@
 let mind = require('mind.common');
+let maps = require('maps');
+const utils = require('utils');
 
 const STATE = {
     IDLE: 'idle',
@@ -29,12 +31,18 @@ class ClaimerMind extends mind.CreepMindBase {
             }
             this.creep.mover.enterStationary();
 
-            if(target.reservation && target.reservation.username != 'rudykocur') {
+            if((target.reservation && target.reservation.username != utils.myUsername()) ||
+                (target.owner && target.owner != utils.myUsername())){
                 this.creep.attackController(target);
             }
             else {
                 this.creep.reserveController(target)
             }
+        }
+        else {
+            let cache = maps.getRoomCache(this.creep.memory.roomName);
+            let target = cache.controller;
+            this.creep.mover.moveTo(target.pos);
         }
     }
 

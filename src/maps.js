@@ -31,8 +31,18 @@ function scanRoom(room) {
     let result = [];
 
     room.find(FIND_STRUCTURES).forEach(struct => {
-        result.push(_.pick(struct, ['pos', 'structureType', 'id']));
+        let obj = _.pick(struct, ['pos', 'structureType', 'id']);
+        obj._typeId = FIND_STRUCTURES;
+        result.push(obj);
     });
+
+    for(let type of [FIND_SOURCES, FIND_MINERALS]) {
+        room.find(type).forEach(src => {
+            let obj = _.pick(src, ['pos', 'id']);
+            obj._typeId = type;
+            result.push(obj);
+        });
+    }
 
     return result;
 }
@@ -42,6 +52,7 @@ class CachedRoom {
         this.name = roomName;
 
         this.cache = getCacheForRoom(roomName);
+        this.cache.data = this.cache.data.map(hydrate);
     }
 
     belongsToUser(username) {
@@ -65,11 +76,11 @@ class CachedRoom {
     }
 
     find(type) {
-        return this.cache.data.map(hydrate);
+        return this.cache.data.filter(obj => obj._typeId === type || (!obj._typeId && type === FIND_STRUCTURES));
     }
 
     findStructures(structType) {
-        return _.filter(this.cache.data, 'structureType', structType).map(hydrate);
+        return _.filter(this.cache.data, 'structureType', structType);
     }
 
     getStructure(structType) {
@@ -148,8 +159,6 @@ module.exports = {
                         return Infinity;
                     }
                 }
-                else {
-                }
 
                 return 1;
             }
@@ -170,9 +179,21 @@ module.exports = {
 
                     let matrix = new PathFinder.CostMatrix;
 
-                    for(let struct of cache.find()) {
+                    for(let struct of cache.find(FIND_STRUCTURES)) {
                         if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
                             matrix.set(struct.pos.x, struct.pos.y, 0xff);
+                        }
+                    }
+
+                    let sources = cache.find(FIND_SOURCES);
+                    if(sources.length == 3) {
+                        let mineral = _.first(cache.find(FIND_MINERALS));
+                        sources.push(mineral);
+                        for(let src of sources) {
+                            let unsafe = utils.getAround(src.pos, 5);
+                            for(let point of unsafe) {
+                                matrix.set(point.x, point.y, 0xFF);
+                            }
                         }
                     }
 
@@ -196,7 +217,10 @@ module.exports = {
         let currentTTL = Game.time - cache.lastUpdateTime;
 
         if(currentTTL > ttl) {
-            console.log(`[maps] updating cache for room ${room.name}`);
+            if(ttl > 0) {
+                console.log(`[maps] updating cache for room ${room.name}`);
+            }
+
             cache.data = scanRoom(room);
 
             if(room.controller) {

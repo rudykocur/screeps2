@@ -64,7 +64,7 @@ class RoomPopulationMind extends utils.Executable {
     }
 
     /**
-     * @param {RoomManager} targetRoom
+     * @param {RoomManager|RemoteRoomHandler|RoomSiege} targetRoom
      * @param options
      */
     spawn(targetRoom, options) {

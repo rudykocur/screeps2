@@ -4,6 +4,7 @@ let flags = require('utils.flags');
 const roomTypes = {
     regular: require('room.regular').RoomManager,
     settlement: require('room.settlement').RoomSettlement,
+    siege: require('room.siege').RoomSiege,
 };
 
 
@@ -23,6 +24,10 @@ module.exports = {
         });
 
         let result = [].concat(managers);
+
+        for(let flag of _.filter(Game.flags, flags.isRoomAttack)) {
+            result.push(new roomTypes.siege(flag.pos.roomName, flag, managers));
+        }
 
         for(let flag of _.filter(Game.flags, flags.isClaim)) {
             result.push(new roomTypes.settlement(flag.pos.roomName, flag, managers));

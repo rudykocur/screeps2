@@ -61,6 +61,31 @@ module.exports = {
         ];
     },
 
+    getAround(center, radius) {
+        let result = [];
+
+        for(let i = radius*-1; i <= radius; i++) {
+            for(let j = radius*-1; j <= radius; j++) {
+                if(i === 0 && j === 0) {
+                    continue;
+                }
+
+                let x = center.x + i;
+                let y = center.y + j;
+
+
+
+                if(x < 1 || x > 49 || y < 1 || y > 49) {
+                    continue;
+                }
+
+                result.push(new RoomPosition(x, y, center.roomName));
+            }
+        }
+
+        return result;
+    },
+
     reverseReactions(reactions) {
         let results = {};
 
