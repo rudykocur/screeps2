@@ -102,6 +102,10 @@ class TransferMind extends mind.CreepMindBase {
             body = bb.build([CARRY, CARRY, MOVE], 1000, [WORK, CARRY, MOVE]);
         }
 
+        if(manager.room.energyCapacityAvailable > 1600) {
+            body = bb.build([CARRY, CARRY, MOVE], 1600, [WORK, CARRY, MOVE]);
+        }
+
         return {
             body: body,
             name: 'transfer',

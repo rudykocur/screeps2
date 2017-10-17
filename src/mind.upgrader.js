@@ -94,6 +94,10 @@ class UpgraderMind extends mind.CreepMindBase {
             body = bb.build([WORK, CARRY, MOVE], 1000);
         }
 
+        if(manager.room.energyCapacityAvailable > 1700) {
+            body = bb.build([WORK, CARRY, MOVE], 1700);
+        }
+
         return {
             body: body,
             name: 'upgrader',

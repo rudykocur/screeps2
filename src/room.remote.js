@@ -1,6 +1,7 @@
 var _ = require("lodash");
 const minds = require('mind');
 const utils = require('utils');
+const maps = require('maps');
 
 let mind_scout = require('mind.scout');
 let mind_defender = require('mind.defender');
@@ -139,6 +140,7 @@ class RemoteRoomHandler extends utils.Executable {
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
         this.enemies = [];
+        this.sources = [];
 
         this.memory.squads.forEach(squadId => {
             let squad = squads.CombatSquad.getSquad(squadId);
@@ -165,6 +167,13 @@ class RemoteRoomHandler extends utils.Executable {
             this.towers = [];
             this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
+
+            this.hostileStructures = this.room.find(FIND_HOSTILE_STRUCTURES)
+                .filter(s => {
+                    if(s.structureType === STRUCTURE_CONTROLLER) return false;
+                    if(s.structureType === STRUCTURE_RAMPART) return false;
+                    return true;
+                });
         }
 
         if(this.enemies.length > 0) {
@@ -266,11 +275,11 @@ class RemoteRoomHandler extends utils.Executable {
         }
     }
 
-    spawnMind(mind) {
+    spawnMind(mind, options) {
         let spawn = this.spawner.getFreeSpawn();
 
         if(spawn) {
-            return this.spawner.spawn(this, mind.getSpawnParams(this.parent));
+            return this.spawner.spawn(this, mind.getSpawnParams(this.parent, options));
         }
     }
 
@@ -279,13 +288,19 @@ class RemoteRoomHandler extends utils.Executable {
     }
 
     trySpawnDefender() {
-        if (!this.memory.defenderName) {
-            let defenderName = this.spawnMind(minds.available.defender);
-            if (defenderName) {
-                this.memory.defenderName = defenderName;
-                console.log(this, 'defender', defenderName, 'spawned')
-            }
+
+        maps.updateRoomCache(this.room, 0);
+
+        let enemyCtrl = this.room.controller.owner && this.room.controller.owner.username !== 'rudykocur';
+
+        if(enemyCtrl && this.hostileStructures.length > 0 && this.getCreepCount(minds.available.defender) < 2) {
+            this.spawnMind(minds.available.defender, {breach: enemyCtrl});
         }
+
+        if(!enemyCtrl && this.getCreepCount(minds.available.defender) < 1) {
+            this.spawnMind(minds.available.defender);
+        }
+
     }
 
     trySpawnClaimer() {

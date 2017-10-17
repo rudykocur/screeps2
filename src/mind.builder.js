@@ -139,6 +139,10 @@ class BuilderMind extends mind.CreepMindBase {
         if(manager.room.energyCapacityAvailable > 1000) {
             body = bb.build([CARRY, WORK, MOVE], 1000);
         }
+        if(manager.room.energyCapacityAvailable > 2000) {
+            body = bb.build([CARRY, WORK, MOVE], 1600);
+        }
+
 
         return {
             body: body,

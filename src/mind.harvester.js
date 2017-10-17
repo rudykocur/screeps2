@@ -1,3 +1,4 @@
+const bb = require('utils.bodybuilder');
 let mind = require('mind.common');
 
 class HarvesterMind extends mind.CreepMindBase {
@@ -40,22 +41,17 @@ class HarvesterMind extends mind.CreepMindBase {
     static getSpawnParams(manager, mineralHarvester) {
         let body = [MOVE, WORK, WORK];
         if(manager.room.energyCapacityAvailable > 500) {
-            body = [MOVE, MOVE, WORK, WORK, WORK, WORK];
+            body = [WORK, WORK, WORK, WORK, MOVE, MOVE];
         }
         if(manager.room.energyCapacityAvailable > 750) {
-            body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+            body = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE];
         }
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+            body = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE];
         }
 
         if(mineralHarvester) {
-            body = [WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE];
-
-            if(manager.room.energyCapacityAvailable > 2000) {
-                body = [WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE,
-                        WORK, WORK, MOVE, WORK, WORK, MOVE, WORK, WORK, MOVE];
-            }
+            body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable);
         }
 
         return {
