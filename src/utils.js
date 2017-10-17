@@ -19,11 +19,24 @@ module.exports = {
 
     throttle(ticks, callback) {
         return () => {
-            if (Game.time % ticks == 0) {
+            if (Game.time % ticks === 0) {
                 callback();
             }
         }
 
+    },
+
+    every(ticks, callback) {
+        if (Game.time % ticks === 0) {
+            callback();
+        }
+    },
+
+    round (number, precision) {
+        let factor = Math.pow(10, precision);
+        let tempNumber = number * factor;
+        let roundedTempNumber = Math.round(tempNumber);
+        return roundedTempNumber / factor;
     },
 
     /**

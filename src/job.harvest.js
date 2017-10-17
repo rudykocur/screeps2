@@ -2,6 +2,7 @@ var _ = require('lodash');
 const minds = require('mind');
 const maps = require('maps');
 const job_common = require('job.common');
+const utils = require('utils');
 
 const JOB_TYPE = 'harvest-source';
 
@@ -35,6 +36,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         if(container) {
             state.targetPos = container.pos;
             state.exact = true;
+            state.containerId = container.id;
         }
         else {
             state.targetPos = source.pos;
@@ -53,7 +55,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
 
         if(state.exact) {
             if(this.creep.pos.isEqualTo(pos)) {
-                this.fsm.enter(STATE.HARVEST);
+                this.fsm.enter(STATE.HARVEST, {containerId: state.containerId});
                 return;
             }
         }
@@ -67,7 +69,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         this.creep.mover.moveTo(pos, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
     }
 
-    harvestSource() {
+    harvestSource(state) {
         let source = Game.getObjectById(this.data.targetId);
 
         if(!source) {
@@ -82,6 +84,12 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
 
         this.creep.mover.enterStationary();
         this.creep.harvest(source);
+
+        if(state.containerId) {
+            utils.every(10, () => {
+                this.creep.repair(Game.getObjectById(state.containerId));
+            })
+        }
     }
 
     /**

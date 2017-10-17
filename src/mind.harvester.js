@@ -44,14 +44,14 @@ class HarvesterMind extends mind.CreepMindBase {
             body = [WORK, WORK, WORK, WORK, MOVE, MOVE];
         }
         if(manager.room.energyCapacityAvailable > 750) {
-            body = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE];
+            body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE];
         }
         if(manager.room.energyCapacityAvailable > 1000) {
-            body = [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE];
+            body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         }
 
         if(mineralHarvester) {
-            body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable);
+            body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable, [CARRY]);
         }
 
         return {

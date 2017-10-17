@@ -191,6 +191,8 @@ class MindCommonActions {
             this.creep.mover.moveTo(point);
         }
         else {
+            let txt = this.creep.memory.roomName;
+            this.creep.room.visual.text(txt, this.creep.pos, {font: 0.7});
             this.creep.mover.enterStationary();
         }
     }
