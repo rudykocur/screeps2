@@ -1,3 +1,4 @@
+var _ = require('lodash');
 const minds = require('mind');
 const maps = require('maps');
 const job_common = require('job.common');
@@ -16,6 +17,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
 
         this.configureFSM(STATE.GOTO, {
             [STATE.GOTO]: {
+                onEnter: this.pickMiningPosition.bind(this),
                 onTick: this.gotoSource.bind(this)
             },
             [STATE.HARVEST]: {
@@ -25,20 +27,44 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
 
     }
 
-    gotoSource() {
+    pickMiningPosition(state) {
         let source = Game.getObjectById(this.data.targetId);
 
+        let container = _.first(source.pos.findInRange(this.workRoom.containers, 1));
+
+        if(container) {
+            state.targetPos = container.pos;
+            state.exact = true;
+        }
+        else {
+            state.targetPos = source.pos;
+            state.exact = false;
+        }
+    }
+
+    gotoSource(state) {
+        let source = Game.getObjectById(this.data.targetId);
         if(!source) {
             this.completeJob();
             return;
         }
 
-        if(!this.creep.pos.isNearTo(source)) {
-            this.creep.mover.moveTo(source, {costCallback: maps.blockHostileRooms});
+        let pos = new RoomPosition(state.targetPos.x, state.targetPos.y, state.targetPos.roomName);
+
+        if(state.exact) {
+            if(this.creep.pos.isEqualTo(pos)) {
+                this.fsm.enter(STATE.HARVEST);
+                return;
+            }
         }
         else {
-            this.fsm.enter(STATE.HARVEST);
+            if(this.creep.pos.isNearTo(pos)) {
+                this.fsm.enter(STATE.HARVEST);
+                return;
+            }
         }
+
+        this.creep.mover.moveTo(pos, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
     }
 
     harvestSource() {
