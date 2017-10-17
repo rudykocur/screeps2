@@ -69,7 +69,7 @@ class RemoteRoomsManager extends utils.Executable {
      */
     getExitRooms(roomName) {
         let exitFlags = _.filter(Game.flags, /**Flag*/ f => {
-            if(f.room.name != roomName) {
+            if(f.pos.roomName != roomName) {
                 return;
             }
 
