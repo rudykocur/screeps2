@@ -1,4 +1,5 @@
 var _ = require('lodash');
+const utils = require('utils');
 
 function hydrate(item) {
     item.pos.__proto__ = RoomPosition.prototype;
@@ -17,6 +18,10 @@ function getCacheForRoom(roomName) {
     _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, data: [], lastUpdateTime: 0});
 
     return Memory.cache.rooms[roomName];
+}
+
+function hasCacheForRoom(roomName) {
+    return !!_.get(Memory, ['cache', 'rooms', roomName])
 }
 
 /**
@@ -41,6 +46,14 @@ class CachedRoom {
 
     belongsToUser(username) {
         return this.cache.owner == username || this.cache.reservedBy == username;
+    }
+
+    ownedBy(username) {
+        return this.cache.owner == username;
+    }
+
+    isOwned() {
+        return !!this.cache.owner;
     }
 
     isFree() {
@@ -94,9 +107,7 @@ module.exports = {
     },
 
     blockHostileRooms(roomName, costMatrix) {
-        let myRoom = _.first(_.filter(Game.rooms, r => r.controller.my));
-
-        let myUser = myRoom.controller.owner.username;
+        let myUser = utils.myUsername();
 
         let cachedRoom = module.exports.getRoomCache(roomName);
 
@@ -111,6 +122,73 @@ module.exports = {
         return costMatrix;
     },
 
+    /**
+     * @param {RoomPosition} from
+     * @param {RoomPosition} to
+     */
+    getMultiRoomPath(from, to) {
+        let myUser = utils.myUsername();
+
+        let allowedRooms = { [ from.roomName ]: true };
+
+        Game.map.findRoute(from.roomName, to.roomName, {
+            routeCallback(roomName) {
+                if(hasCacheForRoom(roomName)) {
+                    let cache = new CachedRoom(roomName);
+
+                    if(cache.isFree()) {
+                        return 1;
+                    }
+
+                    if(cache.ownedBy(myUser)) {
+                        return 1;
+                    }
+
+                    if(cache.isOwned()) {
+                        return Infinity;
+                    }
+                }
+                else {
+                }
+
+                return 1;
+            }
+        }).forEach(function(info) {
+
+            allowedRooms[info.room] = true;
+        });
+
+        let ret = PathFinder.search(from, to, {
+            maxOps: 20000,
+            roomCallback(roomName) {
+                if (allowedRooms[roomName] === undefined) {
+                    return false;
+                }
+
+                if(hasCacheForRoom(roomName)) {
+                    let cache = new CachedRoom(roomName);
+
+                    let matrix = new PathFinder.CostMatrix;
+
+                    for(let struct of cache.find()) {
+                        if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
+                            matrix.set(struct.pos.x, struct.pos.y, 0xff);
+                        }
+                    }
+
+                    return matrix;
+                }
+            }
+        });
+
+        for(let step of ret.path) {
+            let vis = new RoomVisual(step.roomName);
+            vis.circle(step, {});
+        }
+
+        return ret.path;
+    },
+
     updateRoomCache(room, ttl) {
         ttl = ttl || 0;
 
@@ -118,10 +196,18 @@ module.exports = {
         let currentTTL = Game.time - cache.lastUpdateTime;
 
         if(currentTTL > ttl) {
+            console.log(`[maps] updating cache for room ${room.name}`);
             cache.data = scanRoom(room);
 
-            cache.owner = room.controller.owner ? room.controller.owner.username : null;
-            cache.reservedBy = room.controller.reservation ? room.controller.reservation.username : null;
+            if(room.controller) {
+                cache.owner = room.controller.owner ? room.controller.owner.username : null;
+                cache.reservedBy = room.controller.reservation ? room.controller.reservation.username : null;
+            }
+            else {
+                cache.owner = null;
+                cache.reservedBy = null;
+            }
+
 
             cache.lastUpdateTime = Game.time;
         }

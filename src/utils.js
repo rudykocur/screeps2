@@ -39,29 +39,10 @@ module.exports = {
         return roundedTempNumber / factor;
     },
 
-    /**
-     * @param {Flag} flag
-     */
-    isBlockFlag(flag) {
-        return flag.color === COLOR_RED && flag.secondaryColor === COLOR_RED;
-    },
+    myUsername() {
+        let myRoom = _.first(_.filter(Game.rooms, r => r.controller && r.controller.my));
 
-    isMeetingPointFlag() {
-
-    },
-
-    /**
-     * @param {Flag} flag
-     */
-    isExtensionClusterFlag(flag) {
-        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_YELLOW;
-    },
-
-    /**
-     * @param {Flag} flag
-     */
-    isTowerFlag(flag) {
-        return flag.color === COLOR_RED && flag.secondaryColor === COLOR_YELLOW;
+        return myRoom.controller.owner.username;
     },
 
     /**

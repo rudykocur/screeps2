@@ -1,6 +1,7 @@
 var _ = require("lodash");
 const rooms = require("rooms");
 const utils = require('utils');
+let flags = require('utils.flags');
 const job_board = require('job.board');
 const proto = require('prototypes');
 const maps = require('maps');
@@ -38,7 +39,7 @@ module.exports.loop = function () {
 
     let managers = [];
     _.each(Game.rooms, room => {
-        if(!room.controller.my) {
+        if(!room.controller || !room.controller.my) {
             return;
         }
 
@@ -77,5 +78,23 @@ module.exports.loop = function () {
         spawn.room.visual.text(usage+'%', spawn.pos.x, spawn.pos.y+0.5, {color: 'red', stroke: 'white'});
     });
 
-    // utils.debugFun(maps, utils);
+    let claimFlag = _.first(_.filter(Game.flags, flags.isClaim));
+
+    if(claimFlag) {
+        let wanderer = Game.creeps.wanderer;
+        if(!wanderer) {
+            for(let spawn of _.values(Game.spawns)) {
+                if(spawn.spawnCreep([MOVE], 'wanderer') === OK) {
+                    console.log('spawned wanderer');
+                    break;
+                }
+            }
+        }
+        else {
+
+
+            let claimPath = maps.getMultiRoomPath(wanderer.pos, claimFlag.pos);
+            let x = wanderer.moveByPath(claimPath);
+        }
+    }
 };

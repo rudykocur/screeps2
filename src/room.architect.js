@@ -1,5 +1,6 @@
 var _ = require('lodash');
 const utils = require('utils');
+const flags = require('utils.flags');
 const maps = require('maps');
 
 class RoomArchitect extends utils.Executable {
@@ -70,7 +71,7 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildTowers(room) {
-        let flags = this.manager.flags.filter(utils.isTowerFlag);
+        let flags = this.manager.flags.filter(flags.isTower);
 
         for(let flag of flags) {
             if(OK === room.createConstructionSite(flag.pos, STRUCTURE_TOWER)) {
