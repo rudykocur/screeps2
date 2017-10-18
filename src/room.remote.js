@@ -10,6 +10,7 @@ let mind_claimer = require('mind.claimer');
 
 let squads = require('combat.squad');
 let missions = require('combat.missions');
+let threat = require('combat.threat');
 
 class RemoteRoomsManager extends utils.Executable {
 
@@ -176,6 +177,8 @@ class RemoteRoomHandler extends utils.Executable {
                 });
         }
 
+        this.threat = new threat.ThreatAssesment(this.enemies);
+
         if(this.enemies.length > 0) {
             this.danger = this.enemies.filter(creep => {
                 return creep.getActiveBodyparts(ATTACK) > 0 || creep.getActiveBodyparts(RANGED_ATTACK) > 0
@@ -305,14 +308,28 @@ class RemoteRoomHandler extends utils.Executable {
 
         let enemyCtrl = this.room.controller.owner && this.room.controller.owner.username !== 'rudykocur';
 
-        if(enemyCtrl && this.hostileStructures.length > 0 && this.getCreepCount(minds.available.defender) < 2) {
+        if(enemyCtrl && this.shouldSpawnBreachCreep()) {
             this.spawnMind(minds.available.defender, {breach: enemyCtrl});
         }
 
-        if(!enemyCtrl || this.getCreepCount(minds.available.defender) < 1) {
-            this.spawnMind(minds.available.defender);
-        }
+        let defenders = this.getCreepCount(minds.available.defender) + this.getCreepCount(minds.available.rangedDefender);
 
+        if(!enemyCtrl || defenders < 2) {
+            if(this.threat.rangedPower() > 3) {
+                this.spawnMind(minds.available.rangedDefender);
+            }
+            else {
+                this.spawnMind(minds.available.defender);
+            }
+        }
+    }
+
+    shouldSpawnBreachCreep() {
+        if(this.hostileStructures.length === 0) return false;
+        if(this.threat.rangedPower() > 0) return false;
+        if(this.getCreepCount(minds.available.defender) >= 2) return false;
+
+        return true;
     }
 
     trySpawnClaimer() {

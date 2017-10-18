@@ -25,19 +25,15 @@ class RangedDefenderMind extends mind.CreepMindBase {
 
         this.creep.heal();
 
-        if(this.workRoom && this.workRoom.enemies.length > 0) {
-            this.creep.moveTo(_.first(this.workRoom.enemies));
-            this.enterState(STATE.ATTACK);
-
-            return;
-        }
-
         if(this.creep.room.name != roomName) {
             let direction = this.creep.room.findExitTo(roomName);
             let exit = this.creep.pos.findClosestByRange(direction);
             this.creep.moveTo(exit);
         }
         else {
+            if(this.getTarget()) {
+                this.enterState(STATE.ATTACK);
+            }
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
                 this.creep.moveTo(this.creep.room.controller);
             }
@@ -47,13 +43,27 @@ class RangedDefenderMind extends mind.CreepMindBase {
     pickTarget() {
     }
 
+    getTarget() {
+        let target = this.workRoom.threat.getClosestEnemy(this.creep);
+
+        if(!target) {
+            target = _.first(this.workRoom.room.find(FIND_HOSTILE_STRUCTURES).filter(s => s.structureType !== STRUCTURE_CONTROLLER));
+        }
+
+        return target;
+    }
+
     attackTarget() {
-        let target = this.creep.pos.findClosestByRange(this.workRoom.enemies);
+
+        let target = this.getTarget();
 
         if(!target) {
             this.enterState(STATE.IDLE);
             return;
         }
+
+        this.creep.room.visual.line(this.creep.pos, target.pos, {color: "red"});
+
         let result = this.creep.rangedAttack(target);
 
         if(result == ERR_NOT_IN_RANGE) {
@@ -86,9 +96,11 @@ class RangedDefenderMind extends mind.CreepMindBase {
      * @param {RoomManager} manager
      */
     static getSpawnParams(manager) {
+        // let body = [RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK,
+        //         MOVE, MOVE, HEAL];
+        let body = [TOUGH,TOUGH,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,MOVE,MOVE,MOVE,MOVE,MOVE,HEAL,HEAL];
         return {
-            body: [RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK,
-                MOVE, MOVE, HEAL],
+            body: body,
             name: 'rangedDefender',
             memo: {'mind': 'rangedDefender'}
         };

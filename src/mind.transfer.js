@@ -68,6 +68,10 @@ class TransferMind extends mind.CreepMindBase {
             type: 'empty-container',
             minAmount: Math.max(availableCapacity / 2, 50)
         });
+
+        yield this.tryClaimJob(1, {
+            type: 'refill-extensions'
+        });
     }
 
     dropResourcesToStorage() {

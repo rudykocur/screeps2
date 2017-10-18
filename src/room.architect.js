@@ -71,9 +71,7 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildTowers(room) {
-        let flags = this.manager.flags.filter(flags.isTower);
-
-        for(let flag of flags) {
+        for(let flag of this.manager.flags.filter(flags.isTower)) {
             if(OK === room.createConstructionSite(flag.pos, STRUCTURE_TOWER)) {
                 flag.remove();
             }

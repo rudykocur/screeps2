@@ -35,7 +35,6 @@ class DefenderMind extends mind.CreepMindBase {
         else {
             if(this.workRoom.enemies.length > 0 || this.workRoom.hostileStructures.length > 0) {
                 this.enterState(STATE.ATTACK);
-                return;
             }
 
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
@@ -65,6 +64,7 @@ class DefenderMind extends mind.CreepMindBase {
         this.debug = true;
 
         let target = this.creep.pos.findClosestByRange(this.workRoom.enemies);
+
         if(!target) {
             target = _.first(this.workRoom.hostileStructures);
         }

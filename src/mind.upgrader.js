@@ -91,16 +91,8 @@ class UpgraderMind extends mind.CreepMindBase {
     static getSpawnParams(manager) {
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
 
-        if(manager.room.energyCapacityAvailable > 600) {
-            body = bb.build([WORK, CARRY, MOVE], 600);
-        }
-
-        if(manager.room.energyCapacityAvailable > 1000) {
-            body = bb.build([WORK, CARRY, MOVE], 1000);
-        }
-
-        if(manager.room.energyCapacityAvailable > 1700) {
-            body = bb.build([WORK, CARRY, MOVE], 1700);
+        if(manager.room.energyCapacityAvailable > 300) {
+            body = bb.build([WORK, CARRY, MOVE], Math.min(manager.room.energyCapacityAvailable, 1700));
         }
 
         return {
