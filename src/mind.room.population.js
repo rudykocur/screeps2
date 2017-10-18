@@ -53,7 +53,7 @@ class RoomPopulationMind extends utils.Executable {
             else if(this.needUpgrader()) {
                 this.spawnUpgrader(spawn)
             }
-            else if(this.manager.constructionSites.length > 0 && this.needBuilders()) {
+            else if(this.needBuilders()) {
                 this.spawnBuilder(spawn);
             }
         }
@@ -145,6 +145,10 @@ class RoomPopulationMind extends utils.Executable {
     }
 
     needBuilders() {
+        if(this.manager.constructionSites.length === 0) {
+            return false;
+        }
+
         let totalBuilders = this.manager.getCreepCount(minds.available.builder);
         let pointsLeft = _.sum(this.manager.constructionSites, site => site.progressTotal - site.progress);
 
@@ -177,7 +181,7 @@ class RoomPopulationMind extends utils.Executable {
             return this.manager.storage.getStoredEnergy() > 40000;
         }
         else {
-            return this.manager.storage.getStoredEnergy() > 700;
+            return this.manager.storage.getStoredEnergy() > 1000;
         }
     }
 

@@ -250,7 +250,7 @@ class RemoteRoomHandler extends utils.Executable {
                 this.trySpawnClaimer();
             }
 
-            if(this.enemies.length === 0) {
+            if(this.canSpawnWorkers()) {
                 if (this.getCreepCount(minds.available.harvester) < 2) {
                     this.spawnMind(minds.available.harvester);
                 }
@@ -275,6 +275,18 @@ class RemoteRoomHandler extends utils.Executable {
         }
     }
 
+    canSpawnWorkers() {
+        if(this.room.controller.owner && this.room.controller.owner.username !== utils.myUsername()) {
+            return false;
+        }
+
+        if(this.enemies.length > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     spawnMind(mind, options) {
         let spawn = this.spawner.getFreeSpawn();
 
@@ -297,7 +309,7 @@ class RemoteRoomHandler extends utils.Executable {
             this.spawnMind(minds.available.defender, {breach: enemyCtrl});
         }
 
-        if(!enemyCtrl && this.getCreepCount(minds.available.defender) < 1) {
+        if(!enemyCtrl || this.getCreepCount(minds.available.defender) < 1) {
             this.spawnMind(minds.available.defender);
         }
 
@@ -309,6 +321,10 @@ class RemoteRoomHandler extends utils.Executable {
         }
 
         if(this.parent.room.energyCapacityAvailable < 700) {
+            return;
+        }
+
+        if(this.room.controller.upgradeBlocked > 50) {
             return;
         }
 

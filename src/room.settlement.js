@@ -30,7 +30,7 @@ class RoomSettlement extends base.RoomBase {
                 }
 
                 if(this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_SPAWN).length > 0) {
-                    this.flag.delete();
+                    this.flag.remove();
                     Game.notify(`New colony has been created at room ${this.roomName}`);
                 }
             }
