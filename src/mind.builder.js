@@ -37,7 +37,7 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         if(_.sum(this.creep.carry) < this.creep.carryCapacity) {
-            if(this.workRoom.storage && this.actions.isEnoughStoredEnergy(1000)) {
+            if(this.workRoom.storage && this.actions.isEnoughStoredEnergy(500)) {
                 this.enterState(STATE_REFILL);
                 return;
             }

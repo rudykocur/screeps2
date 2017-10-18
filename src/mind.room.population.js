@@ -58,7 +58,7 @@ class RoomPopulationMind extends utils.Executable {
             }
         }
 
-        if(spawn && !spawn.spawning && spawn.blocking) {
+        if(this.freeSpawns.length > 0 && !spawn.spawning && spawn.blocking) {
             let s = this.freeSpawns.pop();
             s.room.visual.circle(s.pos, {fill: "red", opacity: 0.7, radius: 0.7})
         }
