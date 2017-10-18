@@ -191,8 +191,11 @@ class MindCommonActions {
             this.creep.mover.moveTo(point);
         }
         else {
-            let txt = this.creep.memory.roomName;
-            this.creep.room.visual.text(txt, this.creep.pos, {font: 0.7});
+            let creep = this.creep;
+            let t1 = creep.memory.roomName.substr(0, 3);
+            let t2 = creep.memory.roomName.substr(3, 3);
+            creep.room.visual.text(t1, creep.pos, {font: '8px', stroke: 'black'});
+            creep.room.visual.text(t2, creep.pos.x, creep.pos.y + 0.5, {font: '8px', stroke: 'black'});
             this.creep.mover.enterStationary();
         }
     }

@@ -53,11 +53,12 @@ module.exports.loop = function () {
 
     for(let creep of _.values(Game.creeps)) {
         if(creep.memory.isStationary) {
-            creep.room.visual.circle(creep.pos, {
-                fill: "green",
+            creep.room.visual.rect(creep.pos.x - 0.5, creep.pos.y - 0.5, 1.1, 1.1, {
+                stroke: "green",
+                fill: "transparent",
                 opacity: 0.5,
-                radius: 0.5,
-            })
+                radius: 0.7,
+            });
         }
     }
 
