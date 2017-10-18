@@ -26,7 +26,7 @@ class ScoutMind extends mind.CreepMindBase {
             this.creep.mover.moveTo(room.controller.pos);
         }
         else {
-            if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
+            if(!this.creep.pos.inRangeTo(this.creep.room.controller, 4)) {
                 this.creep.mover.moveTo(this.creep.room.controller);
             }
             else {

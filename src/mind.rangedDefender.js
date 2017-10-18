@@ -23,7 +23,7 @@ class RangedDefenderMind extends mind.CreepMindBase {
     gotoRoom() {
         let roomName = this.creep.memory.roomName;
 
-        this.creep.heal();
+        this.creep.heal(this.creep);
 
         if(this.creep.room.name != roomName) {
             let direction = this.creep.room.findExitTo(roomName);
@@ -76,7 +76,7 @@ class RangedDefenderMind extends mind.CreepMindBase {
             }
         }
 
-        this.creep.heal();
+        this.creep.heal(this.creep);
     }
 
     getReverseDirection(creep, target) {

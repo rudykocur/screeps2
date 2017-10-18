@@ -26,7 +26,7 @@ class DefenderMind extends mind.CreepMindBase {
     gotoRoom() {
         let roomName = this.creep.memory.roomName;
 
-
+        this.creep.heal(this.creep);
 
         if(this.creep.pos.roomName != roomName) {
             let room = maps.getRoomCache(roomName);
@@ -35,6 +35,15 @@ class DefenderMind extends mind.CreepMindBase {
         else {
             if(this.workRoom.enemies.length > 0 || this.workRoom.hostileStructures.length > 0) {
                 this.enterState(STATE.ATTACK);
+            }
+
+            let site = _.first(this.workRoom.room.find(FIND_HOSTILE_CONSTRUCTION_SITES));
+
+            if(site) {
+                if(!this.creep.pos.isEqualTo(site.pos)) {
+                    this.creep.mover.moveTo(site);
+                    return;
+                }
             }
 
             if(!this.creep.pos.inRangeTo(this.creep.room.controller, 5)) {
@@ -92,6 +101,8 @@ class DefenderMind extends mind.CreepMindBase {
             this.creep.attack(target);
         }
         this.creep.rangedAttack(target);
+
+        this.creep.heal(this.creep);
     }
 
     goNearTarget(target) {

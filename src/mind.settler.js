@@ -1,11 +1,11 @@
 var _ = require('lodash');
 let mind = require('mind.common');
-let throttle = require('utils').throttle;
+const maps = require('maps');
 let bb = require('utils.bodybuilder');
 
 const STATE_REFILL = 'refill';
 const STATE_BUILD = 'build';
-const STATE_IDLE = 'idle';
+const STATE_ENTER = 'enter-room';
 
 class SettlerMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
@@ -18,9 +18,27 @@ class SettlerMind extends mind.CreepMindBase {
             [STATE_BUILD]: {
                 onTick: this.doBuild.bind(this),
             },
+            [STATE_ENTER]: {
+                onTick: this.gotoRoom.bind(this),
+            }
         };
 
-        this.setStateMachine(fsm, STATE_REFILL);
+        this.setStateMachine(fsm, STATE_ENTER);
+    }
+
+    gotoRoom() {
+        if(this.creep.pos.roomName === this.creep.memory.roomName) {
+            this.enterState(STATE_REFILL);
+            return;
+        }
+
+        this.creep.mover.moveByPath(() => {
+            let cache = maps.getRoomCache(this.creep.memory.roomName);
+            let cacheCtrl = cache.controller;
+            maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
+
+            return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
+        });
     }
 
     doRefill() {
@@ -28,7 +46,7 @@ class SettlerMind extends mind.CreepMindBase {
             return;
         }
 
-        let source = _.first(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
+        let source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
 
         if(_.sum(this.creep.carry) == this.creep.carryCapacity) {
             this.enterState(STATE_BUILD);

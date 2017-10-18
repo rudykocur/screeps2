@@ -314,7 +314,13 @@ class RemoteRoomHandler extends utils.Executable {
 
         let defenders = this.getCreepCount(minds.available.defender) + this.getCreepCount(minds.available.rangedDefender);
 
-        if(!enemyCtrl || defenders < 2) {
+        let requiredDefenders = 1;
+
+        if(this.threat.getCombatCreeps().length > 0) {
+            requiredDefenders = 2;
+        }
+
+        if(!enemyCtrl || defenders < requiredDefenders) {
             if(this.threat.rangedPower() > 3) {
                 this.spawnMind(minds.available.rangedDefender);
             }

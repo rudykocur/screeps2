@@ -13,12 +13,12 @@ class ThreatAssesment {
         return _.sum(this.rangedCreeps, creep => creep.getActiveBodyparts(RANGED_ATTACK));
     }
 
-    getAggressiveCreeps() {
+    getCombatCreeps() {
         return this.combatCreeps;
     }
 
     getClosestEnemy(attacker) {
-        let targets = this.getAggressiveCreeps();
+        let targets = this.combatCreeps;
         if(targets.length === 0) {
             targets = this.enemies;
         }

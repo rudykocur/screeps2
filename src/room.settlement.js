@@ -12,8 +12,9 @@ class RoomSettlement extends base.RoomBase {
     }
 
     update() {
+        let claimers = this.getCreepCount(minds.available.claimer);
 
-        if(!this.room) {
+        if(!this.room && claimers === 0) {
             this.spawnAndGo();
         }
         else {
@@ -25,7 +26,7 @@ class RoomSettlement extends base.RoomBase {
             else {
                 this.room.createConstructionSite(this.flag.pos, STRUCTURE_SPAWN);
 
-                if(this.getCreepCount(minds.available.settler) < 2) {
+                if(this.getCreepCount(minds.available.settler) < 4) {
                     this.spawn(minds.available.settler);
                 }
 
@@ -38,12 +39,12 @@ class RoomSettlement extends base.RoomBase {
     }
 
     getSpawner() {
-        for(let mgr of this.managers) {
-            let spawn = mgr.spawner.getFreeSpawn();
+        let managers = _.sortBy(this.managers, mgr => Game.map.getRoomLinearDistance(mgr.roomName, this.roomName));
+        let mgr = _.first(managers);
+        let spawn = mgr.spawner.getFreeSpawn();
 
-            if(spawn) {
-                return mgr;
-            }
+        if(spawn) {
+            return mgr;
         }
     }
 
