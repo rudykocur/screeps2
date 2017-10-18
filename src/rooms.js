@@ -7,6 +7,16 @@ const roomTypes = {
     siege: require('room.siege').RoomSiege,
 };
 
+function safeCtor(callback) {
+    try {
+        callback();
+    }
+    catch(e) {
+        console.log('Constructor failed:', e, '.Stack trace:', e.stack);
+        Game.notify(`Constructor failed: ${e}. Stack trace: ${e.stack}`, 5);
+    }
+}
+
 
 module.exports = {
     getHandlers(jobBoard) {
@@ -20,17 +30,17 @@ module.exports = {
                 return;
             }
 
-            managers.push(new roomTypes.regular(room, jobBoard));
+            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard)));
         });
 
         let result = [].concat(managers);
 
         for(let flag of _.filter(Game.flags, flags.isRoomAttack)) {
-            result.push(new roomTypes.siege(flag.pos.roomName, flag, managers));
+            safeCtor(() => result.push(new roomTypes.siege(flag.pos.roomName, flag, managers)));
         }
 
         for(let flag of _.filter(Game.flags, flags.isClaim)) {
-            result.push(new roomTypes.settlement(flag.pos.roomName, flag, managers));
+            safeCtor(() => result.push(new roomTypes.settlement(flag.pos.roomName, flag, managers)));
         }
 
         return result;
