@@ -6,7 +6,12 @@ module.exports = {
      */
     isBlock(flag) {},
 
-    isMeetingPoint() {},
+    /**
+     * @param {Flag} flag
+     */
+    isMeetingPoint(flag) {
+        return flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_GREEN;
+    },
 
     /**
      * @param {Flag} flag

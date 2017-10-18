@@ -42,8 +42,8 @@ class RoomManager extends utils.Executable {
 
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
-        this.meetingPoint = Game.flags.IDLE;
         this.flags = _.filter(Game.flags, 'room', this.room);
+        this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
         this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {

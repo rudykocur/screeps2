@@ -30,13 +30,13 @@ class RoomPopulationMind extends utils.Executable {
 
         if(spawn) {
             if (this.manager.getCreepCount(minds.available.harvester) < 1) {
-                this.spawnHarvester(spawn);
+                this.spawnHarvester(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.transfer) < 2) {
-                this.spawnTransfer(spawn);
+                this.spawnTransfer(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.harvester) < 2) {
-                this.spawnHarvester(spawn);
+                this.spawnHarvester(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
@@ -57,6 +57,12 @@ class RoomPopulationMind extends utils.Executable {
                 this.spawnBuilder(spawn);
             }
         }
+
+        if(spawn && !spawn.spawning && spawn.blocking) {
+            let s = this.freeSpawns.pop();
+            s.room.visual.circle(s.pos, {fill: "red", opacity: 0.7, radius: 0.7})
+        }
+
     }
 
     getFreeSpawn() {
@@ -107,7 +113,7 @@ class RoomPopulationMind extends utils.Executable {
         }
     }
 
-    doSpawn(spawn, body, name, memo) {
+    doSpawn(spawn, body, name, memo, blocking) {
         name = this.manager.getCreepName(name);
 
         memo.roomName = spawn.room.name;
@@ -116,6 +122,8 @@ class RoomPopulationMind extends utils.Executable {
             memory: memo,
             energyStructures: this.energyStructures,
         });
+
+        spawn.blocking = blocking;
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
@@ -169,16 +177,16 @@ class RoomPopulationMind extends utils.Executable {
             return this.manager.storage.getStoredEnergy() > 40000;
         }
         else {
-            return this.manager.storage.getStoredEnergy() > 1700;
+            return this.manager.storage.getStoredEnergy() > 700;
         }
     }
 
-    spawnHarvester(spawn) {
+    spawnHarvester(spawn, blocking) {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
         if(this.manager.creeps.length < 1) {
             options.body = [MOVE, WORK, WORK];
         }
-        this.doSpawn(spawn, options.body, options.name, options.memo);
+        this.doSpawn(spawn, options.body, options.name, options.memo, blocking);
     }
 
     spawnMineralHarvester(spawn) {
@@ -186,12 +194,12 @@ class RoomPopulationMind extends utils.Executable {
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 
-    spawnTransfer(spawn) {
+    spawnTransfer(spawn, blocking) {
         let options = minds.available.transfer.getSpawnParams(this.manager);
         if(this.manager.creeps.length < 2) {
             options.body = [MOVE, MOVE, CARRY, CARRY];
         }
-        this.doSpawn(spawn, options.body, options.name, options.memo);
+        this.doSpawn(spawn, options.body, options.name, options.memo, blocking);
     }
     spawnUpgrader(spawn) {
         let options = minds.available.upgrader.getSpawnParams(this.manager);

@@ -24,6 +24,10 @@ class SettlerMind extends mind.CreepMindBase {
     }
 
     doRefill() {
+        if(!this.workRoom) {
+            return;
+        }
+
         let source = _.first(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
 
         if(_.sum(this.creep.carry) == this.creep.carryCapacity) {
@@ -41,11 +45,19 @@ class SettlerMind extends mind.CreepMindBase {
     doBuild() {
         let target;
 
+        if(!this.workRoom) {
+            return;
+        }
+
         if(this.workRoom.room.controller.ticksToDowngrade < 1000) {
             target = this.workRoom.room.controller;
         }
         else {
             target = _.first(this.workRoom.room.find(FIND_MY_CONSTRUCTION_SITES));
+        }
+
+        if(!target) {
+            target = this.workRoom.room.controller;
         }
 
         if(_.sum(this.creep.carry) === 0) {
