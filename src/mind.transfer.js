@@ -2,11 +2,6 @@ var _ = require('lodash');
 
 let mind = require('mind.common');
 let bb = require('utils.bodybuilder');
-// let jobs = require('job.board');
-
-const STATE_SEEK = 'seekEnergy';
-const STATE_TRANSPORT = 'move_energy';
-const STATE_IDLE = 'idle';
 
 class TransferMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
@@ -53,8 +48,12 @@ class TransferMind extends mind.CreepMindBase {
             }
 
             yield this.tryClaimJob(1, {
-                    type: 'refill-tower'
-                });
+                type: 'refill-tower'
+            });
+
+            yield this.tryClaimJob(1, {
+                type: 'controller-link'
+            });
         }
 
         let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);

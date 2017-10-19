@@ -2,6 +2,7 @@ var _ = require("lodash");
 const minds = require('mind');
 const utils = require('utils');
 const maps = require('maps');
+const wrappers = require('room.wrappers');
 
 let mind_scout = require('mind.scout');
 let mind_defender = require('mind.defender');
@@ -152,6 +153,7 @@ class RemoteRoomHandler extends utils.Executable {
 
         if(this.room) {
             this.room.manager = this;
+            this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
             this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
             this.sources = this.room.find(FIND_SOURCES);

@@ -5,7 +5,7 @@ const jobModules = {};
 
 [
     'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower',
-    'job.harvest', 'job.harvest-mineral', 'job.empty-containers',
+    'job.harvest', 'job.harvest-mineral', 'job.empty-containers', 'job.controller-link',
 ].forEach(modName => {
     let mod = require(modName);
     jobModules[mod.JOB_TYPE] = mod.getHandler();
@@ -133,7 +133,7 @@ class JobBoard {
     update(manager) {
 
         _.each(jobModules, mod => {
-            let jobs = mod.generateJobs(manager);
+            let jobs = mod.generateJobs(manager) || [];
 
             jobs.forEach(job => {
                 this.generatedJobs[job.id] = job.id;

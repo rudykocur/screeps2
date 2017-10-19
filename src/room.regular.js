@@ -33,10 +33,20 @@ class RoomManager extends utils.Executable {
 
         this.flags = _.filter(Game.flags, 'room', this.room);
 
+        this.structures = _.filter(Game.structures, 'room', this.room);
+        this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
+        this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
+        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
+        this.extractor = _.first(_.filter(this.structures, 'structureType', STRUCTURE_EXTRACTOR));
+        this.mineral = _.first(this.room.find(FIND_MINERALS));
+        this.sources = this.room.find(FIND_SOURCES);
+        this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
+        this.links = this.structures.filter(s => s.structureType == STRUCTURE_LINK);
+
         let storageFlag = _.first(this.flags.filter(flags.isStorage));
 
         if(this.room.storage) {
-            this.storage = new wrappers.StorageWrapper(this, this.room.storage);
+            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.links);
         }
         else if(storageFlag) {
             this.storage = new wrappers.FlagStorageWrapper(this, storageFlag);
@@ -44,9 +54,6 @@ class RoomManager extends utils.Executable {
         else {
             console.log('OMG NO LOGIC FOR STORAGE !!!');
         }
-
-        this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
-
 
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
@@ -69,16 +76,9 @@ class RoomManager extends utils.Executable {
         });
 
         this.terminal = this.room.terminal;
-        this.structures = _.filter(Game.structures, 'room', this.room);
-        this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
-        this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
-        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
-        this.extractor = _.first(_.filter(this.structures, 'structureType', STRUCTURE_EXTRACTOR));
-        this.mineral = _.first(this.room.find(FIND_MINERALS));
-        this.sources = this.room.find(FIND_SOURCES);
-        this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
 
         this.threat = new threat.ThreatAssesment(this.enemies);
+        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
 
         let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
@@ -164,6 +164,7 @@ class RoomManager extends utils.Executable {
         this.labs.run();
         this.remote.run();
         this.architect.run();
+        this.storage.run();
     }
 
     getExtensionsClusters() {

@@ -1,7 +1,10 @@
 var _ = require("lodash");
+const utils = require('utils');
 
-class FlagStorageWrapper {
+class FlagStorageWrapper extends utils.Executable {
     constructor(room, flag) {
+        super();
+
         this.room = room;
         this.target = flag;
         this.resource =  _.first(this.target.pos.lookFor(LOOK_RESOURCES));
@@ -31,15 +34,36 @@ class FlagStorageWrapper {
     }
 }
 
-class StorageWrapper {
+class StorageWrapper extends utils.Executable {
     /**
      *
-     * @param room
+     * @param manager
      * @param {StructureStorage} storage
      */
-    constructor(room, storage) {
-        this.room = room;
+    constructor(manager, storage, links) {
+        super();
+
+        this.manager = manager;
         this.target = storage;
+
+        this.link = _.first(this.target.pos.findInRange(links, 3));
+
+        _.defaults(manager.room.memory, {storageLinkReservation: 0});
+    }
+
+    update() {
+        if(this.manager.room.memory.storageLinkReservation >= Game.time) {
+            this.manager.room.memory.storageLinkReservation = 0;
+        }
+    }
+
+    reserveLink(duration) {
+        if(this.manager.room.memory.storageLinkReservation < Game.time) {
+            this.manager.room.memory.storageLinkReservation = Game.time + duration;
+            return true;
+        }
+
+        return false;
     }
 
     getStoredEnergy() {
@@ -89,7 +113,7 @@ class ExtensionCluster {
 }
 
 class ControllerWrapper {
-    constructor(manager, ctrl) {
+    constructor(manager, ctrl, links) {
         this.controller = ctrl;
         this.manager = manager;
 
@@ -111,6 +135,24 @@ class ControllerWrapper {
         }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
 
         this.points = _.sortBy(this.points, p => pos.getRangeTo(p)*-1);
+
+        this.link = _.first(pos.findInRange(links, 4));
+    }
+
+    getLinkEnergy() {
+        if(!this.link) {
+            return 0;
+        }
+
+        return this.link.energy;
+    }
+
+    getNeededEnergyInLink() {
+        if(!this.link) {
+            return 0;
+        }
+
+        return this.link.energyCapacity - this.link.energy;
     }
 
     getStandingPosition() {

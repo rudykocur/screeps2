@@ -60,6 +60,22 @@ class UpgraderMind extends mind.CreepMindBase {
             return;
         }
 
+        if(_.sum(this.creep.carry) === this.creep.carryCapacity) {
+            this.enterState(STATE_UPGRADE);
+            return;
+        }
+
+        if(this.workRoom.controller.getLinkEnergy() > 0) {
+            if(!this.creep.pos.isNearTo(this.workRoom.controller.link)) {
+                this.creep.mover.moveTo(this.workRoom.controller.link);
+            }
+            else {
+                this.creep.withdraw(this.workRoom.controller.link, RESOURCE_ENERGY);
+            }
+
+            return;
+        }
+
         if(this.roomMgr.storage.isNear(this.creep)) {
             this.roomMgr.storage.withdraw(this.creep);
             this.enterState(STATE_UPGRADE);
