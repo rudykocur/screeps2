@@ -58,6 +58,12 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
 
     unloadEnergy() {
         if(this.workRoom.storage.link.cooldown > 0) {
+            this.workRoom.room.visual.circle(this.workRoom.storage.link.pos, {
+                radius: 0.5,
+                stroke: "red",
+                strokeWidth: 0.3,
+                fill: "transparent",
+            });
             return;
         }
 
@@ -66,7 +72,6 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         let result = this.creep.transfer(this.workRoom.storage.link, RESOURCE_ENERGY, toTransfer);
 
         if(result === OK) {
-            console.log('Loaded', toTransfer, 'into link');
             this.fsm.enter(STATE.SEND);
         }
         else {
@@ -86,6 +91,9 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         else {
             if(result !== ERR_TIRED) {
                 console.log('energy send failed', result);
+            }
+            else {
+                this.workRoom.room.visual.circle(from.pos, {stroke: "red"});
             }
         }
     }

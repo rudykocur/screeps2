@@ -126,6 +126,14 @@ class SettlerMind extends mind.CreepMindBase {
             s => s.structureType === STRUCTURE_SPAWN && s.energy < s.energyCapacity));
 
         if(!target) {
+            target = this.creep.pos.findClosestByPath(
+                this.workRoom.room.find(FIND_STRUCTURES).filter(
+                    s => s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity
+                )
+            );
+        }
+
+        if(!target) {
             return false;
         }
 

@@ -44,7 +44,7 @@ class UpgraderMind extends mind.CreepMindBase {
     isEnoughStoredEnergy() {
         let reservedEnergy = 700;
         if(this.roomMgr.room.storage) {
-            reservedEnergy = 1000;
+            reservedEnergy = 2000;
         }
 
         if(this.roomMgr.room.controller.ticksToDowngrade < 1000) {
