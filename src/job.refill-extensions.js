@@ -29,12 +29,12 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(this.roomMgr.storage.isNear(this.creep)) {
-            this.roomMgr.storage.withdraw(this.creep);
+        if(this.workRoom.storage.isNear(this.creep)) {
+            this.workRoom.storage.withdraw(this.creep);
             this.fsm.enter(STATE_REFILL);
         }
         else {
-            this.creep.mover.moveTo(this.roomMgr.storage.target);
+            this.creep.mover.moveTo(this.workRoom.storage.target);
         }
     }
 

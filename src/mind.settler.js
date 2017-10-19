@@ -46,17 +46,22 @@ class SettlerMind extends mind.CreepMindBase {
             return;
         }
 
-        let source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
-
-        if(_.sum(this.creep.carry) == this.creep.carryCapacity) {
+        if(_.sum(this.creep.carry) === this.creep.carryCapacity) {
             this.enterState(STATE_BUILD);
         }
 
+        let source;
+        source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_DROPPED_RESOURCES));
+        if(!source) {
+            source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
+        }
+
         if(this.creep.pos.isNearTo(source)) {
+            this.creep.pickup(source);
             this.creep.harvest(source);
         }
         else {
-            this.creep.moveTo(source, {visualizePathStyle: {stroke: "green"}});
+            this.creep.moveTo(source, {visualizePathStyle: {stroke: "green", opacity: 0.4}});
         }
     }
 
@@ -67,34 +72,68 @@ class SettlerMind extends mind.CreepMindBase {
             return;
         }
 
-        if(this.workRoom.room.controller.ticksToDowngrade < 1000) {
-            target = this.workRoom.room.controller;
-        }
-        else {
-            target = _.first(this.workRoom.room.find(FIND_MY_CONSTRUCTION_SITES));
-        }
-
-        if(!target) {
-            target = this.workRoom.room.controller;
-        }
-
         if(_.sum(this.creep.carry) === 0) {
             this.enterState(STATE_REFILL);
             return;
         }
 
+        if(this.workRoom.room.controller.ticksToDowngrade < 1000) {
+            this.upgradeController();
+        }
+        else {
+            if(this.fillSpawn()) {
+                return;
+            }
+
+            if(this.constructSite()) {
+                return;
+            }
+
+            this.upgradeController();
+        }
+    }
+
+    upgradeController() {
+        let target = this.workRoom.room.controller;
+
         if(this.creep.pos.inRangeTo(target, 3)) {
-            if(target.structureType == STRUCTURE_CONTROLLER) {
-                this.creep.upgradeController(target);
-            }
-            else {
-                this.creep.build(target);
-            }
+            this.creep.upgradeController(target);
+        }
+        else {
+            this.creep.moveTo(target);
+        }
+    }
+
+    constructSite() {
+        let target = _.first(this.workRoom.room.find(FIND_MY_CONSTRUCTION_SITES));
+
+        if(!target) {
+            return false;
+        }
+
+        if(this.creep.pos.inRangeTo(target, 3)) {
+            this.creep.build(target);
         }
         else {
             this.creep.moveTo(target);
         }
 
+        return true;
+    }
+
+    fillSpawn() {
+        let target = _.first(this.workRoom.room.find(FIND_STRUCTURES).filter(
+            s => s.structureType === STRUCTURE_SPAWN && s.energy < s.energyCapacity));
+
+        if(!target) {
+            return false;
+        }
+
+        if(this.creep.transfer(target, RESOURCE_ENERGY) !== OK) {
+            this.creep.moveTo(target);
+        }
+
+        return true;
     }
 
     /**

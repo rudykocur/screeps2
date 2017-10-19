@@ -6,6 +6,7 @@ const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
 const room_architect = require('room.architect');
 const room_remote = require('room.remote');
 const room_labs = require('room.labs');
+const threat = require('combat.threat');
 
 const wrappers = require('room.wrappers');
 
@@ -30,11 +31,15 @@ class RoomManager extends utils.Executable {
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
+        this.flags = _.filter(Game.flags, 'room', this.room);
+
+        let storageFlag = _.first(this.flags.filter(flags.isStorage));
+
         if(this.room.storage) {
             this.storage = new wrappers.StorageWrapper(this, this.room.storage);
         }
-        else if(Game.flags.STORAGE) {
-            this.storage = new wrappers.FlagStorageWrapper(this, Game.flags.STORAGE);
+        else if(storageFlag) {
+            this.storage = new wrappers.FlagStorageWrapper(this, storageFlag);
         }
         else {
             console.log('OMG NO LOGIC FOR STORAGE !!!');
@@ -42,7 +47,7 @@ class RoomManager extends utils.Executable {
 
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
-        this.flags = _.filter(Game.flags, 'room', this.room);
+
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
@@ -72,6 +77,8 @@ class RoomManager extends utils.Executable {
         this.mineral = _.first(this.room.find(FIND_MINERALS));
         this.sources = this.room.find(FIND_SOURCES);
         this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
+
+        this.threat = new threat.ThreatAssesment(this.enemies);
 
         let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
@@ -142,9 +149,12 @@ class RoomManager extends utils.Executable {
             return spawn.hitsMax - spawn.hits;
         });
 
-        if((this.towers.length < 1 || damageToSpawns > 1000) && this.enemies.length > 0 && !this.room.controller.safeMode) {
-            console.log('Activating SAFE MODE!!!!');
-            Game.notify('ATTACK. SAFE MODE ACTIVATED');
+        if((this.towers.length < 1 || damageToSpawns > 1000)
+            && this.threat.getCombatCreeps().length > 0 && !this.room.controller.safeMode) {
+
+            console.log(this, 'Activating SAFE MODE!!!!');
+            Game.notify(this + ': ATTACK. SAFE MODE ACTIVATED. Creeps: ' + JSON.stringify(this.enemies));
+
             this.room.controller.activateSafeMode();
         }
 

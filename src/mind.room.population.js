@@ -29,7 +29,15 @@ class RoomPopulationMind extends utils.Executable {
         let spawn = this.getFreeSpawn();
 
         if(spawn) {
-            if (this.manager.getCreepCount(minds.available.harvester) < 1) {
+            if(this.manager.room.controller.level === 1) {
+                if(this.manager.getCreepCount(minds.available.settler) < 4) {
+                    this.spawnSettler(spawn);
+                }
+            }
+            else if(this.manager.room.controller.level === 2 && this.manager.creeps.length < 3) {
+                this.spawnSettler(spawn);
+            }
+            else if (this.manager.getCreepCount(minds.available.harvester) < 1) {
                 this.spawnHarvester(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.transfer) < 2) {
@@ -123,7 +131,7 @@ class RoomPopulationMind extends utils.Executable {
             energyStructures: this.energyStructures,
         });
 
-        spawn.blocking = blocking;
+        spawn.blocking = !!blocking;
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
@@ -213,6 +221,11 @@ class RoomPopulationMind extends utils.Executable {
 
     spawnBuilder(spawn) {
         let options = minds.available.builder.getSpawnParams(this.manager);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
+    spawnSettler(spawn) {
+        let options = minds.available.settler.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 }

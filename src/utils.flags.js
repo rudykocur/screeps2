@@ -4,7 +4,9 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
-    isBlock(flag) {},
+    isStorage(flag) {
+        return flag.color === COLOR_BLUE && flag.secondaryColor === COLOR_BLUE;
+    },
 
     /**
      * @param {Flag} flag

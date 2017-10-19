@@ -109,6 +109,8 @@ class ControllerWrapper {
 
             return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
         }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
+
+        this.points = _.sortBy(this.points, p => pos.getRangeTo(p)*-1);
     }
 
     getStandingPosition() {

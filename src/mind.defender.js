@@ -33,7 +33,7 @@ class DefenderMind extends mind.CreepMindBase {
             this.creep.mover.moveTo(room.controller.pos);
         }
         else {
-            if(this.workRoom.enemies.length > 0 || this.workRoom.hostileStructures.length > 0) {
+            if(this.getTarget()) {
                 this.enterState(STATE.ATTACK);
             }
 
@@ -55,28 +55,23 @@ class DefenderMind extends mind.CreepMindBase {
         }
     }
 
+    getTarget() {
+        let target = this.workRoom.threat.getClosestEnemy(this.creep);
+
+        if(!target) {
+            target = _.first(this.workRoom.room.find(FIND_HOSTILE_STRUCTURES).filter(s => s.structureType !== STRUCTURE_CONTROLLER));
+        }
+
+        return target;
+    }
+
     pickTarget() {
-        let target = _.first(this.workRoom.enemies);
-
-        if(!target) {
-            target = _.first(this.workRoom.hostileStructures);
-        }
-
-        if(!target) {
-            this.enterState(STATE.IDLE);
-        }
-
-        this.localState.targetId = target.id;
     }
 
     attackTarget() {
         this.debug = true;
 
-        let target = this.creep.pos.findClosestByRange(this.workRoom.enemies);
-
-        if(!target) {
-            target = _.first(this.workRoom.hostileStructures);
-        }
+        let target = this.getTarget();
 
         if(!target) {
             this.enterState(STATE.IDLE);
