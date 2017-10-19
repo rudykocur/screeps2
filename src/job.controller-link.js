@@ -81,6 +81,10 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
+        if(!manager.storage.link) {
+            return [];
+        }
+
         let needed = manager.controller.getNeededEnergyInLink();
         if(needed > 50) {
             return [new ControllerLinkJobDTO(manager)];
