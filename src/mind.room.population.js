@@ -21,7 +21,6 @@ class RoomPopulationMind extends utils.Executable {
             this.energyStructures.push.apply(this.energyStructures, cluster.extensions);
         });
 
-
         this.energyStructures.push.apply(this.energyStructures, this.manager.spawns);
     }
 
@@ -29,12 +28,7 @@ class RoomPopulationMind extends utils.Executable {
         let spawn = this.getFreeSpawn();
 
         if(spawn) {
-            if(this.manager.room.controller.level === 1) {
-                if(this.manager.getCreepCount(minds.available.settler) < 4) {
-                    this.spawnSettler(spawn);
-                }
-            }
-            else if(this.manager.room.controller.level === 2 && this.manager.creeps.length < 3) {
+            if(this.needSettler()) {
                 this.spawnSettler(spawn);
             }
             else if (this.manager.getCreepCount(minds.available.harvester) < 1) {
@@ -191,6 +185,20 @@ class RoomPopulationMind extends utils.Executable {
         else {
             return this.manager.storage.getStoredEnergy() > 1000;
         }
+    }
+
+    needSettler() {
+        if(this.manager.room.controller.level > 2) {
+            return false;
+        }
+
+        let requiredSettlers = 4;
+
+        if(this.manager.room.controller.level === 2) {
+            requiredSettlers = 2;
+        }
+
+        return this.manager.getCreepCount(minds.available.settler) < requiredSettlers;
     }
 
     spawnHarvester(spawn, blocking) {
