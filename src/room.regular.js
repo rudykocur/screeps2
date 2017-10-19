@@ -122,6 +122,10 @@ class RoomManager extends utils.Executable {
         return this.mindsByType[type.name];
     }
 
+    getEnergyToTransfer() {
+        return _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+    }
+
     getFreeEnergySource() {
         let usedSources = this.getMinds(minds.available.harvester).map(mind => {
             return mind.getHarvestTarget();

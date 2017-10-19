@@ -27,9 +27,9 @@ class RoomArchitect extends utils.Executable {
             utils.throttle(15, () => this.buildTowers(this.manager.room))();
         }
 
-        // if(availableStorages > 0 && !this.manager.room.storage) {
-        //     utils.throttle(25, () => this.buildStorage(this.manager.room))();
-        // }
+        if(availableStorages > 0 && !this.manager.room.storage) {
+            utils.throttle(25, () => this.buildStorage(this.manager.room))();
+        }
 
         if(this.manager.room.controller.level > 2) {
             utils.throttle(1000, () => this.planRoads())();
@@ -80,13 +80,11 @@ class RoomArchitect extends utils.Executable {
 
     buildStorage(room) {
         let pos = this.manager.storage.target.pos;
+        let around = utils.getPositionsAround(pos);
 
-        room.createConstructionSite(pos, STRUCTURE_STORAGE);
-        room.visual.circle(pos, {
-            fill: "red",
-            opacity: 0.8,
-            radius: 1,
-        });
+        for(let p of around) {
+            room.createConstructionSite(p, STRUCTURE_STORAGE);
+        }
     }
 
     planRoads() {

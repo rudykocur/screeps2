@@ -25,6 +25,13 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
+    isLink(flag) {
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_BROWN;
+    },
+
+    /**
+     * @param {Flag} flag
+     */
     isTower(flag) {
         return flag.color === COLOR_RED && flag.secondaryColor === COLOR_YELLOW;
     },

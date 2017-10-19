@@ -5,6 +5,7 @@ const JOB_TYPE = 'controller-link';
 
 const STATE = {
     LOAD: 'load',
+    RESERVE: 'reserve',
     UNLOAD: 'unload',
     SEND: 'send'
 };
@@ -18,6 +19,9 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
             [STATE.LOAD]: {
                 onTick: this.getEnergy.bind(this)
             },
+            [STATE.RESERVE]: {
+                onTick: this.reserveLink.bind(this)
+            },
             [STATE.UNLOAD]: {
                 onTick: this.unloadEnergy.bind(this)
             },
@@ -30,33 +34,43 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
     getEnergy() {
         if(this.roomMgr.storage.isNear(this.creep)) {
             this.roomMgr.storage.withdraw(this.creep);
-            this.fsm.enter(STATE.UNLOAD);
+            this.fsm.enter(STATE.RESERVE);
         }
         else {
             this.creep.mover.moveTo(this.roomMgr.storage.target);
         }
     }
 
-    unloadEnergy() {
+    reserveLink() {
         if(this.creep.pos.isNearTo(this.workRoom.storage.link)) {
+            this.creep.mover.enterStationary();
+
             let cooldown = this.workRoom.storage.link.cooldown;
 
             if(this.workRoom.storage.reserveLink(cooldown + 2)) {
-
-                let needed = this.workRoom.controller.getNeededEnergyInLink();
-                let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY]);
-                let result = this.creep.transfer(this.workRoom.storage.link, RESOURCE_ENERGY, toTransfer);
-
-                if(result === OK) {
-                    this.fsm.enter(STATE.SEND);
-                }
-                else {
-                    console.log('energy transfer failed', result);
-                }
+                this.fsm.enter(STATE.UNLOAD);
             }
         }
         else {
             this.creep.mover.moveTo(this.workRoom.storage.link);
+        }
+    }
+
+    unloadEnergy() {
+        if(this.workRoom.storage.link.cooldown > 0) {
+            return;
+        }
+
+        let needed = this.workRoom.controller.getNeededEnergyInLink();
+        let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY]);
+        let result = this.creep.transfer(this.workRoom.storage.link, RESOURCE_ENERGY, toTransfer);
+
+        if(result === OK) {
+            console.log('Loaded', toTransfer, 'into link');
+            this.fsm.enter(STATE.SEND);
+        }
+        else {
+            console.log('energy transfer failed', result);
         }
     }
 
@@ -81,14 +95,16 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        if(!manager.storage.link) {
+        if(!manager.storage || !manager.storage.link) {
             return [];
         }
 
         let needed = manager.controller.getNeededEnergyInLink();
-        if(needed > 50) {
+        if(needed > 200) {
             return [new ControllerLinkJobDTO(manager)];
         }
+
+        return [];
     }
 }
 
