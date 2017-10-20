@@ -40,11 +40,14 @@ class RoomSettlement extends base.RoomBase {
 
     getSpawner() {
         let managers = _.sortBy(this.managers, mgr => Game.map.getRoomLinearDistance(mgr.roomName, this.roomName));
-        let mgr = _.first(managers);
-        let spawn = mgr.spawner.getFreeSpawn();
+        managers = managers.filter(m => m.room.controller.level > 3);
 
-        if(spawn) {
-            return mgr;
+        for(let mgr of managers) {
+            let spawn = mgr.spawner.getFreeSpawn();
+
+            if (spawn) {
+                return mgr;
+            }
         }
     }
 

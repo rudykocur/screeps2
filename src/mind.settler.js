@@ -35,7 +35,6 @@ class SettlerMind extends mind.CreepMindBase {
         this.creep.mover.moveByPath(() => {
             let cache = maps.getRoomCache(this.creep.memory.roomName);
             let cacheCtrl = cache.controller;
-            maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
 
             return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
         });
@@ -51,7 +50,13 @@ class SettlerMind extends mind.CreepMindBase {
         }
 
         let source;
-        source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_DROPPED_RESOURCES));
+        if(this.work.room.storage && this.workRoom.room.storage.store[RESOURCE_ENERGY] > 0) {
+            source = this.workRoom.room.storage;
+        }
+
+        if(!source) {
+            source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_DROPPED_RESOURCES));
+        }
         if(!source) {
             source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_SOURCES_ACTIVE));
         }
@@ -59,6 +64,7 @@ class SettlerMind extends mind.CreepMindBase {
         if(this.creep.pos.isNearTo(source)) {
             this.creep.pickup(source);
             this.creep.harvest(source);
+            this.creep.withdraw(source, RESOURCE_ENERGY);
         }
         else {
             this.creep.moveTo(source, {visualizePathStyle: {stroke: "green", opacity: 0.4}});
