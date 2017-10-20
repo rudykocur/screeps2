@@ -28,6 +28,10 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     doCheckStatus() {
+        if(!this.workRoom) {
+            return;
+        }
+
         if(_.sum(this.creep.carry) > 0) {
 
             if(this.workRoom.constructionSites.length > 0) {

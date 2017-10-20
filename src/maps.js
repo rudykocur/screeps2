@@ -108,15 +108,17 @@ module.exports = {
             costs = new PathFinder.CostMatrix;
         }
 
-        room.find(FIND_STRUCTURES).forEach(function(struct) {
-          if (struct.structureType === STRUCTURE_ROAD) {
-            // Favor roads over plain tiles
-            costs.set(struct.pos.x, struct.pos.y, 1);
-          } else if (OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType) >= 0) {
-            // Can't walk through non-walkable buildings
-            costs.set(struct.pos.x, struct.pos.y, 0xff);
-          }
-        });
+        if(room) {
+            room.find(FIND_STRUCTURES).forEach(function (struct) {
+                if (struct.structureType === STRUCTURE_ROAD) {
+                    // Favor roads over plain tiles
+                    costs.set(struct.pos.x, struct.pos.y, 1);
+                } else if (OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType) >= 0) {
+                    // Can't walk through non-walkable buildings
+                    costs.set(struct.pos.x, struct.pos.y, 0xff);
+                }
+            });
+        }
 
         return costs;
     },

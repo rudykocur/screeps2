@@ -74,4 +74,5 @@ module.exports.loop = function () {
         spawn.room.visual.text(usage+'%', spawn.pos.x, spawn.pos.y+0.5, {color: 'red', stroke: 'white'});
     });
 
+    // utils.debugFun2(maps, utils);
 };
