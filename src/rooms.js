@@ -7,12 +7,12 @@ const roomTypes = {
     siege: require('room.siege').RoomSiege,
 };
 
-function safeCtor(callback) {
+function safeCtor(callback, room) {
     try {
         callback();
     }
     catch(e) {
-        console.log('Constructor failed:', e, '.Stack trace:', e.stack);
+        console.log('Constructor failed:', room, '::', e, '.Stack trace:', e.stack);
         Game.notify(`Constructor failed: ${e}. Stack trace: ${e.stack}`, 5);
     }
 }
@@ -30,7 +30,7 @@ module.exports = {
                 return;
             }
 
-            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard)));
+            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard)), room);
         });
 
         let result = [].concat(managers);

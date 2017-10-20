@@ -33,7 +33,7 @@ module.exports = {
      * @param {Flag} flag
      */
     isTower(flag) {
-        return flag.color === COLOR_RED && flag.secondaryColor === COLOR_YELLOW;
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_RED;
     },
 
     /**
