@@ -50,7 +50,7 @@ class SettlerMind extends mind.CreepMindBase {
         }
 
         let source;
-        if(this.work.room.storage && this.workRoom.room.storage.store[RESOURCE_ENERGY] > 0) {
+        if(this.workRoom.room.storage && this.workRoom.room.storage.store[RESOURCE_ENERGY] > 0) {
             source = this.workRoom.room.storage;
         }
 
