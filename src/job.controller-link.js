@@ -68,10 +68,11 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         }
 
         let needed = this.workRoom.controller.getNeededEnergyInLink();
-        let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY]);
+        let has = this.workRoom.storage.link.energy;
+        let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY]) - has;
         let result = this.creep.transfer(this.workRoom.storage.link, RESOURCE_ENERGY, toTransfer);
 
-        if(result === OK) {
+        if(result === OK || toTransfer === 0) {
             this.fsm.enter(STATE.SEND);
         }
         else {

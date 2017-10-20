@@ -49,7 +49,7 @@ class RoomPopulationMind extends utils.Executable {
             else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 1) {
                 this.spawnBuilder(spawn);
             }
-            else if(this.manager.getEnergyToTransfer() > 1300 && this.getSpawnCooldown('transfer') > 200) {
+            else if(this.manager.getAvgEnergyToPickup() > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
             else if(this.needUpgrader()) {

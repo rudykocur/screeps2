@@ -33,10 +33,11 @@ class RoomManager extends utils.Executable {
 
         this.flags = _.filter(Game.flags, 'room', this.room);
 
-        this.structures = _.filter(Game.structures, 'room', this.room);
+        this.structures = this.room.find(FIND_MY_STRUCTURES);
+
         this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
         this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
-        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
+        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType === STRUCTURE_CONTAINER);
         this.extractor = _.first(_.filter(this.structures, 'structureType', STRUCTURE_EXTRACTOR));
         this.mineral = _.first(this.room.find(FIND_MINERALS));
         this.sources = this.room.find(FIND_SOURCES);
@@ -104,6 +105,8 @@ class RoomManager extends utils.Executable {
         if(!this.room.memory.counter) {
             this.room.memory.counter = 0;
         }
+
+        _.defaultsDeep(this.room.memory, {stats: {avgEnergy: []}});
     }
 
     getCreepName(name) {
@@ -122,8 +125,8 @@ class RoomManager extends utils.Executable {
         return this.mindsByType[type.name];
     }
 
-    getEnergyToTransfer() {
-        return _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+    getAvgEnergyToPickup() {
+        return _.sum(this.room.memory.stats.avgEnergy) / this.room.memory.stats.avgEnergy.length;
     }
 
     getFreeEnergySource() {
@@ -169,6 +172,14 @@ class RoomManager extends utils.Executable {
         this.remote.run();
         this.architect.run();
         this.storage.run();
+
+        let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+        let avg = this.room.memory.stats.avgEnergy;
+        avg.unshift(toPickup);
+
+        if(avg.length > 10) {
+            avg.pop();
+        }
     }
 
     getExtensionsClusters() {

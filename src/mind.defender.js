@@ -73,6 +73,11 @@ class DefenderMind extends mind.CreepMindBase {
     attackTarget() {
         this.debug = true;
 
+        if(!this.workRoom) {
+            this.enterState(STATE.IDLE);
+            return;
+        }
+
         let target = this.getTarget();
 
         if(!target) {

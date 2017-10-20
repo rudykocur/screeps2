@@ -164,6 +164,8 @@ class RemoteRoomHandler extends utils.Executable {
 
                 return true;
             });
+
+            this.sources = this.room.find(FIND_SOURCES);
             this.spawns = [];
             this.extensions = [];
             this.extensionsClusters = [];
@@ -247,16 +249,12 @@ class RemoteRoomHandler extends utils.Executable {
         // }
 
         if(this.room) {
-            if (!this.memory.remoteStructures) {
-                this.memory.remoteStructures = this.findRemoteStructures(this.room);
-            }
-
             if (this.enemies.length === 0) {
                 this.trySpawnClaimer();
             }
 
             if(this.canSpawnWorkers()) {
-                if (this.getCreepCount(minds.available.harvester) < 2) {
+                if (this.getCreepCount(minds.available.harvester) < this.sources.length) {
                     this.spawnMind(minds.available.harvester);
                 }
                 else if (this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
@@ -361,20 +359,6 @@ class RemoteRoomHandler extends utils.Executable {
             }
         }
     }
-
-    findRemoteStructures(room) {
-        return {
-            controller: {
-                id: room.controller.id,
-                pos: room.controller.pos
-            },
-            sources: _.map(room.find(FIND_SOURCES), src => {
-                return {pos: src.pos, id: src.id}
-            })
-        }
-    }
-
-
 
     toString() {
         return '[Remote handler for ' + (this.room || this.roomName) + ']';

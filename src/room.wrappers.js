@@ -46,6 +46,10 @@ class StorageWrapper extends utils.Executable {
         this.manager = manager;
         this.target = storage;
 
+        if(!this.target) {
+            console.log('OMG NO STORAGE ????????????', this.target);
+        }
+
         this.link = _.first(this.target.pos.findInRange(links, 3));
 
         _.defaults(manager.room.memory, {storageLinkReservation: 0});

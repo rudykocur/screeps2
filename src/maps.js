@@ -21,7 +21,7 @@ function getCacheForRoom(roomName) {
 }
 
 function hasCacheForRoom(roomName) {
-    return !!_.get(Memory, ['cache', 'rooms', roomName])
+    return !!_.get(Memory, ['cache', 'rooms', roomName]);
 }
 
 /**
@@ -94,6 +94,10 @@ class CachedRoom {
 
 module.exports = {
     getRoomCache(roomName) {
+        if(!hasCacheForRoom(roomName)) {
+            return null;
+        }
+
         return new CachedRoom(roomName);
     },
 
@@ -118,6 +122,10 @@ module.exports = {
     },
 
     blockHostileRooms(roomName, costMatrix) {
+        if(!hasCacheForRoom(roomName)) {
+            return costMatrix;
+        }
+
         let myUser = utils.myUsername();
 
         let cachedRoom = module.exports.getRoomCache(roomName);
