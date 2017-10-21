@@ -18,6 +18,8 @@ class RoomManager extends utils.Executable {
     constructor(room, jobManager) {
         super();
 
+        this.timer.start();
+
         this.room = room;
         this.roomName = room.name;
         room.manager = this;
@@ -92,9 +94,11 @@ class RoomManager extends utils.Executable {
         this.extensionsClusters = this.getExtensionsClusters();
 
         this.architect = new room_architect.RoomArchitect(this);
-        this.remote = new room_remote.RemoteRoomsManager(this);
         this.spawner = new RoomPopulationMind(this);
         this.labs  = new room_labs.LabManager(this);
+        this.timer.stop();
+
+        this.remote = new room_remote.RemoteRoomsManager(this);
     }
 
     initMemory() {
@@ -152,34 +156,45 @@ class RoomManager extends utils.Executable {
     }
 
     update() {
-        let damageToSpawns = _.sum(this.spawns, /**StructureSpawn*/spawn => {
-            return spawn.hitsMax - spawn.hits;
+        this.timer.count(()=> {
+
+            let damageToSpawns = _.sum(this.spawns, /**StructureSpawn*/spawn => {
+                return spawn.hitsMax - spawn.hits;
+            });
+
+            if ((this.towers.length < 1 || damageToSpawns > 1000)
+                && this.threat.getCombatCreeps().length > 0 && !this.room.controller.safeMode) {
+
+                this.room.controller.activateSafeMode();
+
+                console.log(this, 'Activating SAFE MODE!!!!');
+                Game.notify(this + ': ATTACK. SAFE MODE ACTIVATED. Creeps: ' + JSON.stringify(this.enemies));
+
+
+            }
+
         });
-
-        if((this.towers.length < 1 || damageToSpawns > 1000)
-            && this.threat.getCombatCreeps().length > 0 && !this.room.controller.safeMode) {
-
-            console.log(this, 'Activating SAFE MODE!!!!');
-            Game.notify(this + ': ATTACK. SAFE MODE ACTIVATED. Creeps: ' + JSON.stringify(this.enemies));
-
-            this.room.controller.activateSafeMode();
-        }
-
         this.jobManager.update(this);
 
-        this.spawner.run();
-        this.labs.run();
+        this.timer.count(()=> {
+            this.spawner.run();
+            this.labs.run();
+        });
+
         this.remote.run();
-        this.architect.run();
-        this.storage.run();
 
-        let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
-        let avg = this.room.memory.stats.avgEnergy;
-        avg.unshift(toPickup);
+        this.timer.count(()=> {
+            this.architect.run();
+            this.storage.run();
 
-        if(avg.length > 10) {
-            avg.pop();
-        }
+            let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+            let avg = this.room.memory.stats.avgEnergy;
+            avg.unshift(toPickup);
+
+            if(avg.length > 10) {
+                avg.pop();
+            }
+        });
     }
 
     getExtensionsClusters() {

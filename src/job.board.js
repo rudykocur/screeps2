@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+const utils = require('utils');
+
 // const minds = require('mind');
 const jobModules = {};
 
@@ -18,6 +20,8 @@ const jobTypes = {
 
 class JobBoard {
     constructor() {
+        this.updateTimer = new utils.Timer();
+
         if(!Memory.jobBoard) {
             Memory.jobBoard = {};
         }
@@ -131,6 +135,7 @@ class JobBoard {
      * @param {RoomManager} manager
      */
     update(manager) {
+        this.updateTimer.start();
 
         _.each(jobModules, mod => {
             let jobs = mod.generateJobs(manager) || [];
@@ -155,6 +160,8 @@ class JobBoard {
             });
 
         });
+
+        this.updateTimer.stop();
     }
 
     handleDeadCreep(name, memo) {
@@ -167,6 +174,8 @@ class JobBoard {
     }
 
     cleanup() {
+        this.updateTimer.start();
+
         let toDelete = [];
 
         _.each(this.memory, jobData => {
@@ -192,6 +201,8 @@ class JobBoard {
             });
             // console.log('Deleted', toDelete.length, 'jobs:', toDelete);
         }
+
+        this.updateTimer.stop();
     }
 }
 

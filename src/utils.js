@@ -1,16 +1,60 @@
 var _ = require("lodash");
 
+class Timer {
+    constructor() {
+        this.usedTime = 0;
+        this.usedTimeStart = 0;
+    }
+
+    start() {
+        this.usedTimeStart = Game.cpu.getUsed();
+    }
+
+    count(callback) {
+        this.start();
+        callback();
+        this.stop();
+    }
+
+    stop() {
+        this.usedTime += Game.cpu.getUsed() - this.usedTimeStart;
+    }
+}
+
+class CompoundTimer {
+    constructor(timers) {
+        this.timers = timers;
+    }
+
+    get usedTime() {
+        return _.sum(this.timers, t => t.usedTime);
+    }
+}
+
 class Executable {
+    constructor() {
+        this.updateTime = null;
+        this.timer = new Timer();
+    }
+
     update() {}
 
     run() {
         try{
+            let tStart = Game.cpu.getUsed();
             this.update();
+            this.updateTime = Game.cpu.getUsed() - tStart;
         }
         catch(e) {
             console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
             Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 5);
         }
+    }
+
+    err(...messages) {
+        messages.unshift('[ERROR] '+this+': ');
+
+        console.log.apply(console, messages);
     }
 }
 
@@ -72,7 +116,7 @@ function costMatrixForHealer(healPower, maps, roomName) {
 }
 
 module.exports = {
-    Executable,
+    Executable, Timer, CompoundTimer,
 
     throttle(ticks, callback) {
         return () => {

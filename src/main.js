@@ -5,6 +5,7 @@ let flags = require('utils.flags');
 const job_board = require('job.board');
 const proto = require('prototypes');
 const maps = require('maps');
+const stats = require('utis.stats');
 
 proto.installPrototypes();
 
@@ -16,6 +17,8 @@ module.exports.loop = function () {
     if(!Memory.counters) {
         Memory.counters = {squad: 1};
     }
+
+    let initTime = Game.cpu.getUsed();
 
     let jobBoard = new job_board.JobBoard();
 
@@ -62,17 +65,7 @@ module.exports.loop = function () {
         }
     }
 
-    _.defaultsDeep(Memory, {stats: {spawns: {}}});
-    _.each(Game.spawns, (spawn, name) => {
-        let list = Memory.stats.spawns[name] = Memory.stats.spawns[name] || [];
-
-        list.unshift(!!spawn.spawning);
-
-        if(list.length > 1000) {list.pop();}
-
-        let usage = Math.round(_.filter(list).length / list.length * 100);
-        spawn.room.visual.text(usage+'%', spawn.pos.x, spawn.pos.y+0.5, {color: 'red', stroke: 'white'});
-    });
+    stats.countStats(initTime, managers, jobBoard);
 
     // utils.debugFun2(maps, utils);
 };

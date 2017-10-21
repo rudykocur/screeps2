@@ -52,8 +52,12 @@ class RoomArchitect extends utils.Executable {
                 pos => cluster.center.getRangeTo(pos.x, pos.y) === 1
             ));
 
+            if(!pointInPath) {
+                this.err('NO POINT IN PATH', pointInPath, '::', this.manager.storage, '::', this.manager.storage.target);
+            }
+
             for(let point of utils.getPositionsAround(cluster.center)) {
-                if(point.isEqualTo(pointInPath.x, pointInPath.y)) {
+                if(pointInPath && point.isEqualTo(pointInPath.x, pointInPath.y)) {
                     continue;
                 }
 
@@ -156,6 +160,12 @@ class RoomArchitect extends utils.Executable {
             }
 
             let room = Game.rooms[step.roomName];
+
+            if(!room) {
+                this.err('Cannot place road in room', step.roomName);
+                continue;
+            }
+
             let visual = new RoomVisual(step.roomName);
             visual.circle(step, {
                 fill: "red",

@@ -15,6 +15,8 @@ class CreepMindBase extends utils.Executable {
         this.roomMgr = roomManager;
         this.room = this.roomMgr.room;
         this.creep = creep;
+        creep.mind = this;
+
         this.localState = this.creep.memory.localState;
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;

@@ -26,15 +26,11 @@ class RemoteRoomsManager extends utils.Executable {
 
         this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
 
-        this.handlers = this.getHandlers();
+        this.handlers = (this.memory.roomNames || []).map(name => new RemoteRoomHandler(name, this.manager));
     }
 
     get memory(){
         return this.manager.room.memory.remoteRooms;
-    }
-
-    getHandlers() {
-        return (this.memory.roomNames || []).map(name => new RemoteRoomHandler(name, this.manager));
     }
 
     update() {
@@ -120,6 +116,7 @@ class RemoteRoomHandler extends utils.Executable {
      */
     constructor(roomName, parentManager) {
         super();
+        this.timer.start();
 
         this.roomName = roomName;
         this.parent = parentManager;
@@ -194,6 +191,8 @@ class RemoteRoomHandler extends utils.Executable {
                 delete this.memory[name];
             }
         }
+
+        this.timer.stop();
     }
 
     get memory() {
@@ -217,6 +216,8 @@ class RemoteRoomHandler extends utils.Executable {
     }
 
     prioritySpawn() {
+        this.timer.start();
+
         if(!this.room) {
             if(!this.memory.scoutName) {
                 let name = this.spawnMind(mind_scout.ScoutMind);
@@ -231,6 +232,8 @@ class RemoteRoomHandler extends utils.Executable {
                 this.trySpawnDefender();
             }
         }
+
+        this.timer.stop();
     }
 
     update() {
@@ -248,7 +251,10 @@ class RemoteRoomHandler extends utils.Executable {
         //     console.log('New squad added', newSquad);
         // }
 
+
         if(this.room) {
+            this.timer.start();
+
             if (this.enemies.length === 0) {
                 this.trySpawnClaimer();
             }
@@ -269,6 +275,7 @@ class RemoteRoomHandler extends utils.Executable {
                     this.spawnMind(minds.available.transfer);
                 }
             }
+            this.timer.stop();
 
             this.jobManager.update(this);
         }

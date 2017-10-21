@@ -49,6 +49,10 @@ class JobHandlerBase {
             this.fsm.run();
         }
     }
+
+    toString() {
+        return `[${this.constructor.name} for ${this.creep}]`;
+    }
 }
 
 class JobDTO {
