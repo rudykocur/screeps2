@@ -39,10 +39,10 @@ class Executable {
 
     update() {}
 
-    run() {
+    run(...args) {
         try{
             let tStart = Game.cpu.getUsed();
-            this.update();
+            this.update(...args);
             this.updateTime = Game.cpu.getUsed() - tStart;
         }
         catch(e) {
@@ -52,7 +52,13 @@ class Executable {
     }
 
     err(...messages) {
-        messages.unshift('[ERROR] '+this+': ');
+        messages.unshift(`<span style="color:lightcoral; font-weight: bold;">[ERROR] ${this}</span>`);
+
+        console.log.apply(console, messages);
+    }
+
+    info(...messages) {
+        messages.unshift(`<span style="color:springgreen; font-weight: bold;">[INFO] ${this}</span>`);
 
         console.log.apply(console, messages);
     }

@@ -18,8 +18,10 @@ const jobTypes = {
     JOB_EXTENSIONS: require('job.refill-extensions').JOB_TYPE,
 };
 
-class JobBoard {
+class JobBoard extends utils.Executable {
     constructor() {
+        super();
+
         this.updateTimer = new utils.Timer();
 
         if(!Memory.jobBoard) {
@@ -166,7 +168,7 @@ class JobBoard {
 
     handleDeadCreep(name, memo) {
         if(memo.jobId) {
-            console.log('!!!!! Cleaned claim for dead creep', name, '::', memo.jobId);
+            this.info('Cleaned claim for dead creep', name, '::', memo.jobId);
 
             delete this.memory[memo.jobId].claims[name];
             delete this.memory[memo.jobId].takenBy[name];
@@ -203,6 +205,10 @@ class JobBoard {
         }
 
         this.updateTimer.stop();
+    }
+
+    toString() {
+        return '[JobBoard]';
     }
 }
 

@@ -57,7 +57,7 @@ class RoomArchitect extends utils.Executable {
             }
 
             for(let point of utils.getPositionsAround(cluster.center)) {
-                if(pointInPath && point.isEqualTo(pointInPath.x, pointInPath.y)) {
+                if(point.isEqualTo(pointInPath.x, pointInPath.y)) {
                     continue;
                 }
 

@@ -109,7 +109,7 @@ class RoomPopulationMind extends utils.Executable {
 
             this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + options.memo.mind] = Game.time;
 
-            console.log(`Spawned for room ${targetRoom.roomName} new creep ${name} with body: ${options.body}`);
+            this.printSummarisedSpawn(targetRoom.roomName, name, options.body);
 
             return name;
         }
@@ -138,8 +138,16 @@ class RoomPopulationMind extends utils.Executable {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
             this.room.memory.lastSpawnTick[memo.mind] = Game.time;
-            console.log(`Spawned for room ${spawn.room.name} new creep ${name} with body: ${body}`);
+            this.printSummarisedSpawn(memo.roomName, name, body);
         }
+    }
+
+    printSummarisedSpawn(targetRoom, name, body) {
+        let bodyCounts = _.countBy(body);
+        let bodyStr = _.map(bodyCounts, (count, key) => `${key}=${count}`).join(',');
+        let cost = _.sum(body, b => BODYPART_COST[b]);
+
+        this.info('Creep', name, 'created. Target room:', targetRoom, 'cost:', cost, 'parts:', bodyStr);
     }
 
     getSpawnCooldown(mindType) {
@@ -235,6 +243,10 @@ class RoomPopulationMind extends utils.Executable {
     spawnSettler(spawn) {
         let options = minds.available.settler.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
+    toString() {
+        return `[Spawner ${this.manager.roomName}]`;
     }
 }
 

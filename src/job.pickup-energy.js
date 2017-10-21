@@ -51,7 +51,10 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
             storage = this.roomMgr.storage;
         }
 
-        this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
+        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
+        if(struct && struct.hits < struct.hitsMax) {
+            this.creep.repair();
+        }
 
         if(!storage.canDeposit(this.creep)) {
             this.creep.mover.moveTo(storage.target);

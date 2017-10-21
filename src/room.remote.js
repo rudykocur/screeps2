@@ -277,7 +277,7 @@ class RemoteRoomHandler extends utils.Executable {
             }
             this.timer.stop();
 
-            this.jobManager.update(this);
+            this.jobManager.run(this);
         }
 
         for(let mind of this.minds) {

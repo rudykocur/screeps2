@@ -174,7 +174,7 @@ class RoomManager extends utils.Executable {
             }
 
         });
-        this.jobManager.update(this);
+        this.jobManager.run(this);
 
         this.timer.count(()=> {
             this.spawner.run();
@@ -194,6 +194,8 @@ class RoomManager extends utils.Executable {
             if(avg.length > 10) {
                 avg.pop();
             }
+
+            this.room.visual.text(`Avg energy: ${this.getAvgEnergyToPickup()}`, 1, 1);
         });
     }
 
