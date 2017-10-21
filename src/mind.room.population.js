@@ -175,7 +175,7 @@ class RoomPopulationMind extends utils.Executable {
             return false;
         }
 
-        if(this.manager.mineralAmount < 1) {
+        if(this.manager.mineral.mineralAmount < 1) {
             return false;
         }
 

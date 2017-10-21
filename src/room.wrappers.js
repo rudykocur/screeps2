@@ -46,11 +46,7 @@ class StorageWrapper extends utils.Executable {
         this.manager = manager;
         this.target = storage;
 
-        if(!this.target) {
-            console.log('OMG NO STORAGE ????????????', this.target);
-        }
-
-        if(!this.target.pos) {this.err('WHY NO POS?', this.target, '::', this.target.pos);}
+        if(!this.target.pos) {this.warn('WHY NO POS?', this.target, '::', this.target.pos);}
 
         this.link = _.first(this.target.pos.findInRange(links, 3));
 
@@ -96,6 +92,10 @@ class StorageWrapper extends utils.Executable {
      */
     withdraw(toCreep) {
         toCreep.withdraw(this.target, RESOURCE_ENERGY);
+    }
+
+    toString() {
+        return `[StorageWrapper ${this.manager.roomName}]`;
     }
 }
 

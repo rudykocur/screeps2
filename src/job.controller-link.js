@@ -76,7 +76,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
             this.fsm.enter(STATE.SEND);
         }
         else {
-            console.log('energy transfer failed', result);
+            this.err(this.workRoom, 'energy transfer failed', result);
         }
     }
 
@@ -91,7 +91,8 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         }
         else {
             if(result !== ERR_TIRED) {
-                console.log('energy send failed', result);
+                this.completeJob();
+                console.log(this.workRoom, 'energy send failed', result);
             }
             else {
                 this.workRoom.room.visual.circle(from.pos, {stroke: "red"});

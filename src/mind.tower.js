@@ -81,6 +81,10 @@ class TowerMind extends utils.Executable {
         }));
 
         if(!repairTarget) {
+            repairTarget = _.first(this.roomMgr.containers.filter(c => (c.hits/c.hitsMax) < 0.5));
+        }
+
+        if(!repairTarget) {
             repairTarget = _.first(this.roomMgr.roads.filter(road => {
                 return (road.hits / road.hitsMax) < 0.5;
             }));

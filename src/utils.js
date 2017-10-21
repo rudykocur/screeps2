@@ -57,6 +57,12 @@ class Executable {
         console.log.apply(console, messages);
     }
 
+    warn(...messages) {
+        messages.unshift(`<span style="color:gold; font-weight: bold;">[WARN] ${this}</span>`);
+
+        console.log.apply(console, messages);
+    }
+
     info(...messages) {
         messages.unshift(`<span style="color:springgreen; font-weight: bold;">[INFO] ${this}</span>`);
 
