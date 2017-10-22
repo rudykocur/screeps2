@@ -187,16 +187,25 @@ class RoomManager extends utils.Executable {
             this.architect.run();
             this.storage.run();
 
-            let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
-            let avg = this.room.memory.stats.avgEnergy;
-            avg.unshift(toPickup);
 
-            if(avg.length > 10) {
-                avg.pop();
-            }
-
-            this.room.visual.text(`Avg energy: ${this.getAvgEnergyToPickup()}`, 1, 1);
+            this._updateDroppedEnergy();
+            this.printDiagnostics();
         });
+    }
+
+    printDiagnostics() {
+        this.room.visual.text(`Energy avg: ${this.getAvgEnergyToPickup()}`, 0, 0, {align: 'left'});
+        this.room.visual.text(`Energy capacity: ${this.room.energyCapacityAvailable}`, 0, 1, {align: 'left'});
+    }
+
+    _updateDroppedEnergy() {
+        let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+        let avg = this.room.memory.stats.avgEnergy;
+        avg.unshift(toPickup);
+
+        if(avg.length > 10) {
+            avg.pop();
+        }
     }
 
     getExtensionsClusters() {
