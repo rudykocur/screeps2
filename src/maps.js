@@ -2,7 +2,8 @@ var _ = require('lodash');
 const utils = require('utils');
 
 function hydrate(item) {
-    item.pos.__proto__ = RoomPosition.prototype;
+    item.pos = new RoomPosition(item.pos.x, item.pos.y, item.pos.roomName);
+    // item.pos.__proto__ = RoomPosition.prototype;
     return item;
 }
 

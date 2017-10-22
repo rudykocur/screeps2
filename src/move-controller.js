@@ -28,11 +28,15 @@ class CreepMoveController {
             this.memory._moverPath = pathCallback();
         }
 
+        let path = [];
+
         for(let step of this.memory._moverPath) {
-            step.__proto__ = RoomPosition.prototype;
+            // step.__proto__ = RoomPosition.prototype;
+            path.push(new RoomPosition(step.x, step.y, step.roomName));
         }
 
-        let result = this.creep.moveByPath(this.memory._moverPath);
+        let result = this.creep.moveByPath(path);
+        // let result = this.creep.moveByPath(this.memory._moverPath);
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
             console.log(this.creep, ' - mover: ', result);
