@@ -70,7 +70,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.droppedEnergy.map((energy) => {
+        return manager.data.droppedEnergy.map((energy) => {
             return new EnergyJobDTO(energy);
         });
     }

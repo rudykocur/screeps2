@@ -31,7 +31,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
     pickMiningPosition(state) {
         let source = Game.getObjectById(this.data.targetId);
 
-        let container = _.first(source.pos.findInRange(this.workRoom.containers, 1));
+        let container = _.first(source.pos.findInRange(this.workRoom.data.containers, 1));
 
         if(container) {
             state.targetPos = container.pos;
@@ -100,7 +100,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.sources.map((energy) => {
+        return manager.data.sources.map((energy) => {
             return new HarvestJobDTO(energy);
         });
     }

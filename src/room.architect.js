@@ -19,7 +19,7 @@ class RoomArchitect extends utils.Executable {
         let availableTowers = this.getMaxStructuresCount(STRUCTURE_TOWER);
         let availableStorages = this.getMaxStructuresCount(STRUCTURE_STORAGE);
 
-        if(this.manager.extensions.length < availableExtensions) {
+        if(this.manager.data.extensions.length < availableExtensions) {
             utils.throttle(15, () => this.buildExtensions(this.manager.room))();
         }
 
@@ -96,11 +96,11 @@ class RoomArchitect extends utils.Executable {
 
         let storagePos = this.manager.storage.target.pos;
 
-        for(let source of this.manager.sources) {
+        for(let source of this.manager.data.sources) {
             this.generateRoad(source.pos, storagePos);
         }
 
-        for(let spawn of this.manager.spawns) {
+        for(let spawn of this.manager.data.spawns) {
             this.generateRoad(spawn.pos, storagePos);
         }
 
@@ -111,7 +111,7 @@ class RoomArchitect extends utils.Executable {
         this.generateRoad(this.manager.room.controller.pos, storagePos);
 
         for(let handler of this.manager.remote.handlers) {
-            for(let source of handler.sources) {
+            for(let source of handler.data.sources) {
                 this.generateRoad(source.pos, storagePos);
             }
         }

@@ -7,6 +7,7 @@ const room_architect = require('room.architect');
 const room_remote = require('room.remote');
 const room_labs = require('room.labs');
 const threat = require('combat.threat');
+const data = require('room.data');
 
 const wrappers = require('room.wrappers');
 
@@ -33,23 +34,15 @@ class RoomManager extends utils.Executable {
 
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
-        this.flags = _.filter(Game.flags, 'room', this.room);
-
-        this.structures = this.room.find(FIND_MY_STRUCTURES);
-
-        this.extensions = _.filter(this.structures, 'structureType', STRUCTURE_EXTENSION);
-        this.spawns = _.filter(this.structures, 'structureType', STRUCTURE_SPAWN);
-        this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType === STRUCTURE_CONTAINER);
-        this.extractor = _.first(_.filter(this.structures, 'structureType', STRUCTURE_EXTRACTOR));
-        this.mineral = _.first(this.room.find(FIND_MINERALS));
-        this.sources = this.room.find(FIND_SOURCES);
-        this.roads = _.filter(this.room.find(FIND_STRUCTURES), 'structureType', STRUCTURE_ROAD);
-        this.links = this.structures.filter(s => s.structureType == STRUCTURE_LINK);
-
+        this.flags = _.filter(Game.flags, 'pos.roomName', this.roomName);
         let storageFlag = _.first(this.flags.filter(flags.isStorage));
 
+        this.data = new data.RoomData(this, this.room, storageFlag);
+
+
+
         if(this.room.storage) {
-            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.links);
+            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.data.links);
         }
         else if(storageFlag) {
             this.storage = new wrappers.FlagStorageWrapper(this, storageFlag);
@@ -61,17 +54,6 @@ class RoomManager extends utils.Executable {
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
-        this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
-            if(res.resourceType != RESOURCE_ENERGY) {
-                return false;
-            }
-
-            if(!this.room.storage) {
-                return !res.pos.isEqualTo(this.storage.target.pos);
-            }
-
-            return true;
-        });
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
         this.enemiesInside = this.enemies.filter(/**Creep*/creep => {
@@ -81,11 +63,10 @@ class RoomManager extends utils.Executable {
         this.terminal = this.room.terminal;
 
         this.threat = new threat.ThreatAssesment(this.enemies);
-        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
+        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.data.links);
 
-        let towers = _.filter(this.structures, 'structureType', STRUCTURE_TOWER);
 
-        this.towers = towers.map(tower => {
+        this.towers = this.data.towers.map(tower => {
             let mind = new minds.available.tower(tower, this);
             this.minds.push(mind);
             return mind;
@@ -147,18 +128,10 @@ class RoomManager extends utils.Executable {
         return _.first(sources);
     }
 
-    getDroppedEnergy(sourcePos, minAmount) {
-        minAmount = minAmount || 0;
-
-        return sourcePos.findClosestByPath(this.droppedEnergy, {
-            filter: (res) => res.amount > minAmount
-        });
-    }
-
     update() {
         this.timer.count(()=> {
 
-            let damageToSpawns = _.sum(this.spawns, /**StructureSpawn*/spawn => {
+            let damageToSpawns = _.sum(this.data.spawns, /**StructureSpawn*/spawn => {
                 return spawn.hitsMax - spawn.hits;
             });
 
@@ -199,7 +172,7 @@ class RoomManager extends utils.Executable {
     }
 
     _updateDroppedEnergy() {
-        let toPickup = _.sum(this.droppedEnergy, 'amount') + _.sum(this.containers, c => c.store[RESOURCE_ENERGY]);
+        let toPickup = _.sum(this.data.droppedEnergy, 'amount') + _.sum(this.data.containers, c => c.store[RESOURCE_ENERGY]);
         let avg = this.room.memory.stats.avgEnergy;
         avg.unshift(toPickup);
 
@@ -209,7 +182,8 @@ class RoomManager extends utils.Executable {
     }
 
     getExtensionsClusters() {
-        return this.flags.filter(flags.isExtensionCluster).map(f => new wrappers.ExtensionCluster(f.pos, this));
+        return this.flags.filter(flags.isExtensionCluster).map(
+            f => new wrappers.ExtensionCluster(f.pos, this, this.data));
     }
 
     toString() {

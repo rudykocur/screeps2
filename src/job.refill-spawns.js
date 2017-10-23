@@ -48,7 +48,7 @@ class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.spawns.filter(
+        return manager.data.spawns.filter(
             /**StructureSpawn*/spawn => spawn.energy < spawn.energyCapacity
         ).map((spawn) => {
             return new RefillSpawnJobDTO(spawn);

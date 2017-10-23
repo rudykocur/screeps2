@@ -104,12 +104,13 @@ class ExtensionCluster {
     /**
      * @param {RoomPosition} centerPoint
      * @param {RoomManager} manager
+     * @param {RoomData} roomData
      */
-    constructor(centerPoint, manager) {
+    constructor(centerPoint, manager, roomData) {
         this.id = 'extcluster-' + centerPoint.toString();
 
         this.center = centerPoint;
-        this.extensions = this.center.findInRange(manager.extensions, 1);
+        this.extensions = this.center.findInRange(roomData.extensions, 1);
 
         let capacity = _.size(this.extensions) * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
         let storedEnergy = _.sum(this.extensions, 'energy');

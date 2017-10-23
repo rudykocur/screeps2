@@ -46,7 +46,7 @@ class BuilderMind extends mind.CreepMindBase {
                 return;
             }
 
-            if(!this.workRoom.storage && this.workRoom.droppedEnergy.length > 0) {
+            if(!this.workRoom.storage && this.workRoom.data.droppedEnergy.length > 0) {
                 this.enterState(STATE_REFILL);
                 return;
             }
@@ -62,10 +62,10 @@ class BuilderMind extends mind.CreepMindBase {
         let target;
 
         if(this.creep.room != this.workRoom.room) {
-            target = _.first(this.workRoom.droppedEnergy);
+            target = _.first(this.workRoom.data.droppedEnergy);
         }
         else {
-            target = this.creep.pos.findClosestByPath(this.workRoom.droppedEnergy);
+            target = this.creep.pos.findClosestByPath(this.workRoom.data.droppedEnergy);
         }
 
         if(!target) {

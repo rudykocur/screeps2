@@ -69,7 +69,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.containers.map(/**StructureContainer*/cnt=> {
+        return manager.data.containers.map(/**StructureContainer*/cnt=> {
             return new EmptyContainerJobDTO(cnt);
         });
     }

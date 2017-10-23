@@ -13,11 +13,6 @@ const jobModules = {};
     jobModules[mod.JOB_TYPE] = mod.getHandler();
 });
 
-const jobTypes = {
-    JOB_SPAWN: require('job.refill-spawns').JOB_TYPE,
-    JOB_EXTENSIONS: require('job.refill-extensions').JOB_TYPE,
-};
-
 class JobBoard extends utils.Executable {
     constructor() {
         super();
@@ -214,5 +209,4 @@ class JobBoard extends utils.Executable {
 
 module.exports = {
     JobBoard,
-    jobTypes
 };

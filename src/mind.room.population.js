@@ -12,8 +12,9 @@ class RoomPopulationMind extends utils.Executable {
 
         this.manager = manager;
         this.room = this.manager.room;
+        this.roomData = this.manager.data;
 
-        this.freeSpawns = this.manager.spawns.filter(spawn => !spawn.spawning);
+        this.freeSpawns = this.roomData.spawns.filter(spawn => !spawn.spawning);
 
         this.energyStructures = [];
         let clusters = _.sortByOrder(this.manager.extensionsClusters, ['needsEnergy'], ['desc']);
@@ -21,7 +22,7 @@ class RoomPopulationMind extends utils.Executable {
             this.energyStructures.push.apply(this.energyStructures, cluster.extensions);
         });
 
-        this.energyStructures.push.apply(this.energyStructures, this.manager.spawns);
+        this.energyStructures.push.apply(this.energyStructures, this.roomData.spawns);
     }
 
     update() {
@@ -171,11 +172,11 @@ class RoomPopulationMind extends utils.Executable {
     }
 
     needMineralHarvester() {
-        if(!this.manager.extractor) {
+        if(!this.manager.data.extractor) {
             return false;
         }
 
-        if(this.manager.mineral.mineralAmount < 1) {
+        if(this.manager.data.mineral.mineralAmount < 1) {
             return false;
         }
 

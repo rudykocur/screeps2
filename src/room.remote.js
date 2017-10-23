@@ -3,6 +3,7 @@ const minds = require('mind');
 const utils = require('utils');
 const maps = require('maps');
 const wrappers = require('room.wrappers');
+const data = require('room.data');
 
 let mind_scout = require('mind.scout');
 let mind_defender = require('mind.defender');
@@ -139,7 +140,6 @@ class RemoteRoomHandler extends utils.Executable {
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
         this.enemies = [];
-        this.sources = [];
 
         this.memory.squads.forEach(squadId => {
             let squad = squads.CombatSquad.getSquad(squadId);
@@ -152,22 +152,12 @@ class RemoteRoomHandler extends utils.Executable {
             this.room.manager = this;
             this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
+            this.data = new data.RoomData(this, this.room);
+
             this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
-            this.sources = this.room.find(FIND_SOURCES);
-            this.droppedEnergy = _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
-                if(res.resourceType != RESOURCE_ENERGY) {
-                    return false;
-                }
 
-                return true;
-            });
-
-            this.sources = this.room.find(FIND_SOURCES);
-            this.spawns = [];
-            this.extensions = [];
             this.extensionsClusters = [];
             this.towers = [];
-            this.containers = this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_CONTAINER);
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
 
             this.hostileStructures = this.room.find(FIND_HOSTILE_STRUCTURES)
@@ -260,16 +250,16 @@ class RemoteRoomHandler extends utils.Executable {
             }
 
             if(this.canSpawnWorkers()) {
-                if (this.getCreepCount(minds.available.harvester) < this.sources.length) {
+                if (this.getCreepCount(minds.available.harvester) < this.data.sources.length) {
                     this.spawnMind(minds.available.harvester);
                 }
                 else if (this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
                     this.spawnMind(minds.available.builder);
                 }
-                else if (this.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 2) {
+                else if (this.data.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 2) {
                     this.spawnMind(minds.available.transfer);
                 }
-                else if (_.sum(this.droppedEnergy, 'amount') > 2000 &&
+                else if (_.sum(this.data.droppedEnergy, 'amount') > 2000 &&
                     this.getSpawnCooldown(minds.available.transfer) > 200 &&
                     this.getCreepCount(minds.available.transfer) < 5) {
                     this.spawnMind(minds.available.transfer);
