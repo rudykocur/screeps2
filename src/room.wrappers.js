@@ -46,7 +46,8 @@ class StorageWrapper extends utils.Executable {
         this.manager = manager;
         this.target = storage;
 
-        if(!this.target.pos) {this.warn('WHY NO POS?', this.target, '::', this.target.pos);}
+        if(!this.target.pos) {this.warn('WHY NO POS? 222', this.target);}
+        // if(!this.target.pos) {this.warn('WHY NO POS?', this.target, '::', this.target.pos);}
 
         this.link = _.first(this.target.pos.findInRange(links, 3));
 
