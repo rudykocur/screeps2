@@ -111,6 +111,10 @@ class RoomArchitect extends utils.Executable {
         this.generateRoad(this.manager.room.controller.pos, storagePos);
 
         for(let handler of this.manager.remote.handlers) {
+            if(!handler.data) {
+                continue;
+            }
+
             for(let source of handler.data.sources) {
                 this.generateRoad(source.pos, storagePos);
             }
