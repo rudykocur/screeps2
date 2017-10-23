@@ -53,7 +53,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
 
         let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
         if(struct && struct.hits < struct.hitsMax) {
-            this.creep.repair();
+            this.creep.repair(struct);
         }
 
         if(!storage.canDeposit(this.creep)) {
