@@ -46,6 +46,13 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
+    isSpawn(flag) {
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_PURPLE;
+    },
+
+    /**
+     * @param {Flag} flag
+     */
     isRoomAttack(flag) {
         return flag.color === COLOR_RED && flag.secondaryColor === COLOR_GREY;
     }

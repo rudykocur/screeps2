@@ -18,21 +18,26 @@ class RoomArchitect extends utils.Executable {
         let availableExtensions = this.getMaxStructuresCount(STRUCTURE_EXTENSION);
         let availableTowers = this.getMaxStructuresCount(STRUCTURE_TOWER);
         let availableStorages = this.getMaxStructuresCount(STRUCTURE_STORAGE);
+        let availableSpawns = this.getMaxStructuresCount(STRUCTURE_SPAWN);
 
         if(this.manager.data.extensions.length < availableExtensions) {
-            utils.throttle(15, () => this.buildExtensions(this.manager.room))();
+            utils.every(15, () => this.buildExtensions(this.manager.room));
+        }
+
+        if(this.manager.data.spawns.length < availableSpawns) {
+            utils.every(15, () => this.buildSpawns(this.manager.room));
         }
 
         if(this.manager.towers.length < availableTowers) {
-            utils.throttle(15, () => this.buildTowers(this.manager.room))();
+            utils.every(15, () => this.buildTowers(this.manager.room));
         }
 
         if(availableStorages > 0 && !this.manager.room.storage) {
-            utils.throttle(25, () => this.buildStorage(this.manager.room))();
+            utils.every(25, () => this.buildStorage(this.manager.room));
         }
 
         if(this.manager.room.controller.level > 2) {
-            utils.throttle(1000, () => this.planRoads())();
+            utils.every(1000, () => this.planRoads());
         }
     }
 
@@ -67,6 +72,17 @@ class RoomArchitect extends utils.Executable {
                 });
 
                 room.createConstructionSite(point.x, point.y, STRUCTURE_EXTENSION)
+            }
+        }
+    }
+
+    /**
+     * @param {Room} room
+     */
+    buildSpawns(room) {
+        for(let flag of this.manager.flags.filter(flags.isSpawn)) {
+            if(OK === room.createConstructionSite(flag.pos, STRUCTURE_SPAWN)) {
+                flag.remove();
             }
         }
     }
