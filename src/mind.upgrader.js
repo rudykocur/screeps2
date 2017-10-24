@@ -60,7 +60,7 @@ class UpgraderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(_.sum(this.creep.carry) === this.creep.carryCapacity) {
+        if(_.sum(this.creep.carry) > this.creep.carryCapacity/2) {
             this.enterState(STATE_UPGRADE);
             return;
         }
@@ -70,7 +70,7 @@ class UpgraderMind extends mind.CreepMindBase {
                 this.creep.mover.moveTo(this.workRoom.controller.link);
             }
             else {
-                this.creep.withdraw(this.workRoom.controller.link, RESOURCE_ENERGY);
+                this.creep.withdraw(this.workRoom.controller.link.link, RESOURCE_ENERGY);
             }
 
             return;

@@ -23,6 +23,8 @@ class RoomPopulationMind extends utils.Executable {
         });
 
         this.energyStructures.push.apply(this.energyStructures, this.roomData.spawns);
+
+        this.notEnoughEnergy = false;
     }
 
     update() {
@@ -94,6 +96,8 @@ class RoomPopulationMind extends utils.Executable {
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
+                this.notEnoughEnergy = true;
+
                 this.room.visual.circle(spawn.pos, {
                     fill: "transparent",
                     stroke: "red",
@@ -130,6 +134,8 @@ class RoomPopulationMind extends utils.Executable {
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
+                this.notEnoughEnergy = true;
+
                 this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
                 return;
             }

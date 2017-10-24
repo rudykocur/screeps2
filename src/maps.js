@@ -208,6 +208,18 @@ module.exports = {
                         }
                     }
 
+                    let room = Game.rooms[roomName];
+                    if(room) {
+                        let mgr = room.manager;
+                        if(mgr) {
+                            for(let creep of mgr.creeps) {
+                                if(creep.memory.isStationary) {
+                                    matrix.set(creep.pos.x, creep.pos.y, 0xFF);
+                                }
+                            }
+                        }
+                    }
+
                     return matrix;
                 }
             }

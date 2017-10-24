@@ -13,14 +13,15 @@ class RoomSettlement extends base.RoomBase {
 
     update() {
         let claimers = this.getCreepCount(minds.available.claimer);
+        this.pushWanderer();
 
-        if(!this.room && claimers === 0) {
+        if(!this.room || claimers === 0) {
             this.spawnAndGo();
         }
         else {
             if(!this.room.controller.my) {
                 if(this.getCreepCount(minds.available.claimer) === 0) {
-                    this.spawn(minds.available.claimer, {claim: true});
+                    this.spawn(minds.available.claimer, {claim: true}, true);
                 }
             }
             else {
@@ -38,7 +39,7 @@ class RoomSettlement extends base.RoomBase {
         }
     }
 
-    getSpawner() {
+    getSpawner(nearest) {
         let managers = _.sortBy(this.managers, mgr => Game.map.getRoomLinearDistance(mgr.roomName, this.roomName));
         managers = managers.filter(m => m.room.controller.level > 3);
 
@@ -48,11 +49,15 @@ class RoomSettlement extends base.RoomBase {
             if (spawn) {
                 return mgr;
             }
+
+            if(nearest) {
+                break;
+            }
         }
     }
 
-    spawn(mind, options) {
-        let manager = this.getSpawner();
+    spawn(mind, options, nearest) {
+        let manager = this.getSpawner(nearest);
 
         if(manager) {
             return manager.spawner.spawn(this, mind.getSpawnParams(manager, options));
@@ -71,7 +76,12 @@ class RoomSettlement extends base.RoomBase {
                 }
             }
         }
-        else {
+    }
+
+    pushWanderer() {
+        let creepName = 'wanderer_' + this.roomName;
+        let wanderer = Game.creeps[creepName];
+        if(wanderer) {
             let claimPath = maps.getMultiRoomPath(wanderer.pos, this.flag.pos);
             let x = wanderer.moveByPath(claimPath);
         }

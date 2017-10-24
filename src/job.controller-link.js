@@ -47,7 +47,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
 
             let cooldown = this.workRoom.storage.link.cooldown;
 
-            if(this.workRoom.storage.reserveLink(cooldown + 2)) {
+            if(this.workRoom.storage.link.reserve(cooldown + 2)) {
                 this.fsm.enter(STATE.UNLOAD);
             }
         }
@@ -70,7 +70,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         let needed = this.workRoom.controller.getNeededEnergyInLink();
         let has = this.workRoom.storage.link.energy;
         let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY]) - has;
-        let result = this.creep.transfer(this.workRoom.storage.link, RESOURCE_ENERGY, toTransfer);
+        let result = this.creep.transfer(this.workRoom.storage.link.link, RESOURCE_ENERGY, toTransfer);
 
         if(result === OK || toTransfer === 0) {
             this.fsm.enter(STATE.SEND);
@@ -92,7 +92,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         else {
             if(result !== ERR_TIRED) {
                 this.completeJob();
-                console.log(this.workRoom, 'energy send failed', result);
+                this.err(this.workRoom, 'energy send failed', result);
             }
             else {
                 this.workRoom.room.visual.circle(from.pos, {stroke: "red"});

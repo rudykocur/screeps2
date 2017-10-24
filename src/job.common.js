@@ -1,7 +1,10 @@
 const fsmModule = require('fsm');
+const utils = require('utils');
 
-class JobHandlerBase {
+class JobHandlerBase extends utils.Loggable {
     constructor(creep, jobData) {
+        super();
+
         this.creep = creep;
         this.room =  this.creep.room;
         this.roomMgr = this.creep.workRoom;

@@ -8,6 +8,7 @@ const room_remote = require('room.remote');
 const room_labs = require('room.labs');
 const threat = require('combat.threat');
 const data = require('room.data');
+const stats = require('room.stats');
 
 const wrappers = require('room.wrappers');
 
@@ -39,10 +40,10 @@ class RoomManager extends utils.Executable {
 
         this.data = new data.RoomData(this, this.room, storageFlag);
 
-
+        this.links = this.data.links.map(l => new wrappers.LinkWrapper(l));
 
         if(this.room.storage) {
-            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.data.links);
+            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.links);
         }
         else if(storageFlag) {
             this.storage = new wrappers.FlagStorageWrapper(this, storageFlag);
@@ -63,7 +64,7 @@ class RoomManager extends utils.Executable {
         this.terminal = this.room.terminal;
 
         this.threat = new threat.ThreatAssesment(this.enemies);
-        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.data.links);
+        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
 
 
         this.towers = this.data.towers.map(tower => {
@@ -80,6 +81,7 @@ class RoomManager extends utils.Executable {
         this.timer.stop();
 
         this.remote = new room_remote.RemoteRoomsManager(this);
+        this.stats = new stats.RoomStats(this);
     }
 
     initMemory() {
@@ -159,27 +161,18 @@ class RoomManager extends utils.Executable {
         this.timer.count(()=> {
             this.architect.run();
             this.storage.run();
+            this.links.forEach(link => {
+                link.run();
+            });
 
 
-            this._updateDroppedEnergy();
-            this.printDiagnostics();
+            this.stats.run();
         });
     }
 
-    printDiagnostics() {
-        this.room.visual.text(`Energy avg: ${this.getAvgEnergyToPickup()}`, 0, 0, {align: 'left'});
-        this.room.visual.text(`Energy capacity: ${this.room.energyCapacityAvailable}`, 0, 1, {align: 'left'});
-    }
 
-    _updateDroppedEnergy() {
-        let toPickup = _.sum(this.data.droppedEnergy, 'amount') + _.sum(this.data.containers, c => c.store[RESOURCE_ENERGY]);
-        let avg = this.room.memory.stats.avgEnergy;
-        avg.unshift(toPickup);
 
-        if(avg.length > 10) {
-            avg.pop();
-        }
-    }
+
 
     getExtensionsClusters() {
         return this.flags.filter(flags.isExtensionCluster).map(

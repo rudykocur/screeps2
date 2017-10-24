@@ -31,26 +31,7 @@ class CompoundTimer {
     }
 }
 
-class Executable {
-    constructor() {
-        this.updateTime = null;
-        this.timer = new Timer();
-    }
-
-    update() {}
-
-    run(...args) {
-        try{
-            let tStart = Game.cpu.getUsed();
-            this.update(...args);
-            this.updateTime = Game.cpu.getUsed() - tStart;
-        }
-        catch(e) {
-            console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
-            Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 5);
-        }
-    }
-
+class Loggable {
     err(...messages) {
         messages.unshift(`<span style="color:lightcoral; font-weight: bold;">[ERROR] ${this}</span>`);
 
@@ -70,8 +51,31 @@ class Executable {
     }
 }
 
+class Executable extends Loggable{
+    constructor() {
+        super();
+
+        this.updateTime = null;
+        this.timer = new Timer();
+    }
+
+    update() {}
+
+    run(...args) {
+        try{
+            let tStart = Game.cpu.getUsed();
+            this.update(...args);
+            this.updateTime = Game.cpu.getUsed() - tStart;
+        }
+        catch(e) {
+            console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
+            Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 5);
+        }
+    }
+}
+
 module.exports = {
-    Executable, Timer, CompoundTimer,
+    Executable, Timer, CompoundTimer, Loggable,
 
     throttle(ticks, callback) {
         return () => {
