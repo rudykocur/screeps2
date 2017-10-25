@@ -140,7 +140,8 @@ module.exports = {
     },
 
     debugFun3() {
-        let roomName = 'W35N59';
+        let roomName = 'W37N58';
+        // let roomName = 'W35N59';
         let towers = maps.getRoomCache(roomName).findStructures(STRUCTURE_TOWER);
 
         let matrix = {};

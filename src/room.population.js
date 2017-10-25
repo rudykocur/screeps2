@@ -2,27 +2,28 @@ var _ = require("lodash");
 const minds = require('mind');
 const utils = require('utils');
 
-class RoomPopulationMind extends utils.Executable {
+class RoomPopulation extends utils.Executable {
     /**
      *
      * @param {RoomManager} manager
+     * @param {Array<ExtensionCluster>}extensionsClusters
+     * @param {Array<StructureSpawn>} spawns
      */
-    constructor(manager) {
+    constructor(manager, extensionsClusters, spawns) {
         super();
 
         this.manager = manager;
         this.room = this.manager.room;
-        this.roomData = this.manager.data;
 
-        this.freeSpawns = this.roomData.spawns.filter(spawn => !spawn.spawning);
+        this.freeSpawns = spawns.filter(spawn => !spawn.spawning);
 
         this.energyStructures = [];
-        let clusters = _.sortByOrder(this.manager.extensionsClusters, ['needsEnergy'], ['desc']);
+        let clusters = _.sortByOrder(extensionsClusters, ['needsEnergy'], ['desc']);
         clusters.forEach(cluster => {
             this.energyStructures.push.apply(this.energyStructures, cluster.extensions);
         });
 
-        this.energyStructures.push.apply(this.energyStructures, this.roomData.spawns);
+        this.energyStructures.push.apply(this.energyStructures, spawns);
 
         this.notEnoughEnergy = false;
     }
@@ -258,5 +259,5 @@ class RoomPopulationMind extends utils.Executable {
 }
 
 module.exports = {
-    RoomPopulationMind
+    RoomPopulation
 };

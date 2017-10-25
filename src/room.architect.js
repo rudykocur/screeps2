@@ -65,6 +65,7 @@ class RoomArchitect extends utils.Executable {
 
             if(!pointInPath) {
                 this.err('NO POINT IN PATH', pointInPath, '::', this.manager.storage, '::', this.manager.storage.target);
+                return;
             }
 
             for(let point of utils.getPositionsAround(cluster.center)) {

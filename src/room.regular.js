@@ -2,7 +2,7 @@ var _ = require("lodash");
 const utils = require('utils');
 const flags = require('utils.flags');
 const minds = require('mind');
-const RoomPopulationMind = require('mind.room.population').RoomPopulationMind;
+const population = require('room.population');
 const room_architect = require('room.architect');
 const room_remote = require('room.remote');
 const room_labs = require('room.labs');
@@ -85,7 +85,7 @@ class RoomManager extends utils.Executable {
         this.extensionsClusters = this.getExtensionsClusters();
 
         this.architect = new room_architect.RoomArchitect(this);
-        this.spawner = new RoomPopulationMind(this);
+        this.spawner = new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns);
         this.labs  = new room_labs.LabManager(this);
         this.timer.stop();
 
