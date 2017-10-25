@@ -165,6 +165,12 @@ class RoomArchitect extends utils.Executable {
                             costs.set(site.pos.x, site.pos.y, 1);
                         }
                     });
+                    let mgr = room.manager;
+                    if(mgr) {
+                        for(let struct of mgr.data.allStructures) {
+                            costs.set(struct.pos.x, struct.pos.y, 0xFF);
+                        }
+                    }
                 }
 
 

@@ -34,6 +34,9 @@ class RoomData extends cache.CachedData {
         this.towers = this.cachedObjCollection('towers', 300,
             () => this._myStructures.filter(s => s.structureType == STRUCTURE_TOWER));
 
+        this.labs = this.cachedObjCollection('labs', 300,
+            () => this._myStructures.filter(s => s.structureType == STRUCTURE_LAB));
+
         this.droppedEnergy = this.cachedObjCollection('resources', 5,
             () => _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
                 if(res.resourceType != RESOURCE_ENERGY) {
@@ -47,6 +50,8 @@ class RoomData extends cache.CachedData {
                 return true;
             })
         );
+
+        this.allStructures = [].concat(this.spawns, this.extensions, this.links, this.towers);
     }
 
     get _myStructures() {
