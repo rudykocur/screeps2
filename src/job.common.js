@@ -59,6 +59,12 @@ class JobHandlerBase extends utils.Loggable {
 }
 
 class JobDTO {
+    /**
+     * @param id
+     * @param type
+     * @param mind
+     * @param [available]
+     */
     constructor(id, type, mind, available) {
         this.id = id;
         this.type = type;

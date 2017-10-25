@@ -134,6 +134,10 @@ class LinkWrapper extends utils.Executable {
         return Memory.structures[this.link.id];
     }
 
+    get reserved() {
+        return this.memory.reservedUntill > 0;
+    }
+
     transferEnergy(target, amount) {
         let result = this.link.transferEnergy(target.link || target, amount);
 
@@ -246,6 +250,14 @@ class MineralWrapper {
     }
 }
 
+class SourceWrapper {
+    constructor(source, containers, links) {
+        this.source = source;
+        this.container = _.first(this.source.pos.findInRange(containers, 1));
+        this.link = _.first(this.source.pos.findInRange(links, 2));
+    }
+}
+
 module.exports = {
     FlagStorageWrapper,
     StorageWrapper,
@@ -253,4 +265,5 @@ module.exports = {
     ControllerWrapper,
     LinkWrapper,
     MineralWrapper,
+    SourceWrapper,
 };

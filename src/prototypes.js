@@ -1,3 +1,4 @@
+var _ = require('lodash');
 const mover = require('move-controller');
 
 module.exports = {
@@ -29,6 +30,14 @@ module.exports = {
                     }
 
                     return this._mover;
+                }
+            });
+        }
+
+        if(!Creep.prototype.hasOwnProperty('carryMax')) {
+            Object.defineProperty(Creep.prototype, "carryMax", {
+                get: function () {
+                    return _.sum(this.carry) == this.carryCapacity;
                 }
             });
         }

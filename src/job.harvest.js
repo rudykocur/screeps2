@@ -85,6 +85,14 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         this.creep.mover.enterStationary();
         this.creep.harvest(source);
 
+        if(this.workRoom.sources) {
+            let sourceWrapper = this.workRoom.sources[source.id];
+            if(sourceWrapper) {
+                this.handleSourceLink(sourceWrapper, this.workRoom.controller, this.workRoom.storage);
+            }
+        }
+
+
         if(state.containerId) {
             utils.every(5, () => {
                 let container = Game.getObjectById(state.containerId);
@@ -92,6 +100,33 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
                     this.creep.repair();
                 }
             })
+        }
+    }
+
+    /**
+     * @param {SourceWrapper} source
+     * @param {ControllerWrapper} controller
+     * @param {StorageWrapper} storage
+     */
+    handleSourceLink(source, controller, storage) {
+        if(_.sum(this.creep.carry) < this.creep.carryCapacity) {
+            this.creep.withdraw(source.container, RESOURCE_ENERGY);
+        }
+
+        if(source.link) {
+            let energyNeed = source.link.energyCapacity - source.link.energy;
+            if(energyNeed > 0 && this.creep.carryMax) {
+                this.creep.transfer(source.link, RESOURCE_ENERGY);
+            }
+
+            if(energyNeed === 0) {
+                if(source.link.cooldown === 0) {
+                    if(storage.link && storage.link.energy < storage.link.energyCapacity / 2) {
+                        source.link.transferEnergy(storage.link.link);
+
+                    }
+                }
+            }
         }
     }
 

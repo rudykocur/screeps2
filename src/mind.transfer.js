@@ -56,6 +56,10 @@ class TransferMind extends mind.CreepMindBase {
             });
         }
 
+        yield this.tryClaimJob(1, {
+            type: 'empty-storage-link'
+        });
+
         let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);
 
         yield this.tryClaimJob(availableCapacity, {

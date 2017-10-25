@@ -57,6 +57,10 @@ class RoomManager extends utils.Executable {
             this.mineral = new wrappers.MineralWrapper(this.data.mineral, this.data.extractor, this.data.containers);
         }
 
+        this.sources = _.transform(this.data.sources, (result, source) => {
+            result[source.id] = new wrappers.SourceWrapper(source, this.data.containers, this.data.links);
+        });
+
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
