@@ -216,10 +216,41 @@ class ControllerWrapper {
     }
 }
 
+class MineralWrapper {
+    constructor(mineral, extractor, containers) {
+        this.mineral = mineral;
+        this.extractor = extractor;
+        this.pos = this.mineral.pos;
+        this.container = _.first(this.pos.findInRange(containers, 1));
+    }
+
+    pickContainerPlace() {
+        let around = utils.getPositionsAround(this.pos);
+
+        for(let point of around) {
+            if(Game.map.getTerrainAt(point) == 'plain') {
+                let struct = point.lookFor(LOOK_STRUCTURES);
+
+                if(struct.length > 0) {
+                    continue;
+                }
+
+                let construction = _.first(point.lookFor(LOOK_CONSTRUCTION_SITES));
+                if(construction && construction.structureType !== STRUCTURE_CONTAINER) {
+                    continue;
+                }
+
+                return point;
+            }
+        }
+    }
+}
+
 module.exports = {
     FlagStorageWrapper,
     StorageWrapper,
     ExtensionCluster,
     ControllerWrapper,
     LinkWrapper,
+    MineralWrapper,
 };

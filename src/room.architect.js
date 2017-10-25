@@ -12,6 +12,7 @@ class RoomArchitect extends utils.Executable {
         super();
 
         this.manager = manager;
+        this.id = this.manager.room.controller.id;
     }
 
     update() {
@@ -19,6 +20,7 @@ class RoomArchitect extends utils.Executable {
         let availableTowers = this.getMaxStructuresCount(STRUCTURE_TOWER);
         let availableStorages = this.getMaxStructuresCount(STRUCTURE_STORAGE);
         let availableSpawns = this.getMaxStructuresCount(STRUCTURE_SPAWN);
+        let availableExtractors = this.getMaxStructuresCount(STRUCTURE_EXTRACTOR);
 
         if(this.manager.data.extensions.length < availableExtensions) {
             utils.every(15, () => this.buildExtensions(this.manager.room));
@@ -36,8 +38,12 @@ class RoomArchitect extends utils.Executable {
             utils.every(25, () => this.buildStorage(this.manager.room));
         }
 
+        if(availableExtractors > 0 && !this.manager.data.extractor) {
+            utils.every(25, () => this.buildExtractor(this.manager.mineral, this.manager.room));
+        }
+
         if(this.manager.room.controller.level > 2) {
-            utils.every(1000, () => this.planRoads());
+            utils.everyMod(1000, this.id, () => this.planRoads());
         }
     }
 
@@ -107,6 +113,24 @@ class RoomArchitect extends utils.Executable {
         }
     }
 
+    /**
+     *
+     * @param {MineralWrapper} mineral
+     * @param room
+     */
+    buildExtractor(mineral, room) {
+        if(!mineral.container) {
+            let containerPos = mineral.pickContainerPlace();
+
+            room.visual.circle(containerPos, {});
+
+            room.createConstructionSite(containerPos, STRUCTURE_CONTAINER);
+        }
+        else {
+            room.createConstructionSite(mineral.pos, STRUCTURE_EXTRACTOR);
+        }
+    }
+
     planRoads() {
         let roads = [];
 
@@ -122,6 +146,13 @@ class RoomArchitect extends utils.Executable {
 
         for(let cluster of this.manager.extensionsClusters) {
             this.generateRoad(cluster.center, storagePos);
+        }
+
+        if(this.manager.room.controller.level > 5) {
+            this.generateRoad(this.manager.mineral.pos, storagePos);
+            if(this.manager.mineral.container) {
+                this.generateRoad(this.manager.mineral.container.pos, storagePos);
+            }
         }
 
         this.generateRoad(this.manager.room.controller.pos, storagePos);

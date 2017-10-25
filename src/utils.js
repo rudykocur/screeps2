@@ -98,6 +98,12 @@ module.exports = {
         }
     },
 
+    everyMod(ticks, id, callback) {
+        if (Game.time % (ticks + parseInt(id, 16) % 21) === 0) {
+            callback();
+        }
+    },
+
     round (number, precision) {
         let factor = Math.pow(10, precision);
         let tempNumber = number * factor;

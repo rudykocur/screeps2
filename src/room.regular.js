@@ -52,6 +52,11 @@ class RoomManager extends utils.Executable {
             console.log('OMG NO LOGIC FOR STORAGE !!!');
         }
 
+        this.mineral = null;
+        if(this.room.controller.level > 5) {
+            this.mineral = new wrappers.MineralWrapper(this.data.mineral, this.data.extractor, this.data.containers);
+        }
+
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
