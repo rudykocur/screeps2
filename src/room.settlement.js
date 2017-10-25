@@ -13,15 +13,19 @@ class RoomSettlement extends base.RoomBase {
 
     update() {
         let claimers = this.getCreepCount(minds.available.claimer);
+
         this.pushWanderer();
 
-        if(!this.room || claimers === 0) {
+        if(!this.room && claimers === 0) {
             this.spawnAndGo();
         }
         else {
             if(!this.room.controller.my) {
                 if(this.getCreepCount(minds.available.claimer) === 0) {
-                    this.spawn(minds.available.claimer, {claim: true}, true);
+                    let name = this.spawn(minds.available.claimer, {claim: true}, true);
+                    if(name) {
+                        this.important(name, 'en route...');
+                    }
                 }
             }
             else {
@@ -33,6 +37,7 @@ class RoomSettlement extends base.RoomBase {
 
                 if(this.room.find(FIND_STRUCTURES).filter(s => s.structureType == STRUCTURE_SPAWN).length > 0) {
                     this.flag.remove();
+                    this.important(`New colony has been created at room ${this.roomName}`);
                     Game.notify(`New colony has been created at room ${this.roomName}`);
                 }
             }
@@ -81,10 +86,11 @@ class RoomSettlement extends base.RoomBase {
     pushWanderer() {
         let creepName = 'wanderer_' + this.roomName;
         let wanderer = Game.creeps[creepName];
-        if(wanderer) {
+        if(wanderer && !wanderer.pos.inRangeTo(this.flag.pos, 5)) {
             let claimPath = maps.getMultiRoomPath(wanderer.pos, this.flag.pos);
             let x = wanderer.moveByPath(claimPath);
         }
+
     }
 
     toString() {

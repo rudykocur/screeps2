@@ -27,7 +27,13 @@ class RemoteRoomsManager extends utils.Executable {
 
         this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
 
-        this.handlers = (this.memory.roomNames || []).map(name => new RemoteRoomHandler(name, this.manager));
+        if(this.manager.room.controller.level >= 3) {
+            this.handlers = (this.memory.roomNames || []).map(
+                name => new RemoteRoomHandler(name, this.manager));
+        }
+        else {
+            this.handlers = [];
+        }
     }
 
     get memory(){
@@ -35,11 +41,11 @@ class RemoteRoomsManager extends utils.Executable {
     }
 
     update() {
-        for(let handler of this.handlers) {
+        for (let handler of this.handlers) {
             handler.prioritySpawn();
         }
 
-        for(let handler of this.handlers) {
+        for (let handler of this.handlers) {
             handler.run();
         }
 

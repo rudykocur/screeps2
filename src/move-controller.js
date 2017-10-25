@@ -30,9 +30,21 @@ class CreepMoveController {
 
         let path = [];
 
+        let foundCurrentPos = false;
+
         for(let step of this.memory._moverPath.path) {
             // step.__proto__ = RoomPosition.prototype;
-            path.push(new RoomPosition(step.x, step.y, step.roomName));
+            let pos = new RoomPosition(step.x, step.y, step.roomName);
+            path.push(pos);
+
+            if(pos.isEqualTo(this.creep.pos)) {
+                foundCurrentPos = true;
+            }
+
+            if(foundCurrentPos) {
+                let vis = new RoomVisual(pos.roomName);
+                vis.circle(pos, {fill: 'yellow'});
+            }
         }
 
         let result = this.creep.moveByPath(path);
