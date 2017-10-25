@@ -65,9 +65,10 @@ class SettlerMind extends mind.CreepMindBase {
             this.creep.pickup(source);
             this.creep.harvest(source);
             this.creep.withdraw(source, RESOURCE_ENERGY);
+            this.creep.mover.enterStationary();
         }
         else {
-            this.creep.moveTo(source, {visualizePathStyle: {stroke: "green", opacity: 0.4}});
+            this.creep.mover.moveTo(source, {visualizePathStyle: {stroke: "green", opacity: 0.4}});
         }
     }
 
@@ -104,9 +105,10 @@ class SettlerMind extends mind.CreepMindBase {
 
         if(this.creep.pos.inRangeTo(target, 3)) {
             this.creep.upgradeController(target);
+            this.creep.mover.enterStationary();
         }
         else {
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target);
         }
     }
 
@@ -119,9 +121,10 @@ class SettlerMind extends mind.CreepMindBase {
 
         if(this.creep.pos.inRangeTo(target, 3)) {
             this.creep.build(target);
+            this.creep.mover.enterStationary();
         }
         else {
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target);
         }
 
         return true;
@@ -144,7 +147,7 @@ class SettlerMind extends mind.CreepMindBase {
         }
 
         if(this.creep.transfer(target, RESOURCE_ENERGY) !== OK) {
-            this.creep.moveTo(target);
+            this.creep.mover.moveTo(target);
         }
 
         return true;

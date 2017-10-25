@@ -51,7 +51,6 @@ class HarvestExtractorJobHandler extends job_common.JobHandlerBase {
         let container = Game.getObjectById(state.containerId);
 
         if(_.sum(container.store) + 100 > container.storeCapacity) {
-            console.log('mineral: container full');
             return;
         }
 

@@ -174,7 +174,6 @@ module.exports = {
                 return 1;
             }
         }).forEach(function(info) {
-
             allowedRooms[info.room] = true;
         });
 
@@ -185,10 +184,10 @@ module.exports = {
                     return false;
                 }
 
+                let matrix = new PathFinder.CostMatrix;
+
                 if(hasCacheForRoom(roomName)) {
                     let cache = new CachedRoom(roomName);
-
-                    let matrix = new PathFinder.CostMatrix;
 
                     for(let struct of cache.find(FIND_STRUCTURES)) {
                         if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
@@ -207,21 +206,21 @@ module.exports = {
                             }
                         }
                     }
+                }
 
-                    let room = Game.rooms[roomName];
-                    if(room) {
-                        let mgr = room.manager;
-                        if(mgr) {
-                            for(let creep of mgr.creeps) {
-                                if(creep.memory.isStationary) {
-                                    matrix.set(creep.pos.x, creep.pos.y, 0xFF);
-                                }
+                let room = Game.rooms[roomName];
+                if(room) {
+                    let mgr = room.manager;
+                    if(mgr) {
+                        for(let creep of mgr.creeps) {
+                            if(creep.memory.isStationary) {
+                                matrix.set(creep.pos.x, creep.pos.y, 0xFF);
                             }
                         }
                     }
-
-                    return matrix;
                 }
+
+                return matrix;
             }
         });
 
