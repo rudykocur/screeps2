@@ -16,7 +16,7 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
 
         this.configureFSM(STATE.PICKUP, {
             [STATE.PICKUP]: {
-                onTick: this.pickupFromStorage.bind(this)
+                onTick: this.pickupFromTerminal.bind(this)
             },
             [STATE.DEPOSIT]: {
                 onTick: this.loadIntoLab.bind(this)
@@ -24,7 +24,7 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
         })
     }
 
-    pickupFromStorage() {
+    pickupFromTerminal() {
         if(_.sum(this.creep.carry) > 0) {
             this.emptyCarry();
             return;
@@ -38,8 +38,10 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
         else {
             let target = Game.getObjectById(this.data.labId);
             let needed = target.mineralCapacity - target.mineralAmount;
+            let have = terminal.get(this.data.resource);
 
-            this.creep.withdraw(terminal, this.data.resource, Math.min(needed, this.creep.carryCapacity));
+            this.creep.withdraw(terminal, this.data.resource,
+                Math.min(needed, this.creep.carryCapacity, have));
 
             this.fsm.enter(STATE.DEPOSIT)
         }
@@ -92,6 +94,10 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
 
         for(let input of labMgr.getInputLabs()) {
             if(input.lab.mineralAmount + 500 > input.lab.mineralCapacity) {
+                continue;
+            }
+
+            if(manager.terminal.get(input.resource) === 0) {
                 continue;
             }
 

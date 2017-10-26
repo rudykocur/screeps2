@@ -63,7 +63,7 @@ class LabManager extends utils.Executable {
     }
 
     update() {
-        if(this.labs.length < 5 || !this.terminal) {
+        if(this.labs.length < 3 || !this.terminal) {
             return;
         }
 
