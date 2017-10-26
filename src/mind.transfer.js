@@ -36,6 +36,28 @@ class TransferMind extends mind.CreepMindBase {
     }
 
     *findNewJob() {
+        if(this.creep.memory.hauler) {
+            yield this.tryClaimJob(1, {
+                type: 'terminal-fill-energy'
+            });
+
+            yield this.tryClaimJob(1, {
+                type: 'lab-unload'
+            });
+
+            yield this.tryClaimJob(1, {
+                type: 'lab-load'
+            });
+
+            yield this.tryClaimJob(1, {
+                type: 'empty-storage-link'
+            });
+
+            yield this.tryClaimJob(1, {
+                type: 'controller-link'
+            });
+        }
+
         if(this.storage.getStoredEnergy() > 100) {
             if (this.room.energyMissing > 50) {
                 yield this.tryClaimJob(1, {
@@ -77,6 +99,14 @@ class TransferMind extends mind.CreepMindBase {
         });
 
         yield this.tryClaimJob(1, {
+                type: 'lab-unload'
+            });
+
+        yield this.tryClaimJob(1, {
+            type: 'lab-load'
+        });
+
+        yield this.tryClaimJob(1, {
             type: 'refill-extensions'
         });
     }
@@ -98,8 +128,11 @@ class TransferMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
+     * @param {{hauler}} options
      */
-    static getSpawnParams(manager) {
+    static getSpawnParams(manager, options) {
+        options = _.defaults(options || {}, {hauler: false});
+
         let body = [MOVE, MOVE, CARRY, CARRY];
         if(manager.room.energyCapacityAvailable > 500) {
             body = bb.build([CARRY, MOVE], 400);
@@ -120,7 +153,10 @@ class TransferMind extends mind.CreepMindBase {
         return {
             body: body,
             name: 'transfer',
-            memo: {'mind': 'transfer'}
+            memo: {
+                mind: 'transfer',
+                hauler: options.hauler,
+            }
         };
     }
 

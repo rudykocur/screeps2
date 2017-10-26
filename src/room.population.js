@@ -56,6 +56,9 @@ class RoomPopulation extends utils.Executable {
             else if(this.manager.getAvgEnergyToPickup() > 1300 && this.getSpawnCooldown('transfer') > 200) {
                 this.spawnTransfer(spawn);
             }
+            else if(this.needHauler()) {
+                this.spawnHauler(spawn);
+            }
             else if(this.needUpgrader()) {
                 this.spawnUpgrader(spawn)
             }
@@ -217,6 +220,14 @@ class RoomPopulation extends utils.Executable {
         return this.manager.getCreepCount(minds.available.settler) < requiredSettlers;
     }
 
+    needHauler() {
+        if(this.manager.terminal && this.manager.data.labs >= 3) {
+            return true;
+        }
+
+        return false;
+    }
+
     spawnHarvester(spawn, blocking) {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
         if(this.manager.creeps.length < 1) {
@@ -237,6 +248,12 @@ class RoomPopulation extends utils.Executable {
         }
         this.doSpawn(spawn, options.body, options.name, options.memo, blocking);
     }
+
+    spawnHauler(spawn) {
+        let options = minds.available.transfer.getSpawnParams(this.manager, {hauler: true});
+        this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
     spawnUpgrader(spawn) {
         let options = minds.available.upgrader.getSpawnParams(this.manager);
         this.doSpawn(spawn, options.body, options.name, options.memo);

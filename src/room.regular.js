@@ -88,7 +88,7 @@ class RoomManager extends utils.Executable {
 
         this.architect = new room_architect.RoomArchitect(this);
         this.spawner = new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns);
-        this.labs  = new room_labs.LabManager(this);
+        this.labs  = new room_labs.LabManager(this, this.data.labs, this.terminal);
         this.timer.stop();
 
         this.remote = new room_remote.RemoteRoomsManager(this);

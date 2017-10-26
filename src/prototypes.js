@@ -42,6 +42,18 @@ module.exports = {
             });
         }
 
+        if(!StructureStorage.prototype.hasOwnProperty('get')) {
+            StructureStorage.prototype.get = function(resource, defaultValue) {
+                return this.store[resource] || defaultValue || 0;
+            }
+        }
+
+        if(!StructureTerminal.prototype.hasOwnProperty('get')) {
+            StructureTerminal.prototype.get = function(resource, defaultValue) {
+                return this.store[resource] || defaultValue || 0;
+            }
+        }
+
         if(!('RESOURCES_BASE' in global)) {
             global.RESOURCES_BASE = [
                 RESOURCE_UTRIUM,

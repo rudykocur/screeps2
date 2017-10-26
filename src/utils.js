@@ -55,6 +55,12 @@ class Loggable {
 
         console.log.apply(console, messages);
     }
+
+    debug(...messages) {
+        messages.unshift(`<span style="color:slategray; font-weight: bold;">[DEBUG] ${this}</span>`);
+
+        console.log.apply(console, messages);
+    }
 }
 
 class Executable extends Loggable{
