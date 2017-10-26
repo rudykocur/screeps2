@@ -152,7 +152,7 @@ class TransferMind extends mind.CreepMindBase {
 
         return {
             body: body,
-            name: 'transfer',
+            name: options.hauler ? 'hauler' : 'transfer',
             memo: {
                 mind: 'transfer',
                 hauler: options.hauler,

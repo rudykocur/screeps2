@@ -83,12 +83,12 @@ class LabUnloadJobHandler extends job_common.JobHandlerBase {
             return jobs;
         }
 
-        if(labMgr.fsm.state != 'unload' && labMgr.fsm.state != 'process') {
+        if(labMgr.fsm.state != 'empty' && labMgr.fsm.state != 'process') {
             return jobs;
         }
 
-        let unloadThreshold = 1000;
-        if(labMgr.fsm.state === 'unload') {
+        let unloadThreshold = 800;
+        if(labMgr.fsm.state === 'empty') {
             unloadThreshold = 0;
         }
 
@@ -98,7 +98,7 @@ class LabUnloadJobHandler extends job_common.JobHandlerBase {
             }
         }
 
-        if(labMgr.fsm.state === 'unload') {
+        if(labMgr.fsm.state === 'empty') {
             for(let input of labMgr.getInputLabs()) {
                 if(input.lab.mineralAmount > unloadThreshold) {
                     jobs.push(new LabUnloadJobDTO(input.lab, input.lab.mineralType));

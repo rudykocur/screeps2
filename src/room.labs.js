@@ -63,7 +63,7 @@ class LabManager extends utils.Executable {
     }
 
     update() {
-        if(this.labs.length < 3 || !this.terminal) {
+        if(this.labs.length < 3  || !this.terminal) {
             return;
         }
 
@@ -162,6 +162,8 @@ class LabManager extends utils.Executable {
                 return;
             }
         }
+
+        this.important('Finished current batch.');
 
         delete this.memory.finalTarget;
         delete this.memory.currentReaction;

@@ -225,7 +225,9 @@ class RoomPopulation extends utils.Executable {
             return true;
         }
 
-        return false;
+        let haulers = this.manager.getMinds(minds.available.transfer).filter(mind => mind.creep.memory.hauler).length;
+
+        return haulers < 1;
     }
 
     spawnHarvester(spawn, blocking) {
