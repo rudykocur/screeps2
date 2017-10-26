@@ -21,6 +21,10 @@ class RoomMarket extends utils.Executable {
             return;
         }
 
+        if(this.terminal.cooldown > 0) {
+            return;
+        }
+
         utils.everyMod(1, this.terminal.id, this.buyBaseMinerals.bind(this));
     }
 
@@ -31,15 +35,67 @@ class RoomMarket extends utils.Executable {
             return;
         }
 
-        let orders = Game.market.getAllOrders();
-        orders.forEach(order => {
-            order.distance = Game.map.getRoomLinearDistance(this.manager.roomName, order.roomName, true);
-        });
-        orders = _.sortBy(orders, 'distance');
+        if(this.terminal.store[RESOURCE_ENERGY] < 15000) {
+            return;
+        }
+
+        let orders = this.getMarketOrders(toBuy);
 
         _.each(toBuy, (maxPrice, resource) => {
-            // _.first(orders.filter)
+
+            let order = this.findBuyOrder(orders, resource);
+
+            if(!order) {
+                return;
+            }
+
+            let toBuy = this.resourcesMinimum - (this.terminal.store[resource] || 0);
+            toBuy = Math.min(toBuy, order.remainingAmount);
+
+            let result = Game.market.deal(order.id, toBuy, this.manager.roomName);
+
+            if(result === OK) {
+                this.important(`Bought ${toBuy} of ${resource} for ${order.price}. Energy cost: ${order.energyCost}`);
+            }
         });
+    }
+
+    findBuyOrder(orders, resource) {
+        for(let order of orders) {
+            if(order.resourceType !== resource) {
+                continue;
+            }
+
+            return order;
+        }
+    }
+
+    getMarketOrders(maxPrices) {
+        let orders = Game.market.getAllOrders({type: ORDER_SELL});
+        orders.forEach(order => {
+            if(!order.roomName) {
+                return;
+            }
+
+            order.distance = Game.map.getRoomLinearDistance(this.manager.roomName, order.roomName, true);
+            order.energyCost = Game.market.calcTransactionCost(
+                order.remainingAmount, this.manager.roomName, order.roomName)
+        });
+        orders = orders.filter(o => {
+            if(!o.energyCost || o.energyCost > 15000) {
+                return false;
+            }
+
+            if(o.distance > 60) {
+                return false;
+            }
+
+            return o.price < maxPrices[o.resourceType];
+        });
+
+        orders = _.sortBy(orders, 'price');
+
+        return orders;
     }
 
     getResourcesToBuy() {

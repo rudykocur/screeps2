@@ -31,7 +31,7 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
             this.creep.mover.moveTo(storage.target);
         }
         else {
-            storage.withdraw(this.creep);
+            storage.withdraw(this.creep, this.data.resource || RESOURCE_ENERGY);
             this.fsm.enter(STATE.DEPOSIT)
         }
     }
@@ -43,7 +43,7 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
             this.creep.mover.moveTo(target);
         }
         else {
-            this.creep.transfer(target, RESOURCE_ENERGY);
+            this.creep.transfer(target, this.data.resource || RESOURCE_ENERGY);
             this.completeJob();
         }
     }
@@ -53,24 +53,34 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        if(!manager.room.terminal || manager.storage.getStoredEnergy() < 20000) {
-            return [];
+        let jobs = [];
+
+        let terminal = manager.room.terminal;
+        let storage = manager.room.storage;
+
+        if(!terminal || !storage) {
+            return jobs;
         }
 
-        if(manager.room.terminal.store[RESOURCE_ENERGY] > 25000) {
-            return [];
+        for(let resource of [RESOURCE_ENERGY, manager.data.mineral.mineralType]) {
+            if((storage.store[resource] || 0) > 20000 && (terminal.store[resource] || 0) < 25000) {
+                jobs.push(new TerminalFillEnergyJobDTO(terminal, resource));
+            }
         }
 
-        return [new TerminalFillEnergyJobDTO(manager.room.terminal)];
+        return jobs;
     }
 }
 
 class TerminalFillEnergyJobDTO extends job_common.JobDTO {
     /**
      * @param {Structure} struct
+     * @param resource
      */
-    constructor(struct) {
-        super('terminal-fill-energy-'+struct.id, JOB_TYPE, minds.available.transfer);
+    constructor(struct, resource) {
+        super('terminal-fill-'+resource+'-'+struct.id, JOB_TYPE, minds.available.transfer);
+
+        this.resource = resource;
     }
 }
 

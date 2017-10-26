@@ -85,9 +85,10 @@ class StorageWrapper extends utils.Executable {
 
     /**
      * @param {Creep} toCreep
+     * @param resource
      */
-    withdraw(toCreep) {
-        toCreep.withdraw(this.target, RESOURCE_ENERGY);
+    withdraw(toCreep, resource) {
+        toCreep.withdraw(this.target, resource || RESOURCE_ENERGY);
     }
 
     toString() {
