@@ -147,8 +147,11 @@ module.exports = {
     /**
      * @param {RoomPosition} from
      * @param {RoomPosition} to
+     * @param {Object} options
      */
-    getMultiRoomPath(from, to) {
+    getMultiRoomPath(from, to, options) {
+        _.defaults(options, {avoidHostile: true, roomCallback: null});
+
         let myUser = utils.myUsername();
 
         let allowedRooms = { [ from.roomName ]: true };
@@ -166,7 +169,7 @@ module.exports = {
                         return 1;
                     }
 
-                    if(cache.isOwned()) {
+                    if(options.avoidHostile && cache.isOwned()) {
                         return Infinity;
                     }
                 }
@@ -218,6 +221,10 @@ module.exports = {
                             }
                         }
                     }
+                }
+
+                if(options.roomCallback) {
+                    options.roomCallback(roomName, matrix)
                 }
 
                 return matrix;

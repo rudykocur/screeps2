@@ -73,6 +73,10 @@ class TransferMind extends mind.CreepMindBase {
         });
 
         yield this.tryClaimJob(1, {
+            type: 'terminal-fill-energy'
+        });
+
+        yield this.tryClaimJob(1, {
             type: 'refill-extensions'
         });
     }

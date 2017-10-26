@@ -9,6 +9,7 @@ const room_labs = require('room.labs');
 const threat = require('combat.threat');
 const data = require('room.data');
 const stats = require('room.stats');
+const market = require('room.market');
 
 const wrappers = require('room.wrappers');
 
@@ -71,6 +72,7 @@ class RoomManager extends utils.Executable {
         });
 
         this.terminal = this.room.terminal;
+        this.market = new market.RoomMarket(this, this.terminal);
 
         this.threat = new threat.ThreatAssesment(this.enemies);
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
@@ -168,6 +170,7 @@ class RoomManager extends utils.Executable {
         this.remote.run();
 
         this.timer.count(()=> {
+            this.market.run();
             this.architect.run();
             this.storage.run();
             this.links.forEach(link => {
@@ -178,10 +181,6 @@ class RoomManager extends utils.Executable {
             this.stats.run();
         });
     }
-
-
-
-
 
     getExtensionsClusters() {
         return this.flags.filter(flags.isExtensionCluster).map(

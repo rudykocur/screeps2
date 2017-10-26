@@ -7,6 +7,7 @@ const proto = require('prototypes');
 const maps = require('maps');
 const stats = require('utis.stats');
 const sandbox = require('utils.sandbox');
+const utils_console = require('utils.console');
 
 proto.installPrototypes();
 
@@ -68,6 +69,8 @@ module.exports.loop = function () {
 
     stats.countStats(initTime, managers, jobBoard);
 
-    // sandbox.debugFun2(maps, utils);
+    utils_console.installConsoleFunctions(global);
+
+    // sandbox.debugFun2();
     // sandbox.debugFun3();
 };

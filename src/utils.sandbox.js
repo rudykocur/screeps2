@@ -37,7 +37,7 @@ function damageMapForTower(towerPos) {
 function costMatrixForHealer(healPower, maps, roomName) {
     let costs = new PathFinder.CostMatrix();
 
-    maps.getCostMatrix(roomName, costs);
+    // maps.getCostMatrix(roomName, costs);
 
     let cache = maps.getRoomCache(roomName);
 
@@ -132,8 +132,9 @@ module.exports = {
         let path = PathFinder.search(from, to.map(s=>s.pos), {
             plainCost: 2,
             swampCost: 5,
-            maxOps: 13000,
-            roomCallback: (name) => costMatrixForHealer(520, maps, name)
+            maxRooms: 32,
+            maxOps: 43000,
+            roomCallback: (name) => costMatrixForHealer(300, maps, name)
         });
 
         utils.debugPath(path.path);
@@ -151,7 +152,7 @@ module.exports = {
 
             for(let dmg of dmgMap) {
                 let key = `${dmg.pos.x}-${dmg.pos.y}`;
-                matrix[key] = dmg.damage + (matrix[key] || 150);
+                matrix[key] = dmg.damage + (matrix[key] || 0);
             }
         }
 

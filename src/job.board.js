@@ -8,7 +8,7 @@ const jobModules = {};
 [
     'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower',
     'job.harvest', 'job.harvest-mineral', 'job.empty-containers', 'job.controller-link',
-    'job.empty-storage-link',
+    'job.empty-storage-link', 'job.terminal-fill-energy',
 ].forEach(modName => {
     let mod = require(modName);
     jobModules[mod.JOB_TYPE] = mod.getHandler();
