@@ -22,25 +22,15 @@ class RefillTowerJobHandler extends job_common.JobHandlerBase {
     }
 
     getEnergy() {
-        if(this.roomMgr.storage.isNear(this.creep)) {
-            this.roomMgr.storage.withdraw(this.creep);
-            this.fsm.enter(STATE_REFILL);
-        }
-        else {
-            this.creep.mover.moveTo(this.roomMgr.storage.target);
-        }
+        this.actions.withdrawFromStorage(RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE_REFILL)
+        });
     }
 
     refillTower() {
-        let tower = Game.getObjectById(this.data.targetId);
-
-        if(this.creep.pos.isNearTo(tower)) {
-            this.creep.transfer(tower, RESOURCE_ENERGY);
-            this.completeJob();
-        }
-        else {
-            this.creep.mover.moveTo(tower);
-        }
+        this.actions.transferInto(this.data.targetId, RESOURCE_ENERGY, {
+            onDone: () => this.completeJob()
+        });
     }
 
     /**

@@ -44,7 +44,7 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(_.sum(this.creep.carry) < 1) {
+        if(this.creep.carry[RESOURCE_ENERGY] < 1) {
             this.completeJob();
             return;
         }

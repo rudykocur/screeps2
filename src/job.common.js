@@ -1,3 +1,4 @@
+var _ = require('lodash');
 const fsmModule = require('fsm');
 const utils = require('utils');
 
@@ -17,6 +18,8 @@ class JobHandlerBase extends utils.Loggable {
         }
 
         this.creep.memory.jobStateData.fsm = this.creep.memory.jobStateData.fsm || {};
+
+        this.actions = new JobCommonActions(this.creep, this.workRoom, this.fsm);
     }
 
     configureFSM(initialState, config) {
@@ -55,6 +58,121 @@ class JobHandlerBase extends utils.Loggable {
 
     toString() {
         return `[${this.constructor.name} for ${this.creep}]`;
+    }
+}
+
+class JobCommonActions {
+    constructor(creep, workRoom, fsm) {
+        this.creep = creep;
+        this.workRoom = workRoom;
+        this.fsm = fsm;
+    }
+
+    /**
+     * @param [options] Options
+     * @param [options.onDone] callback invoked after transfer
+     * @param [options.onTick] callback invoked in each tick
+     * @param [options.storage] Storage where unload to
+     */
+    unloadAllResources(options) {
+        options = _.defaults(options, {
+            onDone: () => {},
+            onTick: () => {},
+            storage: this.workRoom.storage
+        });
+
+        options.onTick();
+
+        if(!options.storage.canDeposit(this.creep)) {
+            this.creep.mover.moveTo(options.storage.target);
+        }
+        else {
+            if(this.creep.carryTotal > 0) {
+                options.storage.deposit(this.creep);
+            }
+            else {
+                options.onDone();
+            }
+        }
+    }
+
+    /**
+     * @param resource
+     * @param [options] Options
+     * @param [options.onDone] callback invoked after transfer
+     */
+    withdrawFromStorage(resource, options) {
+        options = _.defaults(options, {
+            onDone: () => {},
+        });
+
+        let storage = this.workRoom.storage;
+
+        if(!storage.isNear(this.creep)) {
+            this.creep.mover.moveTo(storage.target);
+        }
+        else {
+            storage.withdraw(this.creep, resource);
+            options.onDone();
+        }
+    }
+
+    /**
+     *
+     * @param target
+     * @param resource
+     * @param {{onDone,getAmount}} options
+     */
+    withdrawFrom(target, resource, options) {
+        options = _.defaults(options, {
+            onDone: () => {},
+            getAmount: () => undefined
+        });
+
+        if(_.isString(target)) {
+            target = Game.getObjectById(target);
+        }
+
+        if(!target) {
+            options.onDone();
+            return;
+        }
+
+        if(!this.creep.pos.isNearTo(target)) {
+            this.creep.mover.moveTo(target);
+        }
+        else {
+            this.creep.withdraw(target, resource, options.getAmount());
+
+            options.onDone();
+        }
+    }
+
+    /**
+     * @param target
+     * @param resource
+     * @param [options] Options
+     * @param [options.onDone] callback invoked after transfer
+     */
+    transferInto(target, resource, options) {
+        options = _.defaults(options, {onDone: () => {}});
+
+        if(_.isString(target)) {
+            target = Game.getObjectById(target);
+        }
+
+        if(!target) {
+            options.onDone();
+            return;
+        }
+
+        if(!this.creep.pos.isNearTo(target)) {
+            this.creep.mover.moveTo(target);
+        }
+        else {
+            this.creep.transfer(target, resource);
+            options.onDone();
+        }
     }
 }
 

@@ -42,6 +42,14 @@ module.exports = {
             });
         }
 
+        if(!Creep.prototype.hasOwnProperty('carryTotal')) {
+            Object.defineProperty(Creep.prototype, "carryTotal", {
+                get: function () {
+                    return _.sum(this.carry);
+                }
+            });
+        }
+
         if(!StructureStorage.prototype.hasOwnProperty('get')) {
             StructureStorage.prototype.get = function(resource, defaultValue) {
                 return this.store[resource] || defaultValue || 0;

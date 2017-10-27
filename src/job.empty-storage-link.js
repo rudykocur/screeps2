@@ -25,36 +25,15 @@ class EmptyStorageLinkJobHandler extends job_common.JobHandlerBase {
     }
 
     pickupFromLink() {
-        let link = Game.getObjectById(this.data.targetId);
-
-        if(!link) {
-            this.completeJob();
-            return;
-        }
-
-        if(this.creep.pos.isNearTo(link)) {
-            this.creep.withdraw(link, RESOURCE_ENERGY);
-            this.fsm.enter(STATE.DEPOSIT);
-        }
-        else {
-            this.creep.mover.moveTo(link);
-        }
+        this.actions.withdrawFrom(this.data.targetId, RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE.DEPOSIT)
+        });
     }
 
     depositEnergy() {
-        let storage = this.roomMgr.storage;
-
-        if(!storage.canDeposit(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            if(_.sum(this.creep.carry) > 0) {
-                storage.deposit(this.creep);
-            }
-            else {
-                this.completeJob();
-            }
-        }
+        this.actions.unloadAllResources({
+            onDone: () => this.completeJob()
+        })
     }
 
     /**

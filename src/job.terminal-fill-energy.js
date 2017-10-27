@@ -25,27 +25,15 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
     }
 
     pickupFromStorage() {
-        let storage = this.roomMgr.storage;
-
-        if(!storage.isNear(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            storage.withdraw(this.creep, this.data.resource || RESOURCE_ENERGY);
-            this.fsm.enter(STATE.DEPOSIT)
-        }
+        this.actions.withdrawFromStorage(this.data.resource || RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE.DEPOSIT)
+        });
     }
 
     depositEnergy() {
-        let target = this.roomMgr.room.terminal;
-
-        if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
-        }
-        else {
-            this.creep.transfer(target, this.data.resource || RESOURCE_ENERGY);
-            this.completeJob();
-        }
+        this.actions.transferInto(this.workRoom.terminal, this.data.resource || RESOURCE_ENERGY, {
+            onDone: () => this.completeJob()
+        })
     }
 
     /**

@@ -25,8 +25,8 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
     }
 
     pickupResource() {
-        if(_.sum(this.creep.carry) > 0) {
-            this.emptyCarry();
+        if(this.creep.carryTotal > 0) {
+            this.actions.unloadAllResources();
             return;
         }
 
@@ -43,47 +43,23 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(!this.creep.pos.isNearTo(source)) {
-            this.creep.mover.moveTo(source);
-        }
-        else {
-            let target = Game.getObjectById(this.data.labId);
-            let needed = target.mineralCapacity - target.mineralAmount;
-            let have = source.get(this.data.resource);
+        this.actions.withdrawFrom(source, this.data.resource, {
+            getAmount: () => {
+                let lab = Game.getObjectById(this.data.labId);
+                let needed = lab.mineralCapacity - lab.mineralAmount;
+                let have = source.get(this.data.resource);
 
-            this.creep.withdraw(source, this.data.resource,
-                Math.min(needed, this.creep.carryCapacity, have));
+                return Math.min(needed, this.creep.carryCapacity, have)
+            },
 
-            this.fsm.enter(STATE.DEPOSIT)
-        }
-    }
-
-    emptyCarry() {
-        let storage = this.roomMgr.storage;
-
-        if(!storage.isNear(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            this.workRoom.storage.deposit(this.creep);
-        }
+            onDone: () => this.fsm.enter(STATE.DEPOSIT)
+        })
     }
 
     loadIntoLab() {
-        let target = Game.getObjectById(this.data.labId);
-
-        if(!target) {
-            this.completeJob();
-            return;
-        }
-
-        if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
-        }
-        else {
-            this.creep.transfer(target, this.data.resource);
-            this.completeJob();
-        }
+        this.actions.transferInto(this.data.labId, this.data.resource, {
+            onDone: this.completeJob.bind(this),
+        })
     }
 
     /**

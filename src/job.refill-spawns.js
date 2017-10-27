@@ -22,25 +22,15 @@ class RefillSpawnsJobHandler extends job_common.JobHandlerBase {
     }
 
     getEnergy() {
-        if(this.roomMgr.storage.isNear(this.creep)) {
-            this.roomMgr.storage.withdraw(this.creep);
-            this.fsm.enter(STATE_REFILL);
-        }
-        else {
-            this.creep.mover.moveTo(this.roomMgr.storage.target);
-        }
+        this.actions.withdrawFromStorage(RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE_REFILL)
+        });
     }
 
     refillSpawn() {
-        let spawn = Game.getObjectById(this.data.targetId);
-
-        if(this.creep.pos.isNearTo(spawn)) {
-            this.creep.transfer(spawn, RESOURCE_ENERGY);
-            this.completeJob();
-        }
-        else {
-            this.creep.mover.moveTo(spawn);
-        }
+        this.actions.transferInto(this.data.targetId, RESOURCE_ENERGY, {
+            onDone: () => this.completeJob()
+        });
     }
 
     /**

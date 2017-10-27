@@ -25,49 +25,20 @@ class LabUnloadJobHandler extends job_common.JobHandlerBase {
     }
 
     pickupFromLab() {
-        if(_.sum(this.creep.carry) > 0) {
-            this.emptyCarry();
+        if(this.creep.carryTotal > 0) {
+            this.actions.unloadAllResources();
             return;
         }
 
-        let target = Game.getObjectById(this.data.labId);
-
-        if(!target) {
-            this.completeJob();
-            return;
-        }
-
-        if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
-        }
-        else {
-            this.creep.withdraw(target, this.data.resource);
-            this.fsm.enter(STATE.DEPOSIT)
-        }
-    }
-
-    emptyCarry() {
-        let storage = this.roomMgr.storage;
-
-        if(!storage.isNear(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            this.workRoom.storage.deposit(this.creep);
-        }
+        this.actions.withdrawFrom(this.data.labId, this.data.resource, {
+            onDone: () => this.fsm.enter(STATE.DEPOSIT)
+        });
     }
 
     depositIntoTerminal() {
-        let terminal = this.roomMgr.terminal;
-
-        if(!this.creep.pos.isNearTo(terminal)) {
-            this.creep.mover.moveTo(terminal);
-        }
-        else {
-            this.creep.transfer(terminal, this.data.resource);
-
-            this.completeJob();
-        }
+        this.actions.transferInto(this.workRoom.terminal, this.data.resource, {
+            onDone: () => this.completeJob()
+        });
     }
 
     /**

@@ -1,3 +1,4 @@
+var _ = require('lodash');
 const minds = require('mind');
 const maps = require('maps');
 const job_common = require('job.common');
@@ -51,18 +52,16 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
             storage = this.roomMgr.storage;
         }
 
-        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
-        if(struct && struct.hits < struct.hitsMax) {
-            this.creep.repair(struct);
-        }
-
-        if(!storage.canDeposit(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            storage.deposit(this.creep);
-            this.completeJob();
-        }
+        this.actions.unloadAllResources({
+            storage: storage,
+            onTick: () => {
+                let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
+                if(struct && struct.hits < struct.hitsMax) {
+                    this.creep.repair(struct);
+                }
+            },
+            onDone: () => this.completeJob(),
+        });
     }
 
     /**
