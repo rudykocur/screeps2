@@ -202,6 +202,17 @@ class LabManager extends utils.Executable {
             ];
     }
 
+    addDiagnosticMessages(messages) {
+        if(this.labs.length < 3) {
+            return;
+        }
+
+        messages.push(`Labs state: ${this.fsm.state}`);
+        if(this.fsm.state !== STATE.IDLE) {
+            messages.push(`Labs target: ${this.memory.finalTarget.resource}, reaction: ${this.memory.currentReaction}`);
+        }
+    }
+
     toString() {
         return `[LabManager for ${this.manager.roomName}]`;
     }

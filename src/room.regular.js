@@ -92,7 +92,7 @@ class RoomManager extends utils.Executable {
         this.timer.stop();
 
         this.remote = new room_remote.RemoteRoomsManager(this);
-        this.stats = new stats.RoomStats(this);
+        this.stats = new stats.RoomStats(this, this.labs);
     }
 
     initMemory() {

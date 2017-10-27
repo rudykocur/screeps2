@@ -2,9 +2,15 @@ var _ = require('lodash');
 const utils = require('utils');
 
 class RoomStats extends utils.Executable {
-    constructor(manager) {
+    /**
+     *
+     * @param manager
+     * @param {LabManager} labs
+     */
+    constructor(manager, labs) {
         super();
         this.manager = manager;
+        this.labs = labs;
         this.room = this.manager.room;
         this.data = manager.data;
 
@@ -29,6 +35,8 @@ class RoomStats extends utils.Executable {
 
         this._updateSpawnerEnergy();
         this._updateSpawnsUsage();
+
+        this.labs.addDiagnosticMessages(this.messages);
 
         this.printDiagnostics();
     }

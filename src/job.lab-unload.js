@@ -87,7 +87,7 @@ class LabUnloadJobHandler extends job_common.JobHandlerBase {
             return jobs;
         }
 
-        let unloadThreshold = 800;
+        let unloadThreshold = 350;
         if(labMgr.fsm.state === 'empty') {
             unloadThreshold = 0;
         }
