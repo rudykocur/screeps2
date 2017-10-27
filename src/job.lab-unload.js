@@ -75,35 +75,14 @@ class LabUnloadJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
+        if(!manager.labs) {
+            return [];
+        }
+
         let jobs = [];
 
-        let labMgr = manager.labs;
-
-        if(!labMgr) {
-            return jobs;
-        }
-
-        if(labMgr.fsm.state != 'empty' && labMgr.fsm.state != 'process') {
-            return jobs;
-        }
-
-        let unloadThreshold = 350;
-        if(labMgr.fsm.state === 'empty') {
-            unloadThreshold = 0;
-        }
-
-        for(let lab of labMgr.getOutputLabs()) {
-            if(lab.mineralAmount > unloadThreshold) {
-                jobs.push(new LabUnloadJobDTO(lab, lab.mineralType));
-            }
-        }
-
-        if(labMgr.fsm.state === 'empty') {
-            for(let input of labMgr.getInputLabs()) {
-                if(input.lab.mineralAmount > unloadThreshold) {
-                    jobs.push(new LabUnloadJobDTO(input.lab, input.lab.mineralType));
-                }
-            }
+        for(let lab of manager.labs.getLabsToUnload()) {
+            jobs.push(new LabUnloadJobDTO(lab, lab.mineralType));
         }
 
         return jobs;

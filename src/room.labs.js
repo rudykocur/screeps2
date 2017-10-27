@@ -1,7 +1,6 @@
 var _ = require('lodash');
 const fsm = require('fsm');
 const utils = require('utils');
-const flags = require('utils.flags');
 
 const STATE = {
     IDLE: 'idle',
@@ -18,7 +17,7 @@ class LabManager extends utils.Executable {
         this.labs = labs;
         this.terminal = terminal;
 
-        _.defaultsDeep(this.manager.room.memory, {labs: {fsm: {}}, });
+        _.defaultsDeep(this.manager.room.memory, {labs: {fsm: {}, layout: {}}, });
 
         this.fsm = new fsm.FiniteStateMachine({
             [STATE.IDLE]: {
@@ -62,15 +61,29 @@ class LabManager extends utils.Executable {
         return this.memory.outLabs.map(Game.getObjectById);
     }
 
+    mustRegenerateLayout() {
+        return this.memory.layout.labCount !== this.labs.length;
+    }
+
     update() {
         if(this.labs.length < 3  || !this.terminal) {
             return;
         }
 
+        if(this.mustRegenerateLayout() && this.fsm.state === STATE.IDLE) {
+            this.regenerateLabLayout();
+        }
+
         this.fsm.run();
+
+        this.decorateLabs();
     }
 
     pickNextTarget() {
+        if(this.mustRegenerateLayout()) {
+            return;
+        }
+
         let target = this.pickNextFinalTarget();
 
         if(!target) {
@@ -88,34 +101,16 @@ class LabManager extends utils.Executable {
     }
 
     prepareLabsForLoad() {
-        let inputLabs = [];
-        let outLabsIds = [];
-        for(let lab of this.labs) {
-            let isInput = _.first(lab.pos.lookFor(LOOK_FLAGS).filter(flags.isInputLab));
-
-            if(isInput) {
-                inputLabs.push(lab);
-            }
-            else {
-                outLabsIds.push(lab.id);
-            }
-        }
-
-        if(inputLabs.length !== 2) {
-            this.warn('Invalid input labs:', inputLabs);
-            this.fsm.enter(STATE.IDLE);
-            return;
-        }
-
-        let labs = _.sortBy(inputLabs, 'id');
+        let inputLabsIds = this.memory.layout.inputLabs;
+        let outLabsIds = this.memory.layout.outputLabs;
 
         this.memory.inLabs = {
             in1: {
-                id: labs[0].id,
+                id: inputLabsIds[0],
                 resource: this.memory.currentReaction[0],
             },
             in2: {
-                id: labs[1].id,
+                id: inputLabsIds[1],
                 resource: this.memory.currentReaction[1],
             },
         };
@@ -148,6 +143,15 @@ class LabManager extends utils.Executable {
         if(currentAmount > this.memory.finalTarget.amount) {
             this.fsm.enter(STATE.EMPTY);
         }
+
+        utils.every(100, () => {
+            if((lab1.mineralAmount === 0 && this.terminal.get(input[0].resource) === 0) ||
+                (lab2.mineralAmount === 0 && this.terminal.get(input[1].resource) === 0))
+            {
+                this.warn('Terminal has no required resources. Entering unload');
+                this.fsm.enter(STATE.EMPTY);
+            }
+        })
     }
 
     checkLabsEmpty() {
@@ -171,6 +175,43 @@ class LabManager extends utils.Executable {
         delete this.memory.outLabs;
 
         this.fsm.enter(STATE.IDLE);
+    }
+
+    getLabsToLoad() {
+        if(this.fsm.state !== STATE.LOAD && this.fsm.state !== STATE.PROCESS) {
+            return [];
+        }
+
+        return this.getInputLabs();
+    }
+
+    getLabsToUnload() {
+        if(this.fsm.state !== STATE.EMPTY && this.fsm.state !== STATE.PROCESS) {
+            return [];
+        }
+
+        let unloadThreshold = 350;
+        if(this.fsm.state === STATE.EMPTY) {
+            unloadThreshold = 0;
+        }
+
+        let result = [];
+
+        for(let lab of this.getOutputLabs()) {
+            if(lab.mineralAmount > unloadThreshold) {
+                result.push(lab);
+            }
+        }
+
+        if(this.fsm.state === STATE.EMPTY) {
+            for(let input of this.getInputLabs()) {
+                if(input.lab.mineralAmount > unloadThreshold) {
+                    result.push(input.lab);
+                }
+            }
+        }
+
+        return result;
     }
 
     pickNextFinalTarget() {
@@ -200,6 +241,85 @@ class LabManager extends utils.Executable {
                 {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
                 {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
             ];
+    }
+
+    regenerateLabLayout() {
+        let lab1, lab2;
+
+        for(let lab of this.labs) {
+            let others = _.without(this.labs, lab);
+
+            if(this.isReachable(lab, others)) {
+                lab1 = lab;
+                break;
+            }
+        }
+
+        if(!lab1) {
+            this.warn('Cannot find reachable first lab');
+            return;
+        }
+
+        let remaining = _.without(this.labs, lab1);
+
+        for(let lab of remaining) {
+            let others = _.without(remaining, lab);
+
+            if(this.isReachable(lab, others)) {
+                lab2 = lab;
+                break;
+            }
+        }
+
+        if(!lab2) {
+            this.warn('Cannot find reachable second lab');
+            return;
+        }
+
+        lab1.room.visual.circle(lab1.pos, {radius: 1});
+        lab2.room.visual.circle(lab2.pos, {radius: 1});
+
+        this.memory.layout = {
+            labCount: this.labs.length,
+            inputLabs: [lab1.id, lab2.id],
+            outputLabs: _.without(this.labs, lab1, lab2).map(lab => lab.id),
+        };
+
+        this.warn(`Regenerated lab layout for count: ${this.labs.length}`);
+    }
+
+    isReachable(centerLab, others) {
+        for(let lab of others) {
+            if(!lab.pos.inRangeTo(centerLab, 2)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    decorateLabs() {
+        if(this.mustRegenerateLayout()) {
+            for(let lab of this.labs) {
+                lab.room.visual.circle(lab.pos, {
+                    fill: 'transparent',
+                    stroke: 'yellow',
+                    strokeWidth: 0.2,
+                    radius: 0.6
+                })
+            }
+        }
+        else {
+            for(let labId of this.memory.layout.inputLabs) {
+                let lab = Game.getObjectById(labId);
+                lab.room.visual.circle(lab.pos, {
+                    fill: 'transparent',
+                    stroke: 'pink',
+                    strokeWidth: 0.2,
+                    radius: 0.6
+                })
+            }
+        }
     }
 
     addDiagnosticMessages(messages) {

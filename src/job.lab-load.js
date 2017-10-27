@@ -80,19 +80,13 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
+        if(!manager.labs) {
+            return [];
+        }
+
         let jobs = [];
 
-        let labMgr = manager.labs;
-
-        if(!labMgr) {
-            return jobs;
-        }
-
-        if(labMgr.fsm.state != 'load' && labMgr.fsm.state != 'process') {
-            return jobs;
-        }
-
-        for(let input of labMgr.getInputLabs()) {
+        for(let input of manager.labs.getLabsToLoad()) {
             if(input.lab.mineralAmount + 500 > input.lab.mineralCapacity) {
                 continue;
             }
