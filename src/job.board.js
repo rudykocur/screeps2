@@ -164,7 +164,6 @@ class JobBoard extends utils.Executable {
 
     handleDeadCreep(name, memo) {
         if(memo.jobId) {
-            this.info('Cleaned claim for dead creep', name, '::', memo.jobId);
 
             delete this.memory[memo.jobId].claims[name];
             delete this.memory[memo.jobId].takenBy[name];

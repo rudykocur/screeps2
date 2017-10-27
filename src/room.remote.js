@@ -309,10 +309,11 @@ class RemoteRoomHandler extends utils.Executable {
 
         maps.updateRoomCache(this.room, 0);
 
-        let enemyCtrl = this.room.controller.owner && this.room.controller.owner.username !== 'rudykocur';
+        let enemyCtrl = !!this.room.controller.owner && this.room.controller.owner.username !== 'rudykocur';
 
         if(enemyCtrl && this.shouldSpawnBreachCreep()) {
             this.spawnMind(minds.available.defender, {breach: enemyCtrl});
+            return;
         }
 
         let defenders = this.getCreepCount(minds.available.defender) + this.getCreepCount(minds.available.rangedDefender);
@@ -323,12 +324,18 @@ class RemoteRoomHandler extends utils.Executable {
             requiredDefenders = 2;
         }
 
-        if(!enemyCtrl || defenders < requiredDefenders) {
+        if(defenders < requiredDefenders) {
+            let name;
+
             if(this.threat.rangedPower() > 3) {
-                this.spawnMind(minds.available.rangedDefender);
+                name = this.spawnMind(minds.available.rangedDefender);
             }
             else {
-                this.spawnMind(minds.available.defender);
+                name = this.spawnMind(minds.available.defender);
+            }
+
+            if(name) {
+                this.warn('Created new defender', name);
             }
         }
     }

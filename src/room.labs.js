@@ -138,20 +138,18 @@ class LabManager extends utils.Executable {
         }
 
         let currentTarget = REACTIONS[input[0].resource][input[1].resource];
-        let currentAmount = this.terminal.get(currentTarget);
+        let currentAmount = this.terminal.get(currentTarget) + _.sum(this.getOutputLabs(), 'mineralAmount');
 
         if(currentAmount > this.memory.finalTarget.amount) {
             this.fsm.enter(STATE.EMPTY);
         }
 
-        utils.every(100, () => {
-            if((lab1.mineralAmount === 0 && this.terminal.get(input[0].resource) === 0) ||
-                (lab2.mineralAmount === 0 && this.terminal.get(input[1].resource) === 0))
-            {
-                this.warn('Terminal has no required resources. Entering unload');
-                this.fsm.enter(STATE.EMPTY);
-            }
-        })
+        if((lab1.mineralAmount === 0 && this.terminal.get(input[0].resource) === 0) ||
+            (lab2.mineralAmount === 0 && this.terminal.get(input[1].resource) === 0))
+        {
+            this.important('Depleted available resources. Entering unload.');
+            this.fsm.enter(STATE.EMPTY);
+        }
     }
 
     checkLabsEmpty() {
@@ -190,7 +188,7 @@ class LabManager extends utils.Executable {
             return [];
         }
 
-        let unloadThreshold = 350;
+        let unloadThreshold = 800;
         if(this.fsm.state === STATE.EMPTY) {
             unloadThreshold = 0;
         }
@@ -226,24 +224,31 @@ class LabManager extends utils.Executable {
     }
 
     getTargets() {
-        if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
+        if(this.labs.length === 3) {
             return [
-                {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
                 {resource: RESOURCE_HYDROXIDE, amount: 5000},
                 {resource: RESOURCE_GHODIUM, amount: 5000},
             ];
         }
 
+        // if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
+        //     return [
+        //         {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 3000},
+        //         {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
+        //         {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 500},
+        //         {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 500},
+        //         // {resource: RESOURCE_HYDROXIDE, amount: 5000},
+        //         // {resource: RESOURCE_GHODIUM, amount: 5000},
+        //     ];
+        // }
+
         return [
             {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 3000},
             {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
-            {resource: RESOURCE_HYDROXIDE, amount: 5000},
-            {resource: RESOURCE_GHODIUM, amount: 5000},
+            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 500},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 500},
+            // {resource: RESOURCE_HYDROXIDE, amount: 5000},
+            // {resource: RESOURCE_GHODIUM, amount: 5000},
         ];
     }
 
