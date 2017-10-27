@@ -232,15 +232,19 @@ class LabManager extends utils.Executable {
                 {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
                 {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 3000},
                 {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
+                {resource: RESOURCE_HYDROXIDE, amount: 5000},
+                {resource: RESOURCE_GHODIUM, amount: 5000},
             ];
         }
 
         return [
-                {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
-            ];
+            {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 3000},
+            {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 3000},
+            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
+            {resource: RESOURCE_HYDROXIDE, amount: 5000},
+            {resource: RESOURCE_GHODIUM, amount: 5000},
+        ];
     }
 
     regenerateLabLayout() {
