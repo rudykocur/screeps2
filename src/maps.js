@@ -56,6 +56,10 @@ class CachedRoom {
         this.cache.data = this.cache.data.map(hydrate);
     }
 
+    get cacheAge() {
+        return Game.time - this.cache.lastUpdateTime
+    }
+
     belongsToUser(username) {
         return this.cache.owner == username || this.cache.reservedBy == username;
     }

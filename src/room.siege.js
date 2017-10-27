@@ -3,6 +3,7 @@ const utils = require('utils');
 const minds = require('mind');
 const maps = require('maps');
 const base = require('room.base');
+const threat = require('combat.threat');
 
 class RoomSiege extends base.RoomBase {
     constructor(roomName, flag, regularRooms) {
@@ -10,15 +11,21 @@ class RoomSiege extends base.RoomBase {
 
         this.flag = flag;
         this.managers = regularRooms;
+
+        this.supportRoom = _.first(this.managers.filter(mgr => mgr.room.controller.level > 6));
+
+        if(this.room) {
+            this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+
+            this.threat = new threat.ThreatAssesment(this.enemies);
+        }
     }
 
     getSpawner() {
-        for(let mgr of this.managers) {
-            let spawn = mgr.spawner.getFreeSpawn();
+        let spawn = this.supportRoom.spawner.getFreeSpawn();
 
-            if(spawn) {
-                return mgr;
-            }
+        if(spawn) {
+            return this.supportRoom;
         }
     }
 
@@ -33,23 +40,35 @@ class RoomSiege extends base.RoomBase {
 
     update() {
 
-        if(this.getCreepCount(minds.available.scout) === 0) {
-            if(this.spawn(minds.available.scout)) {
-                console.log(this, 'Spawned scout');
+        let cache = maps.getRoomCache(this.roomName);
+
+        if(!this.room) {
+            if (this.getCreepCount(minds.available.scout) === 0) {
+                if (this.spawn(minds.available.scout)) {
+                    this.important('Spawned scout');
+                }
+            }
+        }
+
+        if(cache && cache.cacheAge < 1000) {
+            if (this.getCreepCount(minds.available.breach) === 0 && this.supportRoom.labs.areBoostsReady()) {
+                // if (this.spawn(minds.available.breach)) {
+                //     this.important('Spawned breach creep');
+                // }
             }
         }
 
         if(this.room) {
             if(this.shouldSpawnClaimer()) {
                 if(this.spawn(minds.available.claimer)) {
-                    console.log(this, 'SPAWNED CLAIMER !!!!');
+                    this.important(this, 'SPAWNED CLAIMER !!!!');
                 }
             }
         }
     }
 
     shouldSpawnClaimer() {
-        if(this.room.findStructures(STRUCTURE_SPAWN).length > 0) {
+        if(this.room.find(STRUCTURE_SPAWN).length > 0) {
             return false;
         }
 

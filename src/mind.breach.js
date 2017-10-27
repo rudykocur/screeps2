@@ -5,16 +5,20 @@ const bb = require('utils.bodybuilder');
 
 const STATE = {
     IDLE: 'idle',
-    ATTACK: 'attack'
+    ATTACK: 'attack',
+    BOOST: 'boost',
 };
 
-class DefenderMind extends mind.CreepMindBase {
+class BreachMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
 
         this.setStateMachine({
             [STATE.IDLE]: {
                 onTick: this.gotoRoom.bind(this)
+            },
+            [STATE.BOOST]: {
+                onTick: this.boostSelf.bind(this)
             },
             [STATE.ATTACK]: {
                 onEnter: this.pickTarget.bind(this),
@@ -23,7 +27,45 @@ class DefenderMind extends mind.CreepMindBase {
         }, STATE.IDLE);
     }
 
+    boostSelf() {
+        let roomMgr = this.creep.room.manager;
+        if(!roomMgr.labs) {
+            this.warn('There is no labs in', roomMgr);
+        }
+
+        if(this.creep.memory.boosts.length === 0) {
+            this.important('All parts boosted. Onwards!!');
+            this.enterState(STATE.IDLE);
+            return;
+        }
+
+        let toBoost = this.creep.memory.boosts[0];
+
+        let lab = _.first(roomMgr.labs.labs.filter(lab => lab.mineralType === toBoost));
+
+        if(!lab) {
+            this.warn('There is no lab loaded with', toBoost);
+        }
+
+        if(!this.creep.pos.isNearTo(lab)) {
+            this.creep.mover.moveTo(lab);
+        }
+        else {
+            let result = lab.boostCreep(this.creep);
+            if(result === OK) {
+                this.debug('Parts boosted with', toBoost);
+                this.creep.memory.boosts.splice(0, 1);
+            }
+        }
+    }
+
     gotoRoom() {
+        if(this.creep.memory.boosts.length > 0) {
+            this.debug('Entering boost state');
+            this.enterState(STATE.BOOST);
+            return;
+        }
+
         let roomName = this.creep.memory.roomName;
 
         this.creep.heal(this.creep);
@@ -53,7 +95,7 @@ class DefenderMind extends mind.CreepMindBase {
                 }
             }
 
-            let pos = this.workRoom.controller.getStandingPosition();
+            let pos = this.workRoom.flag.pos;
 
             if(!this.creep.pos.isEqualTo(pos)) {
                 this.creep.mover.moveTo(pos);
@@ -67,8 +109,26 @@ class DefenderMind extends mind.CreepMindBase {
     getTarget() {
         let target = this.workRoom.threat.getClosestEnemy(this.creep);
 
+        // let target = this.creep.pos.findClosestByPath(this.workRoom.threat.getCombatCreeps());
+        let room = this.workRoom.room;
+
         if(!target) {
-            target = _.first(this.workRoom.room.find(FIND_HOSTILE_STRUCTURES).filter(s => s.structureType !== STRUCTURE_CONTROLLER));
+            let structures = room.find(FIND_HOSTILE_STRUCTURES).filter(
+                s => s.structureType !== STRUCTURE_CONTROLLER && s.structureType !== STRUCTURE_STORAGE);
+
+            target = _.first(structures.filter(s => s.structureType == STRUCTURE_TOWER));
+
+            if(!target) {
+                target = _.first(structures.filter(s => s.structureType == STRUCTURE_SPAWN));
+            }
+
+            if(!target) {
+                target = _.first(structures.filter(s => s.structureType == STRUCTURE_EXTENSION));
+            }
+
+            if(!target) {
+                target = _.first(structures);
+            }
         }
 
         return target;
@@ -95,23 +155,22 @@ class DefenderMind extends mind.CreepMindBase {
         if(!this.creep.pos.isNearTo(target)) {
             this.goNearTarget(target);
             this.creep.room.visual.line(this.creep.pos, target.pos, {color:"red"});
-            // this.creep.mover.moveTo(target, {visualizePathStyle: {color: "red"}, ignoreDestructibleStructures:true});
-
-            // }
-            // else {
-            //     let x = this.creep.mover.moveTo(target, {visualizePathStyle: {color: "red"}, ignoreDestructibleStructures:true});
-            // }
         }
         else {
             this.creep.mover.enterStationary();
         }
 
+        if(this.creep.hits < this.creep.hitsMax) {
+            this.creep.heal(this.creep);
+        }
+
         if(this.creep.pos.isNearTo(target)) {
             this.creep.attack(target);
         }
+
         this.creep.rangedAttack(target);
 
-        this.creep.heal(this.creep);
+
     }
 
     goNearTarget(target) {
@@ -162,24 +221,20 @@ class DefenderMind extends mind.CreepMindBase {
     static getSpawnParams(manager, options) {
         options = options || {};
 
-        let body = [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK];
-        if(manager.room.energyCapacityAvailable > 1000) {
-            body = [TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK];
-        }
-
-        if(options.breach) {
-            body = bb.build([ATTACK, ATTACK, MOVE], manager.room.energyCapacityAvailable,
-                [], [RANGED_ATTACK, MOVE]);
-        }
+        let body = Memory.siegeCreep.body;
+        let boosts = Memory.siegeCreep.boosts;
 
         return {
             body: body,
-            name: 'defender',
-            memo: {'mind': 'defender'}
+            name: 'breach',
+            memo: {
+                mind: 'breach',
+                boosts: boosts,
+            }
         };
     }
 }
 
 module.exports = {
-    DefenderMind
+    BreachMind
 };

@@ -44,6 +44,10 @@ class RangedDefenderMind extends mind.CreepMindBase {
     }
 
     getTarget() {
+        if(!this.workRoom) {
+            return;
+        }
+
         let target = this.workRoom.threat.getClosestEnemy(this.creep);
 
         if(!target) {

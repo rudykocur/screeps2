@@ -16,7 +16,7 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
 
         this.configureFSM(STATE.PICKUP, {
             [STATE.PICKUP]: {
-                onTick: this.pickupFromTerminal.bind(this)
+                onTick: this.pickupResource.bind(this)
             },
             [STATE.DEPOSIT]: {
                 onTick: this.loadIntoLab.bind(this)
@@ -24,23 +24,34 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
         })
     }
 
-    pickupFromTerminal() {
+    pickupResource() {
         if(_.sum(this.creep.carry) > 0) {
             this.emptyCarry();
             return;
         }
 
-        let terminal = this.roomMgr.terminal;
+        let source;
 
-        if(!this.creep.pos.isNearTo(terminal)) {
-            this.creep.mover.moveTo(terminal);
+        if(this.roomMgr.room.storage.get(this.data.resource) > 0) {
+            source = this.roomMgr.room.storage;
+        }
+        else if(this.roomMgr.terminal.get(this.data.resource) > 0) {
+            source = this.roomMgr.terminal;
+        }
+        else {
+            this.warn('Nowhere to load', this.data.resource, 'from. Room:', this.roomMgr);
+            return;
+        }
+
+        if(!this.creep.pos.isNearTo(source)) {
+            this.creep.mover.moveTo(source);
         }
         else {
             let target = Game.getObjectById(this.data.labId);
             let needed = target.mineralCapacity - target.mineralAmount;
-            let have = terminal.get(this.data.resource);
+            let have = source.get(this.data.resource);
 
-            this.creep.withdraw(terminal, this.data.resource,
+            this.creep.withdraw(source, this.data.resource,
                 Math.min(needed, this.creep.carryCapacity, have));
 
             this.fsm.enter(STATE.DEPOSIT)
@@ -87,11 +98,15 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
         let jobs = [];
 
         for(let input of manager.labs.getLabsToLoad()) {
-            if(input.lab.mineralAmount + 500 > input.lab.mineralCapacity) {
+            if(input.resource !== RESOURCE_ENERGY && input.lab.mineralAmount + 500 > input.lab.mineralCapacity) {
                 continue;
             }
 
-            if(manager.terminal.get(input.resource) === 0) {
+            if(input.resource === RESOURCE_ENERGY && input.lab.energy + 500 > input.lab.energyCapacity) {
+                continue;
+            }
+
+            if(manager.terminal.get(input.resource) +  manager.room.storage.get(input.resource) === 0) {
                 continue;
             }
 

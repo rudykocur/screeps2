@@ -189,6 +189,10 @@ class ControllerWrapper {
                 return false;
             }
 
+            if(pos.getRangeTo(item.x, item.y) < 2) {
+                return false;
+            }
+
             return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
         }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
 

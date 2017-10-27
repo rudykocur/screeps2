@@ -7,6 +7,8 @@ const STATE = {
     EMPTY: 'empty',
     LOAD: 'load',
     PROCESS: 'process',
+    LOAD_BOOST: 'loadBoost',
+    EMPTY_BOOST: 'emptyBoost',
 };
 
 class LabManager extends utils.Executable {
@@ -14,7 +16,7 @@ class LabManager extends utils.Executable {
         super();
 
         this.manager = manager;
-        this.labs = labs;
+        this.labs = _.sortBy(labs, 'id');
         this.terminal = terminal;
 
         _.defaultsDeep(this.manager.room.memory, {labs: {fsm: {}, layout: {}}, });
@@ -32,6 +34,13 @@ class LabManager extends utils.Executable {
             },
             [STATE.EMPTY]: {
                  onTick: this.checkLabsEmpty.bind(this),
+            },
+            [STATE.LOAD_BOOST]: {
+                onEnter: () => {this.important('Entered boost load state.')},
+                 onTick: () => {},
+            },
+            [STATE.EMPTY_BOOST]: {
+                 onTick: this.checkBoostsUnloaded.bind(this),
             },
         }, this.memory.fsm, STATE.IDLE);
     }
@@ -79,8 +88,62 @@ class LabManager extends utils.Executable {
         this.decorateLabs();
     }
 
+    loadBoosts(resources) {
+        this.memory.boostsToLoad = resources;
+
+        if(this.fsm.state === STATE.PROCESS || this.fsm.state.LOAD) {
+            this.warn('Interrupting cooking. Time to prepare boosts:', resources);
+
+            this.fsm.enter(STATE.EMPTY);
+        }
+    }
+
+    unloadBoosts() {
+        this.fsm.enter(STATE.EMPTY_BOOST);
+    }
+
+    checkBoostsUnloaded() {
+        for(let lab of this.labs) {
+            if(lab.mineralAmount > 0) {
+                return;
+            }
+        }
+
+        this.important('Going back to regular work.');
+
+        delete this.memory.boostsToLoad;
+
+        this.fsm.enter(STATE.IDLE);
+    }
+
+    areBoostsReady() {
+        if(!this.memory.boostsToLoad) {
+            return false;
+        }
+
+        for(let i = 0; i < this.memory.boostsToLoad.length; i++) {
+            let resource = this.memory.boostsToLoad[i];
+            let lab = this.labs[i];
+
+            if(lab.mineralAmount  === 0) {
+                return false;
+            }
+
+            if(lab.energy < 1000) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     pickNextTarget() {
         if(this.mustRegenerateLayout()) {
+            return;
+        }
+
+        if(this.memory.boostsToLoad) {
+            this.fsm.enter(STATE.LOAD_BOOST);
             return;
         }
 
@@ -176,6 +239,31 @@ class LabManager extends utils.Executable {
     }
 
     getLabsToLoad() {
+        if(this.fsm.state === STATE.LOAD_BOOST) {
+            let result = [];
+
+            for(let i = 0; i < this.memory.boostsToLoad.length; i++) {
+                let resource = this.memory.boostsToLoad[i];
+                let lab = this.labs[i];
+
+                if(lab.mineralAmount < 2000) {
+                    result.push({
+                        lab, resource
+                    });
+                }
+
+                if(lab.energy < 1000) {
+                    result.push({
+                        lab,
+                        resource: RESOURCE_ENERGY
+                    });
+                }
+
+            }
+
+            return result;
+        }
+
         if(this.fsm.state !== STATE.LOAD && this.fsm.state !== STATE.PROCESS) {
             return [];
         }
@@ -184,16 +272,28 @@ class LabManager extends utils.Executable {
     }
 
     getLabsToUnload() {
-        if(this.fsm.state !== STATE.EMPTY && this.fsm.state !== STATE.PROCESS) {
+        if(this.fsm.state !== STATE.EMPTY && this.fsm.state !== STATE.PROCESS &&
+            this.fsm.state !== STATE.EMPTY_BOOST)
+        {
             return [];
         }
 
         let unloadThreshold = 800;
-        if(this.fsm.state === STATE.EMPTY) {
+        if(this.fsm.state === STATE.EMPTY || this.fsm.state === STATE.EMPTY_BOOST) {
             unloadThreshold = 0;
         }
 
         let result = [];
+
+        if(this.fsm.state === STATE.EMPTY_BOOST) {
+            for(let lab of this.labs) {
+                if(lab.mineralAmount > unloadThreshold) {
+                    result.push(lab);
+                }
+            }
+
+            return result;
+        }
 
         for(let lab of this.getOutputLabs()) {
             if(lab.mineralAmount > unloadThreshold) {
@@ -231,24 +331,24 @@ class LabManager extends utils.Executable {
             ];
         }
 
-        // if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
-        //     return [
-        //         {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 3000},
-        //         {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
-        //         {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 500},
-        //         {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 500},
-        //         // {resource: RESOURCE_HYDROXIDE, amount: 5000},
-        //         // {resource: RESOURCE_GHODIUM, amount: 5000},
-        //     ];
-        // }
+        if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
+            return [
+                {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
+                {resource: RESOURCE_HYDROXIDE, amount: 5000},
+                {resource: RESOURCE_GHODIUM, amount: 5000},
+            ];
+        }
 
         return [
             {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 3000},
             {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 500},
-            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 500},
-            // {resource: RESOURCE_HYDROXIDE, amount: 5000},
-            // {resource: RESOURCE_GHODIUM, amount: 5000},
+            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
+            {resource: RESOURCE_HYDROXIDE, amount: 5000},
+            {resource: RESOURCE_GHODIUM, amount: 5000},
         ];
     }
 
@@ -337,7 +437,7 @@ class LabManager extends utils.Executable {
         }
 
         messages.push(`Labs state: ${this.fsm.state}`);
-        if(this.fsm.state !== STATE.IDLE) {
+        if(this.fsm.state !== STATE.IDLE && this.memory.finalTarget) {
             messages.push(`Labs target: ${this.memory.finalTarget.resource}, reaction: ${this.memory.currentReaction}`);
         }
     }

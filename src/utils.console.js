@@ -31,7 +31,17 @@ function setSellPrice(resource, minPrice) {
 setSellPrice.description = 'Sets minimum sell price.';
 setSellPrice.signature = 'setSellPrice(resource, minPrice)';
 
-let commands = [help, setBuyPrice, setSellPrice];
+function setSiegeCreep(body, boosts) {
+    Memory.siegeCreep = {
+        body, boosts
+    };
+
+    console.log(`Set blueprint for siege creep.`);
+}
+setSiegeCreep.description = 'Sets blueprint for siege creep.';
+setSiegeCreep.signature = 'setSiegeCreep(body, boosts)';
+
+let commands = [help, setBuyPrice, setSellPrice, setSiegeCreep];
 
 module.exports = {
     installConsoleFunctions(target) {
