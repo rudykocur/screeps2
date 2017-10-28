@@ -181,9 +181,11 @@ module.exports = {
 
     getNextReaction(resource, amount, store) {
 
+        let neededAmount = amount - (store[resource] || 0);
+
         store = _.omit(store, resource);
 
-        if((store[resource] || 0) > amount) {
+        if((store[resource] || 0) >= amount) {
             return null;
         }
 
@@ -192,12 +194,12 @@ module.exports = {
         while(toCheck.length > 0) {
             let reaction = toCheck.pop();
 
-            if((store[reaction[0]] || 0) < amount && RESOURCES_BASE.indexOf(reaction[0]) < 0) {
+            if((store[reaction[0]] || 0) < neededAmount && RESOURCES_BASE.indexOf(reaction[0]) < 0) {
                 toCheck.push(REACTIONS_REVERSE[reaction[0]]);
                 continue;
             }
 
-            if((store[reaction[1]] || 0) < amount && RESOURCES_BASE.indexOf(reaction[1]) < 0) {
+            if((store[reaction[1]] || 0) < neededAmount && RESOURCES_BASE.indexOf(reaction[1]) < 0) {
                 toCheck.push(REACTIONS_REVERSE[reaction[1]]);
                 continue;
             }
@@ -226,4 +228,8 @@ module.exports = {
             }
         }
     },
+
+    roomNameToInt(name) {
+        return parseInt(name.replace('W', 'A').replace('E', 'B').replace('N', 'C').replace('S', 'D'), 16)
+    }
 };

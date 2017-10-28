@@ -53,6 +53,13 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
+    isLab(flag) {
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_WHITE;
+    },
+
+    /**
+     * @param {Flag} flag
+     */
     isRoomAttack(flag) {
         return flag.color === COLOR_RED && flag.secondaryColor === COLOR_GREY;
     }

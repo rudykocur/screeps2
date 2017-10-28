@@ -51,7 +51,7 @@ class HarvesterMind extends mind.CreepMindBase {
         }
 
         if(mineralHarvester) {
-            body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable, [CARRY]);
+            body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable);
         }
 
         return {

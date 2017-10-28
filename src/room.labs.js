@@ -157,10 +157,29 @@ class LabManager extends utils.Executable {
 
         this.memory.finalTarget = target;
         this.memory.currentReaction = currentReaction;
+        this.memory.currentReactionProgress = 0;
 
-        this.important('Set new target:', target.resource, 'with reaction:', currentReaction);
+        this.memory.currentReactionAmount = this.calculateCurrentReactionBatchSize();
+
+        this.important(`Set new target: ${target.resource} with reaction ${currentReaction}. ` +
+            `To produce: ${this.memory.currentReactionAmount}`);
 
         this.fsm.enter(STATE.LOAD);
+    }
+
+    calculateCurrentReactionBatchSize() {
+        let target = this.memory.finalTarget;
+        let currentReaction = this.memory.currentReaction;
+        let currentProduct = REACTIONS[currentReaction[0]][currentReaction[1]];
+        let needsOfFinalTarget = target.amount - this.terminal.get(target.resource);
+
+        if(target.resource === currentProduct) {
+            return needsOfFinalTarget;
+        }
+
+        let haveCurrentReaction = this.terminal.get(currentProduct);
+
+        return needsOfFinalTarget - haveCurrentReaction;
     }
 
     prepareLabsForLoad() {
@@ -191,19 +210,27 @@ class LabManager extends utils.Executable {
         this.fsm.enter(STATE.PROCESS);
     }
 
+    getCurrentTarget() {
+        let reaction = this.memory.currentReaction;
+        return REACTIONS[reaction[0]][reaction[1]];
+    }
+
     runReactions() {
         let input = this.getInputLabs();
         let lab1 = input[0].lab;
         let lab2 = input[1].lab;
 
+        let producedAmount = 0;
+
         for(let lab of this.getOutputLabs()) {
-            lab.runReaction(lab1, lab2);
+            if(lab.runReaction(lab1, lab2) === OK) {
+                producedAmount += LAB_REACTION_AMOUNT;
+            }
         }
 
-        let currentTarget = REACTIONS[input[0].resource][input[1].resource];
-        let currentAmount = this.terminal.get(currentTarget) + _.sum(this.getOutputLabs(), 'mineralAmount');
+        this.memory.currentReactionProgress = (this.memory.currentReactionProgress || 0)  + producedAmount;
 
-        if(currentAmount > this.memory.finalTarget.amount) {
+        if(this.memory.currentReactionProgress >= this.memory.currentReactionAmount) {
             this.fsm.enter(STATE.EMPTY);
         }
 
@@ -440,7 +467,11 @@ class LabManager extends utils.Executable {
 
         messages.push(`Labs state: ${this.fsm.state}`);
         if(this.fsm.state !== STATE.IDLE && this.memory.finalTarget) {
-            messages.push(`Labs target: ${this.memory.finalTarget.resource}, reaction: ${this.memory.currentReaction}`);
+            let progress = this.memory.currentReactionProgress;
+            let reactionTotal = this.memory.currentReactionAmount;
+
+            messages.push(`Labs target: ${this.memory.finalTarget.resource} x ${this.memory.finalTarget.amount}`);
+            messages.push(`Labs reaction: ${this.memory.currentReaction} ${progress}/${reactionTotal}`);
         }
     }
 

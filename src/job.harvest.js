@@ -96,7 +96,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         if(state.containerId) {
             utils.every(5, () => {
                 let container = Game.getObjectById(state.containerId);
-                if(container.hits < container.hitsMax) {
+                if(container && container.hits < container.hitsMax) {
                     this.creep.repair();
                 }
             })

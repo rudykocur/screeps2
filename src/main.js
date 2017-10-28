@@ -16,9 +16,13 @@ if(!('REACTIONS_REVERSE' in global)) {
 }
 
 module.exports.loop = function () {
+    let t1 = Game.cpu.getUsed();
     if(!Memory.counters) {
         Memory.counters = {squad: 1};
     }
+    let t2 = Game.cpu.getUsed();
+
+    // console.log(`TICK: init=${t1}, memory=${t2-t1}`);
 
     let initTime = Game.cpu.getUsed();
 

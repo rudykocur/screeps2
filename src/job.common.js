@@ -19,7 +19,7 @@ class JobHandlerBase extends utils.Loggable {
 
         this.creep.memory.jobStateData.fsm = this.creep.memory.jobStateData.fsm || {};
 
-        this.actions = new JobCommonActions(this.creep, this.workRoom, this.fsm);
+        this.actions = new JobCommonActions(this, this.creep, this.workRoom, this.fsm);
     }
 
     configureFSM(initialState, config) {
@@ -62,7 +62,8 @@ class JobHandlerBase extends utils.Loggable {
 }
 
 class JobCommonActions {
-    constructor(creep, workRoom, fsm) {
+    constructor(handler, creep, workRoom, fsm) {
+        this.hander = handler;
         this.creep = creep;
         this.workRoom = workRoom;
         this.fsm = fsm;
@@ -75,7 +76,7 @@ class JobCommonActions {
      * @param [options.storage] Storage where unload to
      */
     unloadAllResources(options) {
-        options = _.defaults(options, {
+        options = _.defaults(options || {}, {
             onDone: () => {},
             onTick: () => {},
             storage: this.workRoom.storage

@@ -51,7 +51,7 @@ class RoomSiege extends base.RoomBase {
         }
 
         if(cache && cache.cacheAge < 1000) {
-            if (this.getCreepCount(minds.available.breach) === 0 && this.supportRoom.labs.areBoostsReady()) {
+            if (this.shouldSpawnBreacher()) {
                 // if (this.spawn(minds.available.breach)) {
                 //     this.important('Spawned breach creep');
                 // }
@@ -67,8 +67,32 @@ class RoomSiege extends base.RoomBase {
         }
     }
 
+    shouldSpawnBreacher() {
+        if(this.getCreepCount(minds.available.breach) > 1) {
+            return false;
+        }
+
+        if(!this.supportRoom.labs.areBoostsReady()) {
+            return false;
+        }
+
+        let cache = maps.getRoomCache(this.roomName);
+
+        if(cache.findStructures(STRUCTURE_SPAWN).length > 0) {
+            return true;
+        }
+
+        if(cache.findStructures(STRUCTURE_TOWER).length > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     shouldSpawnClaimer() {
-        if(this.room.find(STRUCTURE_SPAWN).length > 0) {
+        let cache = maps.getRoomCache(this.roomName);
+
+        if(cache.find(STRUCTURE_SPAWN).length > 0) {
             return false;
         }
 

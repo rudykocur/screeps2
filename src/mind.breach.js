@@ -108,18 +108,25 @@ class BreachMind extends mind.CreepMindBase {
 
     getTarget() {
         let target = this.workRoom.threat.getClosestEnemy(this.creep);
-
         // let target = this.creep.pos.findClosestByPath(this.workRoom.threat.getCombatCreeps());
         let room = this.workRoom.room;
 
         if(!target) {
             let structures = room.find(FIND_HOSTILE_STRUCTURES).filter(
-                s => s.structureType !== STRUCTURE_CONTROLLER && s.structureType !== STRUCTURE_STORAGE);
+                s => s.structureType !== STRUCTURE_CONTROLLER /*&& s.structureType !== STRUCTURE_STORAGE*/);
 
             target = _.first(structures.filter(s => s.structureType == STRUCTURE_TOWER));
 
             if(!target) {
                 target = _.first(structures.filter(s => s.structureType == STRUCTURE_SPAWN));
+            }
+
+            if(!target) {
+                target = _.first(structures.filter(s => s.structureType == STRUCTURE_STORAGE));
+            }
+
+            if(!target) {
+                target = _.first(structures.filter(s => s.structureType == STRUCTURE_TERMINAL));
             }
 
             if(!target) {
@@ -182,7 +189,7 @@ class BreachMind extends mind.CreepMindBase {
                 room.find().forEach(struct => {
                     let r = Game.rooms[roomName];
 
-                    let cost;
+                    let cost = 1;
 
                     if(struct.structureType === STRUCTURE_RAMPART) {
                         cost = 30;

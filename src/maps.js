@@ -2,7 +2,13 @@ var _ = require('lodash');
 const utils = require('utils');
 
 function hydrate(item) {
-    item.pos = new RoomPosition(item.pos.x, item.pos.y, item.pos.roomName);
+    if(_.isString(item.pos)) {
+        let parts = item.pos.split(',');
+        item.pos = new RoomPosition(parts[0], parts[1], parts[2]);
+    }
+    else {
+        item.pos = new RoomPosition(item.pos.x, item.pos.y, item.pos.roomName);
+    }
     // item.pos.__proto__ = RoomPosition.prototype;
     return item;
 }
@@ -107,14 +113,14 @@ module.exports = {
     },
 
     getCostMatrix(roomName, costs) {
-        let room = module.exports.getRoomCache(roomName);
+        let cache = module.exports.getRoomCache(roomName);
 
         if(!costs) {
             costs = new PathFinder.CostMatrix;
         }
 
-        if(room) {
-            room.find(FIND_STRUCTURES).forEach(function (struct) {
+        if(cache) {
+            cache.find(FIND_STRUCTURES).forEach(function (struct) {
                 if (struct.structureType === STRUCTURE_ROAD) {
                     // Favor roads over plain tiles
                     costs.set(struct.pos.x, struct.pos.y, 1);
@@ -266,7 +272,7 @@ module.exports = {
             }
 
 
-            cache.lastUpdateTime = Game.time;
+            cache.lastUpdateTime = Game.time + utils.roomNameToInt(room.name) % 21;
         }
     }
 };
