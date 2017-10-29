@@ -12,13 +12,20 @@ class RoomSiege extends base.RoomBase {
         this.flag = flag;
         this.managers = regularRooms;
 
-        this.supportRoom = _.first(this.managers.filter(mgr => mgr.room.controller.level > 6));
+        this.supportRoom = this.pickSupportRoom();
 
         if(this.room) {
             this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
 
             this.threat = new threat.ThreatAssesment(this.enemies);
         }
+    }
+
+    pickSupportRoom() {
+        let rooms = this.managers.filter(mgr => mgr.room.controller.level > 6);
+        rooms = _.sortBy(rooms, (manager) => Game.map.getRoomLinearDistance(manager.roomName, this.roomName));
+
+        return _.first(rooms);
     }
 
     getSpawner() {
@@ -50,19 +57,15 @@ class RoomSiege extends base.RoomBase {
             }
         }
 
-        if(cache && cache.cacheAge < 1000) {
-            if (this.shouldSpawnBreacher()) {
-                // if (this.spawn(minds.available.breach)) {
-                //     this.important('Spawned breach creep');
-                // }
+        if (this.shouldSpawnBreacher()) {
+            if (this.spawn(minds.available.breach)) {
+                this.important('Spawned breach creep');
             }
         }
 
-        if(this.room) {
-            if(this.shouldSpawnClaimer()) {
-                if(this.spawn(minds.available.claimer)) {
-                    this.important(this, 'SPAWNED CLAIMER !!!!');
-                }
+        if(this.shouldSpawnClaimer()) {
+            if(this.spawn(minds.available.claimer)) {
+                this.important('SPAWNED CLAIMER !!!!');
             }
         }
     }
@@ -104,7 +107,7 @@ class RoomSiege extends base.RoomBase {
             return false;
         }
 
-        if(this.room.controller.upgradeBlocked > 0) {
+        if(this.room.controller.upgradeBlocked > 300) {
             return false;
         }
 

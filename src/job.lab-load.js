@@ -74,11 +74,11 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
         let jobs = [];
 
         for(let input of manager.labs.getLabsToLoad()) {
-            if(input.resource !== RESOURCE_ENERGY && input.lab.mineralAmount + 500 > input.lab.mineralCapacity) {
+            if(input.resource !== RESOURCE_ENERGY && (input.lab.mineralAmount + 1000) > input.lab.mineralCapacity) {
                 continue;
             }
 
-            if(input.resource === RESOURCE_ENERGY && input.lab.energy + 500 > input.lab.energyCapacity) {
+            if(input.resource === RESOURCE_ENERGY && (input.lab.energy + 500) > input.lab.energyCapacity) {
                 continue;
             }
 

@@ -360,22 +360,22 @@ class LabManager extends utils.Executable {
 
         if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
             return [
-                {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 5000},
+                {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 5000},
                 {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 3000},
-                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
-                {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 5000},
+                {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 5000},
                 {resource: RESOURCE_HYDROXIDE, amount: 5000},
                 {resource: RESOURCE_GHODIUM, amount: 5000},
             ];
         }
 
         return [
-            {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 3000},
-            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 3000},
-            {resource: RESOURCE_KEANIUM_ALKALIDE, amount: 3000},
+            {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 5000},
+            {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 5000},
+            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 5000},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 5000},
+            {resource: RESOURCE_KEANIUM_ALKALIDE, amount: 5000},
             {resource: RESOURCE_HYDROXIDE, amount: 5000},
             {resource: RESOURCE_GHODIUM, amount: 5000},
         ];

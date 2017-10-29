@@ -115,10 +115,12 @@ class BreachMind extends mind.CreepMindBase {
             let structures = room.find(FIND_HOSTILE_STRUCTURES).filter(
                 s => s.structureType !== STRUCTURE_CONTROLLER /*&& s.structureType !== STRUCTURE_STORAGE*/);
 
-            target = _.first(structures.filter(s => s.structureType == STRUCTURE_TOWER));
-
             if(!target) {
                 target = _.first(structures.filter(s => s.structureType == STRUCTURE_SPAWN));
+            }
+
+            if(!target) {
+                target = _.first(structures.filter(s => s.structureType == STRUCTURE_TOWER));
             }
 
             if(!target) {
@@ -152,6 +154,10 @@ class BreachMind extends mind.CreepMindBase {
             return;
         }
 
+        if(this.tryAttackController()) {
+            return;
+        }
+
         let target = this.getTarget();
 
         if(!target) {
@@ -178,6 +184,32 @@ class BreachMind extends mind.CreepMindBase {
         this.creep.rangedAttack(target);
 
 
+    }
+
+    tryAttackController() {
+        if(this.creep.getActiveBodyparts(CLAIM) === 0) {
+            return false;
+        }
+
+        let ctrl = this.workRoom.room.controller;
+
+        if(ctrl.upgradeBlocked > 100) {
+            return false;
+        }
+
+        if(this.creep.pos.isNearTo(ctrl)) {
+            this.creep.attackController(ctrl);
+        }
+        else {
+            this.goNearTarget(ctrl);
+            this.creep.room.visual.line(this.creep.pos, ctrl.pos, {color:"green"});
+        }
+
+        if(this.creep.hits < this.creep.hitsMax) {
+            this.creep.heal(this.creep);
+        }
+
+        return true;
     }
 
     goNearTarget(target) {

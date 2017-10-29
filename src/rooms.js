@@ -33,11 +33,13 @@ module.exports = {
             safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard)), room);
         });
 
-        let result = [].concat(managers);
+        let result = [];
 
         for(let flag of _.filter(Game.flags, flags.isRoomAttack)) {
             safeCtor(() => result.push(new roomTypes.siege(flag.pos.roomName, flag, managers)));
         }
+
+        result = result.concat(managers);
 
         for(let flag of _.filter(Game.flags, flags.isClaim)) {
             safeCtor(() => result.push(new roomTypes.settlement(flag.pos.roomName, flag, managers)));
