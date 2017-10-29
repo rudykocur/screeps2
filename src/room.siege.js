@@ -99,15 +99,15 @@ class RoomSiege extends base.RoomBase {
             return false;
         }
 
-        if(!this.room.controller.owner) {
+        if(!cache.isOwned()) {
             return false;
         }
 
-        if(this.room.controller.my) {
+        if(cache.ownedByMe()) {
             return false;
         }
 
-        if(this.room.controller.upgradeBlocked > 300) {
+        if(this.room && this.room.controller.upgradeBlocked > 300) {
             return false;
         }
 

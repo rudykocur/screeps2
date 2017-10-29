@@ -74,6 +74,14 @@ class CachedRoom {
         return this.cache.owner == username;
     }
 
+    ownedByEnemy() {
+        return this.isOwned() && !this.ownedBy(utils.myUsername());
+    }
+
+    ownedByMe() {
+        return this.ownedBy(utils.myUsername());
+    }
+
     isOwned() {
         return !!this.cache.owner;
     }
