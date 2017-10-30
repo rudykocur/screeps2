@@ -5,6 +5,8 @@ const maps = require('maps');
 const base = require('room.base');
 const threat = require('combat.threat');
 
+const profiler = require('profiler');
+
 class RoomSiege extends base.RoomBase {
     constructor(roomName, flag, regularRooms) {
         super(roomName);
@@ -123,6 +125,8 @@ class RoomSiege extends base.RoomBase {
     }
 
 }
+
+profiler.registerClass(RoomSiege, RoomSiege.name);
 
 module.exports = {
     RoomSiege

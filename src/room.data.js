@@ -1,6 +1,8 @@
 var _ = require('lodash');
 const cache = require('utils.cache');
 
+const profiler = require('profiler');
+
 class RoomData extends cache.CachedData {
     constructor(manager, room, storageFlag) {
         super(_.defaults(manager.room.memory, {data: {}}).data);
@@ -77,6 +79,8 @@ class RoomData extends cache.CachedData {
         return this.__allStructures;
     }
 }
+
+profiler.registerClass(RoomData, RoomData.name);
 
 module.exports = {
     RoomData

@@ -3,6 +3,8 @@ const minds = require('mind');
 const maps = require('maps');
 const job_common = require('job.common');
 
+const profiler = require('profiler');
+
 const JOB_TYPE = 'energy-pickup';
 
 const STATE_GET_ENERGY = 'get-energy';

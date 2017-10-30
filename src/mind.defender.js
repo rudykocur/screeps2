@@ -3,6 +3,8 @@ let mind = require('mind.common');
 let maps = require('maps');
 const bb = require('utils.bodybuilder');
 
+const profiler = require('profiler');
+
 const STATE = {
     IDLE: 'idle',
     ATTACK: 'attack'
@@ -179,6 +181,8 @@ class DefenderMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(DefenderMind, DefenderMind.name);
 
 module.exports = {
     DefenderMind

@@ -2,6 +2,8 @@ var _ = require('lodash');
 
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 // const minds = require('mind');
 const jobModules = {};
 
@@ -11,7 +13,9 @@ const jobModules = {};
     'job.empty-storage-link', 'job.terminal-fill-energy', 'job.lab-load', 'job.lab-unload',
 ].forEach(modName => {
     let mod = require(modName);
-    jobModules[mod.JOB_TYPE] = mod.getHandler();
+    let handler = mod.getHandler();
+    profiler.registerClass(handler, handler.name);
+    jobModules[mod.JOB_TYPE] = handler;
 });
 
 class JobBoard extends utils.Executable {
@@ -206,6 +210,8 @@ class JobBoard extends utils.Executable {
         return '[JobBoard]';
     }
 }
+
+profiler.registerClass(JobBoard, JobBoard.name);
 
 module.exports = {
     JobBoard,

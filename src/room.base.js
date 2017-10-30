@@ -23,6 +23,10 @@ class RoomBase extends utils.Executable {
     getCreepCount(type) {
         return _.size(this.mindsByType[type.name]);
     }
+
+    getAllMinds() {
+        return this.minds;
+    }
 }
 
 module.exports = {

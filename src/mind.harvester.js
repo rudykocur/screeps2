@@ -1,6 +1,8 @@
 const bb = require('utils.bodybuilder');
 let mind = require('mind.common');
 
+const profiler = require('profiler');
+
 class HarvesterMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
@@ -61,6 +63,8 @@ class HarvesterMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(HarvesterMind, HarvesterMind.name);
 
 module.exports = {
     HarvesterMind

@@ -12,6 +12,7 @@ const stats = require('room.stats');
 const market = require('room.market');
 
 const wrappers = require('room.wrappers');
+const profiler = require('profiler');
 
 class RoomManager extends utils.Executable {
     /**
@@ -123,6 +124,10 @@ class RoomManager extends utils.Executable {
         return this.mindsByType[type.name] || [];
     }
 
+    getAllMinds() {
+        return this.minds.concat(this.remote.getAllMinds());
+    }
+
     getAvgEnergyToPickup() {
         return _.sum(this.room.memory.stats.avgEnergy) / this.room.memory.stats.avgEnergy.length;
     }
@@ -191,6 +196,8 @@ class RoomManager extends utils.Executable {
         return `[RoomManager ${this.room}]`;
     }
 }
+
+profiler.registerClass(RoomManager, RoomManager.name);
 
 module.exports = {
     RoomManager

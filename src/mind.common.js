@@ -1,5 +1,7 @@
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 /**
  * @property {Room} room
  */
@@ -202,6 +204,9 @@ class MindCommonActions {
         }
     }
 }
+
+profiler.registerClass(CreepMindBase, CreepMindBase.name);
+
 
 module.exports = {
     CreepMindBase

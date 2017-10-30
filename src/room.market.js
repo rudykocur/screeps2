@@ -1,6 +1,8 @@
 var _ = require('lodash');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 class RoomMarket extends utils.Executable {
     /**
      *
@@ -119,6 +121,8 @@ class RoomMarket extends utils.Executable {
         return `[RoomMarket for ${this.manager.roomName}]`;
     }
 }
+
+profiler.registerClass(RoomMarket, RoomMarket.name);
 
 module.exports = {
     RoomMarket

@@ -3,6 +3,8 @@ var _ = require('lodash');
 let mind = require('mind.common');
 let bb = require('utils.bodybuilder');
 
+const profiler = require('profiler');
+
 class TransferMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
@@ -165,8 +167,9 @@ class TransferMind extends mind.CreepMindBase {
             }
         };
     }
-
 }
+
+profiler.registerClass(TransferMind, TransferMind.name);
 
 module.exports = {
     TransferMind

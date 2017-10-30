@@ -1,6 +1,8 @@
 var _ = require("lodash");
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 class FlagStorageWrapper extends utils.Executable {
     constructor(room, flag) {
         super();
@@ -263,6 +265,14 @@ class SourceWrapper {
         this.link = _.first(this.source.pos.findInRange(links, 2));
     }
 }
+
+profiler.registerClass(FlagStorageWrapper, FlagStorageWrapper.name);
+profiler.registerClass(StorageWrapper, StorageWrapper.name);
+profiler.registerClass(ExtensionCluster, ExtensionCluster.name);
+profiler.registerClass(ControllerWrapper, ControllerWrapper.name);
+profiler.registerClass(LinkWrapper, LinkWrapper.name);
+profiler.registerClass(MineralWrapper, MineralWrapper.name);
+profiler.registerClass(SourceWrapper, SourceWrapper.name);
 
 module.exports = {
     FlagStorageWrapper,

@@ -1,5 +1,7 @@
 let mind = require('mind.common');
 
+const profiler = require('profiler');
+
 const STATE = {
     IDLE: 'idle',
     ATTACK: 'attack'
@@ -110,6 +112,8 @@ class RangedDefenderMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(RangedDefenderMind, RangedDefenderMind.name);
 
 module.exports = {
     RangedDefenderMind

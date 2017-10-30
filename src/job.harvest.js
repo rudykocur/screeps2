@@ -4,6 +4,8 @@ const maps = require('maps');
 const job_common = require('job.common');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 const JOB_TYPE = 'harvest-source';
 
 const STATE = {

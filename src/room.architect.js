@@ -3,6 +3,8 @@ const utils = require('utils');
 const flags = require('utils.flags');
 const maps = require('maps');
 
+const profiler = require('profiler');
+
 class RoomArchitect extends utils.Executable {
     /**
      *
@@ -255,6 +257,8 @@ class RoomArchitect extends utils.Executable {
         return `[RoomArchitect for ${this.manager.room}]`;
     }
 }
+
+profiler.registerClass(RoomArchitect, RoomArchitect.name);
 
 module.exports = {
     RoomArchitect

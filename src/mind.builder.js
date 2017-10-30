@@ -3,6 +3,8 @@ let mind = require('mind.common');
 let throttle = require('utils').throttle;
 let bb = require('utils.bodybuilder');
 
+const profiler = require('profiler');
+
 const STATE_REFILL = 'refill';
 const STATE_BUILD = 'build';
 const STATE_IDLE = 'idle';
@@ -191,6 +193,8 @@ class BuilderMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(BuilderMind, BuilderMind.name);
 
 module.exports = {
     BuilderMind

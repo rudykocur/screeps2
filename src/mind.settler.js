@@ -3,6 +3,8 @@ let mind = require('mind.common');
 const maps = require('maps');
 let bb = require('utils.bodybuilder');
 
+const profiler = require('profiler');
+
 const STATE_REFILL = 'refill';
 const STATE_BUILD = 'build';
 const STATE_ENTER = 'enter-room';
@@ -170,6 +172,8 @@ class SettlerMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(SettlerMind, SettlerMind.name);
 
 module.exports = {
     SettlerMind

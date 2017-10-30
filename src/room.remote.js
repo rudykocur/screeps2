@@ -14,6 +14,8 @@ let squads = require('combat.squad');
 let missions = require('combat.missions');
 let threat = require('combat.threat');
 
+const profiler = require('profiler');
+
 class RemoteRoomsManager extends utils.Executable {
 
     /**
@@ -38,6 +40,16 @@ class RemoteRoomsManager extends utils.Executable {
 
     get memory(){
         return this.manager.room.memory.remoteRooms;
+    }
+
+    getAllMinds() {
+        let result = [];
+
+        for(let remote of this.handlers) {
+            result = result.concat(remote.minds);
+        }
+
+        return result;
     }
 
     update() {
@@ -276,9 +288,9 @@ class RemoteRoomHandler extends utils.Executable {
             this.jobManager.run(this);
         }
 
-        for(let mind of this.minds) {
-            mind.run();
-        }
+        // for(let mind of this.minds) {
+        //     mind.run();
+        // }
     }
 
     canSpawnWorkers() {
@@ -374,6 +386,9 @@ class RemoteRoomHandler extends utils.Executable {
         return '[Remote handler for ' + (this.room || this.roomName) + ']';
     }
 }
+
+profiler.registerClass(RemoteRoomsManager, RemoteRoomsManager.name);
+profiler.registerClass(RemoteRoomHandler, RemoteRoomHandler.name);
 
 module.exports = {
     RemoteRoomsManager

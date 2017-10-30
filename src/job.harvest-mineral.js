@@ -2,6 +2,8 @@ var _ = require('lodash');
 const minds = require('mind');
 const job_common = require('job.common');
 
+const profiler = require('profiler');
+
 const JOB_TYPE = 'harvest-mineral';
 
 const STATE = {

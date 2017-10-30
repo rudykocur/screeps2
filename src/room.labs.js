@@ -2,6 +2,8 @@ var _ = require('lodash');
 const fsm = require('fsm');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 const STATE = {
     IDLE: 'idle',
     EMPTY: 'empty',
@@ -479,6 +481,8 @@ class LabManager extends utils.Executable {
         return `[LabManager for ${this.manager.roomName}]`;
     }
 }
+
+profiler.registerClass(LabManager, LabManager.name);
 
 module.exports = {
     LabManager

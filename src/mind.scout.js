@@ -1,6 +1,8 @@
 let mind = require('mind.common');
 let maps = require('maps');
 
+const profiler = require('profiler');
+
 const STATE_SCOUT = 'scout';
 const STATE_IDLE = 'idle';
 
@@ -54,6 +56,8 @@ class ScoutMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(ScoutMind, ScoutMind.name);
 
 module.exports = {
     ScoutMind

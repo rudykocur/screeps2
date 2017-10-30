@@ -18,34 +18,47 @@ class CreepMoveController {
         return result;
     }
 
+    serializeStep(pos) {
+        return pos.x+','+pos.y+','+pos.roomName;
+    }
+
+    unserializePath(path) {
+        let result = [];
+        let steps = path.split(';');
+        return steps.map(step => {
+            let parts = step.split(',');
+            return new RoomPosition(parts[0], parts[1], parts[2]);
+        })
+    }
+
     moveByPath(pathCallback) {
         if(!this.memory._moverPath) {
             console.log(this.creep, 'regenerating cached path');
             this.memory._moverPath = {
-                path: pathCallback(),
+                path: pathCallback().map(this.serializeStep).join(';'),
                 currentPos: this.creep.pos,
                 blockCounter: 0,
             };
         }
 
-        let path = [];
+        let path = this.unserializePath(this.memory._moverPath.path);
 
-        let foundCurrentPos = false;
-
-        for(let step of this.memory._moverPath.path) {
-            // step.__proto__ = RoomPosition.prototype;
-            let pos = new RoomPosition(step.x, step.y, step.roomName);
-            path.push(pos);
-
-            if(pos.isEqualTo(this.creep.pos)) {
-                foundCurrentPos = true;
-            }
-
-            if(foundCurrentPos) {
-                let vis = new RoomVisual(pos.roomName);
-                vis.circle(pos, {fill: 'yellow'});
-            }
-        }
+        // let foundCurrentPos = false;
+        //
+        // for(let step of this.memory._moverPath.path) {
+        //     // step.__proto__ = RoomPosition.prototype;
+        //     let pos = new RoomPosition(step.x, step.y, step.roomName);
+        //     path.push(pos);
+        //
+        //     if(pos.isEqualTo(this.creep.pos)) {
+        //         foundCurrentPos = true;
+        //     }
+        //
+        //     if(foundCurrentPos) {
+        //         let vis = new RoomVisual(pos.roomName);
+        //         vis.circle(pos, {fill: 'yellow'});
+        //     }
+        // }
 
         let result = this.creep.moveByPath(path);
 

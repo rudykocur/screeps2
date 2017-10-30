@@ -2,6 +2,8 @@ let mind = require('mind.common');
 let throttle = require('utils').throttle;
 const bb = require('utils.bodybuilder');
 
+const profiler = require('profiler');
+
 const STATE_REFILL = 'refill';
 const STATE_UPGRADE = 'upgrade';
 const STATE_IDLE = 'idle';
@@ -118,6 +120,8 @@ class UpgraderMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(UpgraderMind, UpgraderMind.name);
 
 module.exports = {
     UpgraderMind

@@ -2,6 +2,8 @@ var _ = require("lodash");
 const minds = require('mind');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 class RoomPopulation extends utils.Executable {
     /**
      *
@@ -240,6 +242,10 @@ class RoomPopulation extends utils.Executable {
             return false;
         }
 
+        if(this.manager.storage.getStoredEnergy() < 20000) {
+            return false;
+        }
+
         return this.manager.data.ramparts.length > 0 || this.manager.data.walls.length > 0;
     }
 
@@ -294,6 +300,8 @@ class RoomPopulation extends utils.Executable {
         return `[Spawner ${this.manager.roomName}]`;
     }
 }
+
+profiler.registerClass(RoomPopulation, RoomPopulation.name);
 
 module.exports = {
     RoomPopulation

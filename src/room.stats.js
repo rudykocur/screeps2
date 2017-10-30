@@ -1,6 +1,8 @@
 var _ = require('lodash');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 class RoomStats extends utils.Executable {
     /**
      *
@@ -60,16 +62,23 @@ class RoomStats extends utils.Executable {
     _updateSpawnsUsage() {
         for(let spawn of this.data.spawns) {
             let name = spawn.name;
-            let usage = this.memory.spawnUsage[name] = this.memory.spawnUsage[name] || [];
-
-            usage.unshift(!!spawn.spawning);
-
-            if(usage.length > 1000) {
-                usage.pop();
+            if(this.memory.spawnUsage[name] && !this.memory.spawnUsage[name].currentValue) {
+                delete this.memory.spawnUsage[name];
             }
 
-            let totalUsage = Math.round(_.filter(usage).length / usage.length * 100);
-            this.messages.push(`Spawn: ${name}, usage: ${totalUsage}%`);
+            let avgData = this.memory.spawnUsage[name] || {currentValue: 1};
+
+            avgData.currentValue = (avgData.currentValue * (1000 - 1) + spawn.spawning?1:0) / 1000;
+            // let usage = this.memory.spawnUsage[name] = this.memory.spawnUsage[name] || [];
+            //
+            // usage.unshift(!!spawn.spawning);
+            //
+            // if(usage.length > 1000) {
+            //     usage.pop();
+            // }
+            //
+            // let totalUsage = Math.round(_.filter(usage).length / usage.length * 100);
+            this.messages.push(`Spawn: ${name}, usage: ${avgData.currentValue*100}%`);
         }
     }
 
@@ -90,6 +99,8 @@ class RoomStats extends utils.Executable {
         return `[RoomStats for ${this.manager.roomName}]`;
     }
 }
+
+profiler.registerClass(RoomStats, RoomStats.name);
 
 module.exports = {
     RoomStats

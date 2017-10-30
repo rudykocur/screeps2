@@ -2,6 +2,8 @@ let mind = require('mind.common');
 let maps = require('maps');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 const STATE = {
     IDLE: 'idle',
     RESERVE: 'reserve'
@@ -89,6 +91,8 @@ class ClaimerMind extends mind.CreepMindBase {
         };
     }
 }
+
+profiler.registerClass(ClaimerMind, ClaimerMind.name);
 
 module.exports = {
     ClaimerMind

@@ -3,6 +3,8 @@ const maps = require('maps');
 const base = require('room.base');
 const minds = require('mind');
 
+const profiler = require('profiler');
+
 class RoomSettlement extends base.RoomBase {
     constructor(roomName, claimFlag, regularRooms) {
         super(roomName);
@@ -98,6 +100,8 @@ class RoomSettlement extends base.RoomBase {
     }
 
 }
+
+profiler.registerClass(RoomSettlement, RoomSettlement.name);
 
 module.exports = {
     RoomSettlement

@@ -1,6 +1,8 @@
 const minds = require('mind');
 const job_common = require('job.common');
 
+const profiler = require('profiler');
+
 const JOB_TYPE = 'refill-spawns';
 
 const STATE_GET_ENERGY = 'get-energy';

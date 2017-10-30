@@ -2,6 +2,8 @@ var _ = require('lodash');
 const fsm = require('fsm');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 const STATE_IDLE = 'idle';
 const STATE_REPAIR = 'repair';
 const STATE_HEAL = 'heal';
@@ -143,6 +145,8 @@ class TowerMind extends utils.Executable {
         return this.tower.energy < this.tower.energyCapacity - 150;
     }
 }
+
+profiler.registerClass(TowerMind, TowerMind.name);
 
 module.exports = {
     TowerMind
