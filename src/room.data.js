@@ -5,6 +5,9 @@ class RoomData extends cache.CachedData {
     constructor(manager, room, storageFlag) {
         super(_.defaults(manager.room.memory, {data: {}}).data);
 
+        this.__allStructures = null;
+        this.__myStructures = null;
+
         this.room = room;
 
         this.spawns = this.cachedObjCollection('spawns', 300,
@@ -27,6 +30,12 @@ class RoomData extends cache.CachedData {
 
         this.roads = this.cachedObjCollection('roads', 100,
             () => this._allStructures.filter(s => s.structureType == STRUCTURE_ROAD));
+
+        this.ramparts = this.cachedObjCollection('ramparts', 100,
+            () => this._allStructures.filter(s => s.structureType == STRUCTURE_RAMPART));
+
+        this.walls = this.cachedObjCollection('walls', 100,
+            () => this._allStructures.filter(s => s.structureType == STRUCTURE_WALL));
 
         this.links = this.cachedObjCollection('links', 300,
             () => this._myStructures.filter(s => s.structureType == STRUCTURE_LINK));
@@ -55,11 +64,17 @@ class RoomData extends cache.CachedData {
     }
 
     get _myStructures() {
-        return this.room.find(FIND_MY_STRUCTURES);
+        if(this.__myStructures === null) {
+            this.__myStructures = this.room.find(FIND_MY_STRUCTURES);
+        }
+        return this.__myStructures;
     }
 
     get _allStructures() {
-        return this.room.find(FIND_STRUCTURES);
+        if(this.__allStructures === null) {
+            this.__allStructures = this.room.find(FIND_STRUCTURES);
+        }
+        return this.__allStructures;
     }
 }
 

@@ -120,7 +120,7 @@ class RoomManager extends utils.Executable {
     }
 
     getMinds(type) {
-        return this.mindsByType[type.name];
+        return this.mindsByType[type.name] || [];
     }
 
     getAvgEnergyToPickup() {

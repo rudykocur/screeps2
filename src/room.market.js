@@ -49,7 +49,7 @@ class RoomMarket extends utils.Executable {
                 return;
             }
 
-            let toBuy = this.resourcesMinimum - (this.terminal.store[resource] || 0);
+            let toBuy = Math.max(1000, this.resourcesMinimum - (this.terminal.store[resource] || 0));
             toBuy = Math.min(toBuy, order.remainingAmount);
 
             let result = Game.market.deal(order.id, toBuy, this.manager.roomName);

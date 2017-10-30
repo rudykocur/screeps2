@@ -41,13 +41,16 @@ class TransferMind extends mind.CreepMindBase {
                 type: 'terminal-fill-energy'
             });
 
-            yield this.tryClaimJob(1, {
-                type: 'lab-unload'
-            });
+            if(this.creep.ticksToLive > 100) {
 
-            yield this.tryClaimJob(1, {
-                type: 'lab-load'
-            });
+                yield this.tryClaimJob(1, {
+                    type: 'lab-unload'
+                });
+
+                yield this.tryClaimJob(1, {
+                    type: 'lab-load'
+                });
+            }
 
             yield this.tryClaimJob(1, {
                 type: 'empty-storage-link'
@@ -98,13 +101,16 @@ class TransferMind extends mind.CreepMindBase {
             type: 'terminal-fill-energy'
         });
 
-        yield this.tryClaimJob(1, {
+        if(this.creep.ticksToLive > 100) {
+
+            yield this.tryClaimJob(1, {
                 type: 'lab-unload'
             });
 
-        yield this.tryClaimJob(1, {
-            type: 'lab-load'
-        });
+            yield this.tryClaimJob(1, {
+                type: 'lab-load'
+            });
+        }
 
         yield this.tryClaimJob(1, {
             type: 'refill-extensions'

@@ -84,6 +84,13 @@ class TowerMind extends utils.Executable {
             }));
         }
 
+        if(!repairTarget) {
+            repairTarget = _.min(this.roomMgr.data.ramparts, r => r.hits);
+            if(repairTarget.hits > 1000) {
+                repairTarget = null;
+            }
+        }
+
         if(repairTarget) {
             this.fsm.enter(STATE_REPAIR, {repairId: repairTarget.id});
             return;

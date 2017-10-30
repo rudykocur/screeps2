@@ -65,6 +65,9 @@ class RoomPopulation extends utils.Executable {
             else if(this.needBuilders()) {
                 this.spawnBuilder(spawn);
             }
+            else if(this.needReinforcer()) {
+                this.spawnReinforcer(spawn);
+            }
         }
 
         if(this.freeSpawns.length > 0 && !spawn.spawning && spawn.blocking) {
@@ -230,6 +233,16 @@ class RoomPopulation extends utils.Executable {
         return haulers < 1;
     }
 
+    needReinforcer() {
+        let reinforcers = this.manager.getMinds(minds.available.builder).filter(mind => mind.creep.memory.reinforcer).length;
+
+        if(reinforcers > 0) {
+            return false;
+        }
+
+        return this.manager.data.ramparts.length > 0 || this.manager.data.walls.length > 0;
+    }
+
     spawnHarvester(spawn, blocking) {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
         if(this.manager.creeps.length < 1) {
@@ -269,6 +282,11 @@ class RoomPopulation extends utils.Executable {
 
     spawnSettler(spawn) {
         let options = minds.available.settler.getSpawnParams(this.manager);
+        this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
+    spawnReinforcer(spawn) {
+        let options = minds.available.builder.getSpawnParams(this.manager, {reinforcer: true});
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 

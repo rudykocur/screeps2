@@ -1,3 +1,4 @@
+var _ = require('lodash');
 let mind = require('mind.common');
 let throttle = require('utils').throttle;
 let bb = require('utils.bodybuilder');
@@ -104,7 +105,18 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     pickBuildTarget(state) {
-        let site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
+        let site;
+
+        if(this.creep.memory.reinforcer) {
+            site = this._pickRampartOrWall();
+        }
+        else {
+            site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
+
+            if(!site) {
+                site = this._pickRampartOrWall();
+            }
+        }
 
         if(!site) {
             this.enterState(STATE_IDLE);
@@ -114,18 +126,30 @@ class BuilderMind extends mind.CreepMindBase {
         state.buildSiteId = site.id;
     }
 
+    _pickRampartOrWall() {
+        let rampart = _.min(this.workRoom.data.ramparts, r => r.hits);
+        let wall = _.min(this.workRoom.data.walls, r => r.hits);
+
+        return _.min([rampart, wall], s => s.hits);
+    }
+
     doBuild(state) {
         let target = Game.getObjectById(state.buildSiteId);
 
         if(!target) {
-            this.enterState(STATE_REFILL);
+            this.enterState(STATE_IDLE);
             return;
         }
 
         if(target.pos.inRangeTo(this.creep, 3)) {
             this.creep.mover.enterStationary();
 
-            this.creep.build(target);
+            if(target instanceof ConstructionSite) {
+                this.creep.build(target);
+            }
+            else {
+                this.creep.repair(target);
+            }
 
             if(_.sum(this.creep.carry) < 1) {
                 this.enterState(STATE_REFILL);
@@ -139,8 +163,11 @@ class BuilderMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
+     * @param {Object} [options]
      */
-    static getSpawnParams(manager) {
+    static getSpawnParams(manager, options) {
+        options = _.defaults(options || {}, {reinforcer: false});
+
         let body = [MOVE, MOVE, CARRY, CARRY, WORK];
         if(manager.room.energyCapacityAvailable > 600) {
             body = bb.build([CARRY, WORK, MOVE], 600);
@@ -155,8 +182,12 @@ class BuilderMind extends mind.CreepMindBase {
 
         return {
             body: body,
-            name: 'builder',
-            memo: {'mind': 'builder'}
+            name: options.reinforcer? 'reinforcer': 'builder',
+            memo: {
+                mind: 'builder',
+                reinforcer: options.reinforcer,
+
+            }
         };
     }
 }
