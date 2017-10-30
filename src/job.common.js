@@ -1,6 +1,7 @@
 var _ = require('lodash');
 const fsmModule = require('fsm');
 const utils = require('utils');
+const maps = require('maps');
 
 class JobHandlerBase extends utils.Loggable {
     constructor(creep, jobData) {
@@ -85,7 +86,9 @@ class JobCommonActions {
         options.onTick();
 
         if(!options.storage.canDeposit(this.creep)) {
-            this.creep.mover.moveTo(options.storage.target);
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, {});
+            })
         }
         else {
             if(this.creep.carryTotal > 0) {

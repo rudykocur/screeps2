@@ -68,7 +68,9 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             }
         }
 
-        this.creep.mover.moveTo(pos, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
+        this.creep.mover.moveByPath(() =>{
+            return maps.getMultiRoomPath(this.creep.pos, pos, {});
+        })
     }
 
     harvestSource(state) {
@@ -94,14 +96,11 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             }
         }
 
-
         if(state.containerId) {
-            utils.every(5, () => {
-                let container = Game.getObjectById(state.containerId);
-                if(container && container.hits < container.hitsMax) {
-                    this.creep.repair();
-                }
-            })
+            let container = Game.getObjectById(state.containerId);
+            if(container && container.hits < container.hitsMax) {
+                this.creep.repair(container);
+            }
         }
     }
 

@@ -33,7 +33,6 @@ class CreepMoveController {
 
     moveByPath(pathCallback) {
         if(!this.memory._moverPath) {
-            console.log(this.creep, 'regenerating cached path');
             this.memory._moverPath = {
                 path: pathCallback().map(this.serializeStep).join(';'),
                 currentPos: this.creep.pos,
@@ -43,35 +42,18 @@ class CreepMoveController {
 
         let path = this.unserializePath(this.memory._moverPath.path);
 
-        // let foundCurrentPos = false;
-        //
-        // for(let step of this.memory._moverPath.path) {
-        //     // step.__proto__ = RoomPosition.prototype;
-        //     let pos = new RoomPosition(step.x, step.y, step.roomName);
-        //     path.push(pos);
-        //
-        //     if(pos.isEqualTo(this.creep.pos)) {
-        //         foundCurrentPos = true;
-        //     }
-        //
-        //     if(foundCurrentPos) {
-        //         let vis = new RoomVisual(pos.roomName);
-        //         vis.circle(pos, {fill: 'yellow'});
-        //     }
-        // }
-
         let result = this.creep.moveByPath(path);
 
         if(this.memory._moverPath.blockCounter > 4) {
-            console.log('OMG CREEP', this.creep, 'IS STUCK');
+            new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'red', radius: 0.7});
             delete this.memory._moverPath;
+            this.enterStationary();
             return;
         }
 
         this._updateCurrentStep(this.memory._moverPath);
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
-            console.log(this.creep, ' - mover: ', result);
             delete this.memory._moverPath;
         }
     }
@@ -83,6 +65,7 @@ class CreepMoveController {
             state.blockCounter += 1;
         }
         else {
+            this.exitStationary();
             state.blockCounter = 0;
         }
 
@@ -91,6 +74,7 @@ class CreepMoveController {
 
     enterStationary() {
         this.memory.isStationary = true;
+        delete this.memory._moverPath;
     }
 
     exitStationary() {

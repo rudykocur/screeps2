@@ -53,7 +53,7 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
         }
 
         for(let resource of [RESOURCE_ENERGY, manager.data.mineral.mineralType]) {
-            if((storage.store[resource] || 0) > 20000 && (terminal.store[resource] || 0) < 25000) {
+            if(storage.get(resource) > 20000 && terminal.get(resource) < 25000) {
                 jobs.push(new TerminalFillEnergyJobDTO(terminal, resource));
             }
         }

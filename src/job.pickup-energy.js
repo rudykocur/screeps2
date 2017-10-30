@@ -35,7 +35,9 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(resource)) {
-            this.creep.mover.moveTo(resource, {costCallback: maps.blockHostileRooms, visualizePathStyle: {}});
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, resource.pos, {});
+            })
         }
         else {
             this.creep.pickup(resource);

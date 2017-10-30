@@ -73,7 +73,7 @@ class RoomManager extends utils.Executable {
         });
 
         this.terminal = this.room.terminal;
-        this.market = new market.RoomMarket(this, this.terminal);
+        this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.data.labs);
 
         this.threat = new threat.ThreatAssesment(this.enemies);
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);

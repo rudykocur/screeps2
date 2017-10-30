@@ -16,7 +16,21 @@ if(!('REACTIONS_REVERSE' in global)) {
 }
 
 const profiler = require('profiler');
-profiler.enable();
+// profiler.enable();
+
+class TickCache {
+    constructor(){
+        this.cache = {};
+    }
+
+    get(key, callback) {
+        if(!this.cache[key]) {
+            this.cache[key] = callback();
+        }
+
+        return this.cache[key];
+    }
+}
 
 module.exports = {
     loop: function() {
@@ -34,6 +48,8 @@ module.exports = {
             Memory.counters = {squad: 1};
         }
         let t2 = Game.cpu.getUsed();
+
+        global.tickCache = new TickCache();
 
         // console.log(`TICK: init=${t1}, memory=${t2-t1}`);
 

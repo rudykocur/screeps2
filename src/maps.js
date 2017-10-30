@@ -110,18 +110,21 @@ class CachedRoom {
         return `[CachedRoom ${this.name}]`;
     }
 }
-
-module.exports = {
-    getRoomCache(roomName) {
+function getRoomCache(roomName) {
+    return tickCache.get('maps-roomCache-'+roomName, () => {
         if(!hasCacheForRoom(roomName)) {
             return null;
         }
 
         return new CachedRoom(roomName);
-    },
+    });
+}
+
+module.exports = {
+    getRoomCache,
 
     getCostMatrix(roomName, costs) {
-        let cache = module.exports.getRoomCache(roomName);
+        let cache = getRoomCache(roomName);
 
         if(!costs) {
             costs = new PathFinder.CostMatrix;
@@ -168,16 +171,16 @@ module.exports = {
      * @param {Object} options
      */
     getMultiRoomPath(from, to, options) {
-        _.defaults(options, {avoidHostile: true, roomCallback: null});
+        _.defaults(options || {}, {avoidHostile: true, roomCallback: null});
 
         let myUser = utils.myUsername();
 
         let allowedRooms = { [ from.roomName ]: true };
 
-        Game.map.findRoute(from.roomName, to.roomName, {
+        let roomRoute = Game.map.findRoute(from.roomName, to.roomName, {
             routeCallback(roomName) {
-                if(hasCacheForRoom(roomName)) {
-                    let cache = new CachedRoom(roomName);
+                let cache = getRoomCache(roomName);
+                if(cache) {
 
                     if(cache.isFree()) {
                         return 1;
@@ -194,12 +197,21 @@ module.exports = {
 
                 return 1;
             }
-        }).forEach(function(info) {
+        });
+
+        if(roomRoute === ERR_NO_PATH) {
+            console.log('WARNING - no route', from, 'to', to);
+            return null;
+        }
+
+        roomRoute.forEach(function(info) {
             allowedRooms[info.room] = true;
         });
 
         let ret = PathFinder.search(from, to, {
-            maxOps: 20000,
+            maxOps: Math.min(_.size(allowedRooms) * 1000, 15000),
+            plainCost: 2,
+            swampCost:5,
             roomCallback(roomName) {
                 if (allowedRooms[roomName] === undefined) {
                     return false;
@@ -207,12 +219,15 @@ module.exports = {
 
                 let matrix = new PathFinder.CostMatrix;
 
-                if(hasCacheForRoom(roomName)) {
-                    let cache = new CachedRoom(roomName);
+                let cache = getRoomCache(roomName);
+                if(cache) {
 
                     for(let struct of cache.find(FIND_STRUCTURES)) {
                         if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
                             matrix.set(struct.pos.x, struct.pos.y, 0xff);
+                        }
+                        else if (struct.structureType === STRUCTURE_ROAD) {
+                            matrix.set(struct.pos.x, struct.pos.y, 1);
                         }
                     }
 
@@ -231,14 +246,11 @@ module.exports = {
 
                 let room = Game.rooms[roomName];
                 if(room) {
-                    let mgr = room.manager;
-                    if(mgr) {
-                        for(let creep of mgr.creeps) {
-                            if(creep.memory.isStationary) {
-                                matrix.set(creep.pos.x, creep.pos.y, 0xFF);
-                            }
+                    _.each(Game.creeps, creep => {
+                        if(creep.room == room && creep.memory.isStationary){
+                            matrix.set(creep.pos.x, creep.pos.y, 0xFF);
                         }
-                    }
+                    })
                 }
 
                 if(options.roomCallback) {

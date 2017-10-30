@@ -8,12 +8,16 @@ class RoomMarket extends utils.Executable {
      *
      * @param {RoomManager} manager
      * @param {StructureTerminal} terminal
+     * @param {StructureStorage} storage
+     * @param {Array<StructureLab>} labs
      */
-    constructor(manager, terminal) {
+    constructor(manager, terminal, storage, labs) {
         super();
 
         this.manager = manager;
         this.terminal = terminal;
+        this.storage = storage;
+        this.labs = labs;
 
         this.resourcesMinimum = 20000;
     }
@@ -100,16 +104,52 @@ class RoomMarket extends utils.Executable {
         return orders;
     }
 
-    getResourcesToBuy() {
-        let base = _.without(RESOURCES_BASE, [RESOURCE_CATALYST, RESOURCE_ENERGY]);
+    getResourcesTotal() {
+        let result = {};
+
+        for(let resource of RESOURCES_ALL) {
+            result[resource] = 0;
+            for(let struct of [this.terminal, this.storage]) {
+                result[resource] += struct.get(resource);
+            }
+        }
+
+        for(let lab of this.labs) {
+            if(lab.mineralType) {
+                result[lab.mineralType] += lab.mineralAmount;
+            }
+        }
+
+        return result;
+    }
+
+    getWantedResources() {
+        let base = _.without(RESOURCES_BASE, [RESOURCE_ENERGY]);
+        if(this.labs.length <= 3){
+            base = _.without(base, [RESOURCE_CATALYST]);
+        }
+        
+        let have = this.getResourcesTotal();
 
         let result = {};
         for(let resource of base) {
+
+            if(have[resource] < this.resourcesMinimum) {
+                result[resource] = this.resourcesMinimum - have[resource] + 2000;
+            }
+        }
+
+        return result;
+    }
+
+    getResourcesToBuy() {
+        let wanted = this.getWantedResources();
+
+        let result = {};
+        for(let resource of _.keys(wanted)) {
             let maxPrice = _.get(Memory, ['market','buy', resource]);
 
-            let have = this.terminal.store[resource] || 0;
-
-            if(have < this.resourcesMinimum && maxPrice) {
+            if(maxPrice) {
                 result[resource] = maxPrice;
             }
         }

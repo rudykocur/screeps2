@@ -364,7 +364,7 @@ class LabManager extends utils.Executable {
             return [
                 {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 5000},
                 {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 5000},
-                {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 3000},
+                {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 5000},
                 {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 5000},
                 {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 5000},
                 {resource: RESOURCE_HYDROXIDE, amount: 5000},
