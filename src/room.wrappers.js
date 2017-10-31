@@ -110,12 +110,30 @@ class ExtensionCluster {
 
         this.center = centerPoint;
         this.extensions = this.center.findInRange(roomData.extensions, 1);
+        this.extensionsMax = this.countPlainsAround(centerPoint) - 1;
 
         let capacity = _.size(this.extensions) * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
         let storedEnergy = _.sum(this.extensions, 'energy');
 
         this.needsEnergy = (storedEnergy < capacity);
         this.energyNeeded = capacity - storedEnergy;
+
+        let vis = new RoomVisual(centerPoint.roomName);
+        vis.text(this.extensionsMax, centerPoint);
+    }
+
+    /**
+     * @param {RoomPosition} center
+     */
+    countPlainsAround(center) {
+        let result = 0;
+        for(let pos of utils.getPositionsAround(center)) {
+            if(Game.map.getTerrainAt(pos) !== 'wall') {
+                result += 1;
+            }
+        }
+
+        return result;
     }
 }
 

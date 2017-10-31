@@ -23,11 +23,16 @@ class CreepMoveController {
     }
 
     unserializePath(path) {
-        let result = [];
+        if(path.length === 0) {
+            return [];
+        }
+
         let steps = path.split(';');
         return steps.map(step => {
             let parts = step.split(',');
+
             return new RoomPosition(parts[0], parts[1], parts[2]);
+
         })
     }
 

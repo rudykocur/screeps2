@@ -59,11 +59,11 @@ class RoomArchitect extends utils.Executable {
     }
 
     buildExtensions(room) {
-        let cluster = _.first(this.manager.extensionsClusters.filter(
-            c => c.extensions.length < 7
-        ));
+        let clusters = this.manager.extensionsClusters.filter(
+            c => c.extensions.length < c.extensionsMax
+        );
 
-        if(cluster) {
+        for(let cluster of clusters) {
             let storagePath = cluster.center.findPathTo(this.manager.storage.target);
 
             let pointInPath = _.first(storagePath.filter(
@@ -72,7 +72,7 @@ class RoomArchitect extends utils.Executable {
 
             if(!pointInPath) {
                 this.err('NO POINT IN PATH', pointInPath, '::', this.manager.storage, '::', this.manager.storage.target);
-                return;
+                continue;
             }
 
             for(let point of utils.getPositionsAround(cluster.center)) {

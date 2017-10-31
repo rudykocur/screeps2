@@ -19,7 +19,7 @@ class RoomMarket extends utils.Executable {
         this.storage = storage;
         this.labs = labs;
 
-        this.resourcesMinimum = 20000;
+        this.resourcesMinimum = 8000;
     }
 
     update() {
