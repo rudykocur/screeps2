@@ -20,13 +20,13 @@ class FiniteStateMachine extends utils.Executable {
         return this.memory.localState;
     }
 
-    update() {
+    update(...args) {
         if(!this.state) {
             this.enter(this.initialState);
         }
 
         if(this.config[this.state].onTick) {
-            this.config[this.state].onTick(this.localState);
+            this.config[this.state].onTick(this.localState, ...args);
         }
     }
 

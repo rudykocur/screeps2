@@ -161,6 +161,8 @@ class BuilderMind extends mind.CreepMindBase {
             this.creep.repair(_.first(this.creep.pos.lookFor(LOOK_STRUCTURES)));
             this.creep.mover.moveTo(target);
         }
+
+        this.creep.room.visual.line(this.creep.pos, target.pos, {})
     }
 
     /**

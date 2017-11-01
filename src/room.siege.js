@@ -38,11 +38,11 @@ class RoomSiege extends base.RoomBase {
         }
     }
 
-    spawn(mind) {
+    spawn(mind, options) {
         let manager = this.getSpawner();
 
         if(manager) {
-            return manager.spawner.spawn(this, mind.getSpawnParams(manager));
+            return manager.spawner.spawn(this, mind.getSpawnParams(manager, options));
 
         }
     }
@@ -58,6 +58,9 @@ class RoomSiege extends base.RoomBase {
                 }
             }
         }
+        else {
+            this.memory.hasCombatCreeps = this.threat.getCombatCreeps().length > 0;
+        }
 
         if (this.shouldSpawnBreacher()) {
             if (this.spawn(minds.available.breach)) {
@@ -65,15 +68,21 @@ class RoomSiege extends base.RoomBase {
             }
         }
 
+        if(this.shouldSpawnDefender()) {
+            if (this.spawn(minds.available.breach, {withBoosts: false})) {
+                this.important('Spawned defender');
+            }
+        }
+
         if(this.shouldSpawnClaimer()) {
             if(this.spawn(minds.available.claimer)) {
-                this.important('SPAWNED CLAIMER !!!!');
+                this.important('Spawned claimer');
             }
         }
     }
 
     shouldSpawnBreacher() {
-        if(this.getCreepCount(minds.available.breach) > 1) {
+        if(this.getCreepCount(minds.available.breach) > 0) {
             return false;
         }
 
@@ -83,11 +92,49 @@ class RoomSiege extends base.RoomBase {
 
         let cache = maps.getRoomCache(this.roomName);
 
+        if(!cache) {
+            return false
+        }
+
+        if(cache.getSafeModeUntill() - 400 > Game.time) {
+            return false;
+        }
+
         if(cache.findStructures(STRUCTURE_SPAWN).length > 0) {
             return true;
         }
 
-        if(cache.findStructures(STRUCTURE_TOWER).length > 0) {
+        return false;
+    }
+
+    shouldSpawnDefender() {
+        if(!this.room) {
+            return false;
+        }
+
+        if(this.getCreepCount(minds.available.breach, {withBoosts: false}).length > 0) {
+            return false;
+        }
+
+        let cache = maps.getRoomCache(this.roomName);
+
+        if(!cache) {
+            return false;
+        }
+
+        if(cache.findStructures(STRUCTURE_SPAWN).length > 0) {
+            return false;
+        }
+
+        if(cache.getSafeModeUntill() > Game.time) {
+            return false;
+        }
+
+        if(this.memory.hasCombatCreeps) {
+            return true;
+        }
+
+        if(this.threat.enemies.length > 0) {
             return true;
         }
 
@@ -97,7 +144,15 @@ class RoomSiege extends base.RoomBase {
     shouldSpawnClaimer() {
         let cache = maps.getRoomCache(this.roomName);
 
-        if(cache.find(STRUCTURE_SPAWN).length > 0) {
+        if(!cache) {
+            return false;
+        }
+
+        if(cache.getSafeModeUntill() > Game.time) {
+            return false;
+        }
+
+        if(cache.findStructures(STRUCTURE_SPAWN).length > 0) {
             return false;
         }
 

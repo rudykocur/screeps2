@@ -9,20 +9,26 @@ class RoomMarket extends utils.Executable {
      * @param {RoomManager} manager
      * @param {StructureTerminal} terminal
      * @param {StructureStorage} storage
-     * @param {Array<StructureLab>} labs
+     * @param {LabManager} labMgr
      */
-    constructor(manager, terminal, storage, labs) {
+    constructor(manager, terminal, storage, labMgr) {
         super();
 
         this.manager = manager;
         this.terminal = terminal;
         this.storage = storage;
-        this.labs = labs;
+        this.labMgr = labMgr;
 
         this.resourcesMinimum = 8000;
+        this.resourcesThreshold = 2000;
+
+        this.terminalLimit = this.resourcesMinimum + this.resourcesThreshold;
     }
 
-    update() {
+    /**
+     * @param {InterRoomExchange} exchange
+     */
+    update(exchange) {
         if(!this.terminal) {
             return;
         }
@@ -31,7 +37,19 @@ class RoomMarket extends utils.Executable {
             return;
         }
 
-        utils.everyMod(1, this.terminal.id, this.buyBaseMinerals.bind(this));
+        this.importResources(exchange);
+        utils.everyMod(100, this.terminal.id, this.buyBaseMinerals.bind(this));
+    }
+
+    /**
+     * @param {InterRoomExchange} exchange
+     */
+    importResources(exchange) {
+        let wanted = this.getWantedResources();
+
+        _.each(wanted, (amount, resource) => {
+            exchange.requestResources(this.manager, resource, amount);
+        });
     }
 
     buyBaseMinerals() {
@@ -107,14 +125,14 @@ class RoomMarket extends utils.Executable {
     getResourcesTotal() {
         let result = {};
 
-        for(let resource of RESOURCES_ALL) {
+        for(let resource of _.without(RESOURCES_ALL, RESOURCE_ENERGY)) {
             result[resource] = 0;
             for(let struct of [this.terminal, this.storage]) {
                 result[resource] += struct.get(resource);
             }
         }
 
-        for(let lab of this.labs) {
+        for(let lab of this.labMgr.labs) {
             if(lab.mineralType) {
                 result[lab.mineralType] += lab.mineralAmount;
             }
@@ -123,9 +141,30 @@ class RoomMarket extends utils.Executable {
         return result;
     }
 
+    getExportedResources() {
+        let result = {};
+
+        for(let resource of RESOURCES_ALL) {
+            if(RESOURCES_BASE.indexOf(resource) >= 0) {
+                if(this.terminal.get(resource) > this.terminalLimit) {
+                    result[resource] = this.terminal.get(resource) - this.terminalLimit;
+                }
+            }
+            else if(this.terminal.get(resource) > 1000) {
+                result[resource] = this.terminal.get(resource);
+            }
+        }
+
+        return result;
+    }
+
     getWantedResources() {
+        if(this.labMgr.labs === 0) {
+            return {};
+        }
+
         let base = _.without(RESOURCES_BASE, [RESOURCE_ENERGY]);
-        if(this.labs.length <= 3){
+        if(this.labMgr.labs.length <= 3){
             base = _.without(base, [RESOURCE_CATALYST]);
         }
         
@@ -135,7 +174,15 @@ class RoomMarket extends utils.Executable {
         for(let resource of base) {
 
             if(have[resource] < this.resourcesMinimum) {
-                result[resource] = this.resourcesMinimum - have[resource] + 2000;
+                result[resource] = this.resourcesMinimum - have[resource] + this.resourcesThreshold;
+            }
+        }
+
+        let boosts = this.labMgr.getActiveBoosts();
+
+        for(let boostResource of boosts) {
+            if(have[boostResource] < 3000) {
+                result[boostResource] = 3000 - have[boostResource];
             }
         }
 

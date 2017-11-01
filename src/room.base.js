@@ -10,6 +10,8 @@ class RoomBase extends utils.Executable {
 
         let room = Game.rooms[roomName];
 
+        Memory.rooms[roomName] = Memory.rooms[roomName] || {};
+
         if (room) {
             room.manager = this;
             this.room = room;
@@ -20,8 +22,20 @@ class RoomBase extends utils.Executable {
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
     }
 
-    getCreepCount(type) {
-        return _.size(this.mindsByType[type.name]);
+    get memory() {
+        return Memory.rooms[this.roomName];
+    }
+
+    getCreepCount(type, memo) {
+        memo = memo || {};
+
+        let minds = this.mindsByType[type.name];
+        if(minds && _.size(memo) > 0) {
+            let filterFn = _.matches(memo);
+            minds = minds.filter(mind => filterFn(mind.creep.memory));
+        }
+
+        return _.size(minds);
     }
 
     getAllMinds() {

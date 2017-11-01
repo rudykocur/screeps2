@@ -94,6 +94,10 @@ class CachedRoom {
         return this.getStructure(STRUCTURE_CONTROLLER);
     }
 
+    getSafeModeUntill() {
+        return this.cache.safeModeUntill;
+}
+
     find(type) {
         return this.cache.data.filter(obj => obj._typeId === type || (!obj._typeId && type === FIND_STRUCTURES));
     }
@@ -171,7 +175,10 @@ module.exports = {
      * @param {Object} options
      */
     getMultiRoomPath(from, to, options) {
-        _.defaults(options || {}, {avoidHostile: true, roomCallback: null});
+        _.defaults(options || {}, {
+            avoidHostile: true,
+            roomCallback: null,
+        });
 
         let myUser = utils.myUsername();
 
@@ -209,7 +216,7 @@ module.exports = {
         });
 
         let ret = PathFinder.search(from, to, {
-            maxOps: Math.min(_.size(allowedRooms) * 1000, 15000),
+            maxOps: Math.min(_.size(allowedRooms) * 1500, 15000),
             plainCost: 2,
             swampCost:5,
             roomCallback(roomName) {
@@ -281,16 +288,17 @@ module.exports = {
             }
 
             cache.data = scanRoom(room);
+            cache.owner = null;
+            cache.reservedBy = null;
+            cache.safeModeUntill = null;
 
             if(room.controller) {
                 cache.owner = room.controller.owner ? room.controller.owner.username : null;
                 cache.reservedBy = room.controller.reservation ? room.controller.reservation.username : null;
+                if(room.controller.safeMode > 0) {
+                    cache.safeModeUntill = room.controller.safeMode + Game.time;
+                }
             }
-            else {
-                cache.owner = null;
-                cache.reservedBy = null;
-            }
-
 
             cache.lastUpdateTime = Game.time + utils.roomNameToInt(room.name) % 21;
         }

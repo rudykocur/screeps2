@@ -73,7 +73,6 @@ class RoomManager extends utils.Executable {
         });
 
         this.terminal = this.room.terminal;
-        this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.data.labs);
 
         this.threat = new threat.ThreatAssesment(this.enemies);
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
@@ -90,6 +89,7 @@ class RoomManager extends utils.Executable {
         this.architect = new room_architect.RoomArchitect(this);
         this.spawner = new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns);
         this.labs  = new room_labs.LabManager(this, this.data.labs, this.terminal);
+        this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.labs);
         this.timer.stop();
 
         this.remote = new room_remote.RemoteRoomsManager(this);
@@ -146,7 +146,7 @@ class RoomManager extends utils.Executable {
         return _.first(sources);
     }
 
-    update() {
+    update(exchange) {
         this.timer.count(()=> {
 
             let damageToSpawns = _.sum(this.data.spawns, /**StructureSpawn*/spawn => {
@@ -169,13 +169,13 @@ class RoomManager extends utils.Executable {
 
         this.timer.count(()=> {
             this.spawner.run();
-            this.labs.run();
+            this.labs.run(exchange);
         });
 
         this.remote.run();
 
         this.timer.count(()=> {
-            this.market.run();
+            this.market.run(exchange);
             this.architect.run();
             this.storage.run();
             this.links.forEach(link => {

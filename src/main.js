@@ -8,6 +8,7 @@ const maps = require('maps');
 const stats = require('utis.stats');
 const sandbox = require('utils.sandbox');
 const utils_console = require('utils.console');
+const exchange = require('room.exchange');
 
 proto.installPrototypes();
 
@@ -77,8 +78,11 @@ module.exports = {
 
         let managers = rooms.getHandlers(jobBoard);
 
+        let exch = new exchange.InterRoomExchange(managers);
+        exch.run();
+
         for(let manager of managers) {
-            manager.run();
+            manager.run(exch);
         }
 
         managers.forEach((manager) => {

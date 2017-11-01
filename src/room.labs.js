@@ -76,7 +76,7 @@ class LabManager extends utils.Executable {
         return this.memory.layout.labCount !== this.labs.length;
     }
 
-    update() {
+    update(exchange) {
         if(this.labs.length < 3  || !this.terminal) {
             return;
         }
@@ -85,7 +85,7 @@ class LabManager extends utils.Executable {
             this.regenerateLabLayout();
         }
 
-        this.fsm.run();
+        this.fsm.run(exchange);
 
         this.decorateLabs();
     }
@@ -118,6 +118,14 @@ class LabManager extends utils.Executable {
         this.fsm.enter(STATE.IDLE);
     }
 
+    getActiveBoosts() {
+        if(!this.memory.boostsToLoad) {
+            return [];
+        }
+
+        return this.memory.boostsToLoad;
+    }
+
     areBoostsReady() {
         if(!this.memory.boostsToLoad) {
             return false;
@@ -131,7 +139,7 @@ class LabManager extends utils.Executable {
                 return false;
             }
 
-            if(lab.energy < 1000) {
+            if(lab.energy < 800) {
                 return false;
             }
         }
@@ -139,7 +147,7 @@ class LabManager extends utils.Executable {
         return true;
     }
 
-    pickNextTarget() {
+    pickNextTarget(state, exchange) {
         if(this.mustRegenerateLayout()) {
             return;
         }
@@ -149,7 +157,7 @@ class LabManager extends utils.Executable {
             return;
         }
 
-        let target = this.pickNextFinalTarget();
+        let target = this.pickNextFinalTarget(exchange);
 
         if(!target) {
             return;
@@ -176,12 +184,12 @@ class LabManager extends utils.Executable {
         let needsOfFinalTarget = target.amount - this.terminal.get(target.resource);
 
         if(target.resource === currentProduct) {
-            return needsOfFinalTarget;
+            return Math.min(needsOfFinalTarget, LAB_MINERAL_CAPACITY);
         }
 
         let haveCurrentReaction = this.terminal.get(currentProduct);
 
-        return needsOfFinalTarget - haveCurrentReaction;
+        return Math.min(needsOfFinalTarget - haveCurrentReaction, LAB_MINERAL_CAPACITY);
     }
 
     prepareLabsForLoad() {
@@ -341,11 +349,11 @@ class LabManager extends utils.Executable {
         return result;
     }
 
-    pickNextFinalTarget() {
+    pickNextFinalTarget(exchange) {
         let targets = this.getTargets();
 
         for(let target of targets) {
-            let amount = this.terminal.get(target.resource);
+            let amount = exchange.getTotal(target.resource);
             if(amount < target.amount) {
                 return target;
             }
@@ -355,32 +363,21 @@ class LabManager extends utils.Executable {
     getTargets() {
         if(this.labs.length === 3) {
             return [
-                {resource: RESOURCE_HYDROXIDE, amount: 5000},
-                {resource: RESOURCE_GHODIUM, amount: 5000},
+                {resource: RESOURCE_HYDROXIDE, amount: 6000},
+                {resource: RESOURCE_GHODIUM, amount: 6000},
             ];
         }
 
-        if(this.manager.room.terminal.get(RESOURCE_CATALYST) > 0) {
-            return [
-                {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 5000},
-                {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 5000},
-                {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 5000},
-                {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 5000},
-                {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 5000},
-                {resource: RESOURCE_HYDROXIDE, amount: 5000},
-                {resource: RESOURCE_GHODIUM, amount: 5000},
-            ];
-        }
-
-        return [
-            {resource: RESOURCE_LEMERGIUM_ALKALIDE, amount: 5000},
-            {resource: RESOURCE_GHODIUM_ALKALIDE, amount: 5000},
-            {resource: RESOURCE_ZYNTHIUM_ALKALIDE, amount: 5000},
-            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 5000},
-            {resource: RESOURCE_KEANIUM_ALKALIDE, amount: 5000},
-            {resource: RESOURCE_HYDROXIDE, amount: 5000},
-            {resource: RESOURCE_GHODIUM, amount: 5000},
-        ];
+        return _.shuffle([
+            {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 6000},
+            {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 6000},
+            {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 6000},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 6000},
+            {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 6000},
+        ]).concat([
+            {resource: RESOURCE_HYDROXIDE, amount: 6000},
+            {resource: RESOURCE_GHODIUM, amount: 6000},
+        ]);
     }
 
     regenerateLabLayout() {
@@ -450,14 +447,43 @@ class LabManager extends utils.Executable {
             }
         }
         else {
-            for(let labId of this.memory.layout.inputLabs) {
-                let lab = Game.getObjectById(labId);
-                lab.room.visual.circle(lab.pos, {
-                    fill: 'transparent',
-                    stroke: 'pink',
-                    strokeWidth: 0.2,
-                    radius: 0.6
-                })
+            if(this.fsm.state === STATE.LOAD || this.fsm.state === STATE.PROCESS) {
+                for(let labId of this.memory.layout.inputLabs) {
+                    let lab = Game.getObjectById(labId);
+                    lab.room.visual.circle(lab.pos, {
+                        fill: 'transparent',
+                        stroke: 'pink',
+                        strokeWidth: 0.2,
+                        radius: 0.6
+                    })
+                }
+            }
+
+            if(this.fsm.state === STATE.LOAD_BOOST) {
+                for(let i = 0; i < this.memory.boostsToLoad.length; i++) {
+                    let resource = this.memory.boostsToLoad[i];
+                    let lab = this.labs[i];
+
+                    if(lab.mineralAmount  === 0 || lab.energy < 800) {
+                        lab.room.visual.circle(lab.pos, {
+                            fill: 'transparent',
+                            stroke: 'red',
+                            strokeWidth: 0.2,
+                            radius: 0.6,
+                            opacity: 0.7,
+                        });
+                        lab.room.visual.text(resource, lab.pos, {font: 0.5});
+                    }
+                    else {
+                        lab.room.visual.circle(lab.pos, {
+                            fill: 'transparent',
+                            stroke: 'green',
+                            strokeWidth: 0.2,
+                            radius: 0.6,
+                            opacity: 0.7,
+                        });
+                    }
+                }
             }
         }
     }

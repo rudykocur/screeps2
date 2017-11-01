@@ -62,7 +62,7 @@ class BreachMind extends mind.CreepMindBase {
     }
 
     gotoRoom() {
-        if(this.creep.memory.boosts.length > 0) {
+        if(this.creep.memory.boosts && this.creep.memory.boosts.length > 0) {
             this.debug('Entering boost state');
             this.enterState(STATE.BOOST);
             return;
@@ -70,12 +70,18 @@ class BreachMind extends mind.CreepMindBase {
 
         let roomName = this.creep.memory.roomName;
 
-        this.creep.heal(this.creep);
+        if(this.creep.hits < this.creep.hitsMax) {
+            this.creep.heal(this.creep);
+        }
 
         if(this.creep.pos.roomName != roomName) {
             let cache = maps.getRoomCache(roomName);
             if(cache) {
-                this.creep.mover.moveTo(cache.controller.pos);
+                this.creep.mover.moveByPath(() =>{
+                    return maps.getMultiRoomPath(this.creep.pos, cache.controller.pos, {
+                        avoidHostile: false,
+                    });
+                })
             }
             else {
                 let exitDir = this.creep.room.findExitTo(roomName);
@@ -151,10 +157,12 @@ class BreachMind extends mind.CreepMindBase {
     attackTarget() {
         this.debug = true;
 
-        if(!this.workRoom) {
+        if(!this.workRoom || this.creep.pos.roomName != this.workRoom.roomName) {
             this.enterState(STATE.IDLE);
             return;
         }
+
+        maps.updateRoomCache(this.creep.room, 50);
 
         if(this.tryAttackController()) {
             return;
@@ -220,6 +228,10 @@ class BreachMind extends mind.CreepMindBase {
             costCallback: (roomName, matrix) => {
                 let room = maps.getRoomCache(roomName);
 
+                if(!room) {
+                    return matrix;
+                }
+
                 room.find().forEach(struct => {
                     let r = Game.rooms[roomName];
 
@@ -260,10 +272,19 @@ class BreachMind extends mind.CreepMindBase {
      * @param {RoomManager} manager
      */
     static getSpawnParams(manager, options) {
-        options = options || {};
+        options = _.defaults(options || {}, {withBoosts: true});
 
         let body = Memory.siegeCreep.body;
-        let boosts = Memory.siegeCreep.boosts;
+
+        let boosts;
+        if(options.withBoosts) {
+            boosts = Memory.siegeCreep.boosts;
+        }
+        else {
+            body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,HEAL,HEAL,HEAL,HEAL,HEAL];
+            boosts = Memory.siegeCreep.boosts
+        }
 
         return {
             body: body,
@@ -271,6 +292,7 @@ class BreachMind extends mind.CreepMindBase {
             memo: {
                 mind: 'breach',
                 boosts: boosts,
+                withBoosts: options.withBoosts,
             }
         };
     }
