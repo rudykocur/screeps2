@@ -62,6 +62,25 @@ module.exports = {
             }
         }
 
+        if(!RoomPosition.prototype.hasOwnProperty('serialize')) {
+            RoomPosition.prototype.serialize = function() {
+                return this.x+','+this.y+','+this.roomName;
+            }
+        }
+
+        if(!RoomPosition.prototype.hasOwnProperty('isEdge')) {
+            RoomPosition.prototype.isEdge = function() {
+                return this.x === 49 || this.y === 49 || this.x === 0 || this.y === 0;
+            }
+        }
+
+        if(!RoomPosition.unserialize) {
+            RoomPosition.unserialize = function(posStr) {
+                let parts = posStr.split(',');
+                return new RoomPosition(parts[0], parts[1], parts[2]);
+            }
+        }
+
         if(!('RESOURCES_BASE' in global)) {
             global.RESOURCES_BASE = [
                 RESOURCE_UTRIUM,

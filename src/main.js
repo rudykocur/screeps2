@@ -9,6 +9,7 @@ const stats = require('utis.stats');
 const sandbox = require('utils.sandbox');
 const utils_console = require('utils.console');
 const exchange = require('room.exchange');
+const procmgr = require('process.manager');
 
 proto.installPrototypes();
 
@@ -57,6 +58,7 @@ module.exports = {
         let initTime = Game.cpu.getUsed();
 
         let jobBoard = new job_board.JobBoard();
+        let processManager = new procmgr.ProcessManager();
 
         _.each(Memory.creeps, (creepData, creepName) => {
             if(!Game.creeps[creepName]) {
@@ -76,7 +78,7 @@ module.exports = {
             maps.updateRoomCache(room, 500);
         });
 
-        let managers = rooms.getHandlers(jobBoard);
+        let managers = rooms.getHandlers(jobBoard, processManager);
 
         let exch = new exchange.InterRoomExchange(managers);
         exch.run();
@@ -107,6 +109,8 @@ module.exports = {
         stats.countStats(initTime, managers, jobBoard);
 
         utils_console.installConsoleFunctions(global);
+
+        processManager.run();
 
         // sandbox.debugFun2();
         // sandbox.debugFun3();

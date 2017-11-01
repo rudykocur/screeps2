@@ -14,12 +14,15 @@ const market = require('room.market');
 const wrappers = require('room.wrappers');
 const profiler = require('profiler');
 
+const procdef = require('process.roomDefence');
+
 class RoomManager extends utils.Executable {
     /**
      * @param {Room} room
      * @param jobManager
+     * @param {ProcessManager} procMgr
      */
-    constructor(room, jobManager) {
+    constructor(room, jobManager, procMgr) {
         super();
 
         this.timer.start();
@@ -31,6 +34,7 @@ class RoomManager extends utils.Executable {
         this.initMemory();
 
         this.jobManager = jobManager;
+        this.processManager = procMgr;
 
         this.creeps = _.filter(Game.creeps, "memory.roomName", this.room.name);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
@@ -190,6 +194,10 @@ class RoomManager extends utils.Executable {
     getExtensionsClusters() {
         return this.flags.filter(flags.isExtensionCluster).map(
             f => new wrappers.ExtensionCluster(f.pos, this, this.data));
+    }
+
+    runDef() {
+        this.processManager.addProcess(new procdef.RoomDefenceAnalysis(this.roomName, {roomName: this.roomName}));
     }
 
     toString() {

@@ -19,7 +19,7 @@ function safeCtor(callback, room) {
 
 
 module.exports = {
-    getHandlers(jobBoard) {
+    getHandlers(jobBoard, procMgr) {
         let managers = [];
         _.each(Game.rooms, room => {
             if(!room.controller || !room.controller.my) {
@@ -30,7 +30,7 @@ module.exports = {
                 return;
             }
 
-            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard)), room);
+            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard, procMgr)), room);
         });
 
         let result = [];
