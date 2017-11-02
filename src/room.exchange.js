@@ -38,6 +38,10 @@ class InterRoomExchange extends utils.Executable {
         let remaining = amount;
 
         for(let available of exports) {
+            if(target.roomName === available.manager.roomName) {
+                continue;
+            }
+
             let toTransfer = Math.min(remaining, available.amount);
             let status = available.manager.terminal.send(available.resource, toTransfer, target.roomName);
 

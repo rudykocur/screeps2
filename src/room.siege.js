@@ -112,7 +112,7 @@ class RoomSiege extends base.RoomBase {
             return false;
         }
 
-        if(this.getCreepCount(minds.available.breach, {withBoosts: false}).length > 0) {
+        if(this.getCreepCount(minds.available.breach, {withBoosts: false}) > 0) {
             return false;
         }
 
