@@ -11,6 +11,11 @@ const STATE = {
 };
 
 class DefenderMind extends mind.CreepMindBase {
+    /**
+     *
+     * @param creep
+     * @param {RoomManager} roomManager
+     */
     constructor(creep, roomManager) {
         super(creep, roomManager);
 
@@ -67,10 +72,26 @@ class DefenderMind extends mind.CreepMindBase {
     }
 
     getTarget() {
-        let target = this.workRoom.threat.getClosestEnemy(this.creep);
+
+        let target;
+
+        if(this.workRoom.threat.getCombatCreeps().length === 0) {
+            target = Game.getObjectById(this.creep.memory.lastTargetId);
+        }
+
+        if(!target) {
+            target = this.workRoom.threat.getClosestEnemy(this.creep);
+        }
 
         if(!target) {
             target = _.first(this.workRoom.room.find(FIND_HOSTILE_STRUCTURES).filter(s => s.structureType !== STRUCTURE_CONTROLLER));
+        }
+
+        if(target) {
+            this.creep.memory.lastTargetId = target.id;
+        }
+        else {
+            this.creep.memory.lastTargetId = null;
         }
 
         return target;
@@ -113,16 +134,22 @@ class DefenderMind extends mind.CreepMindBase {
         }
         this.creep.rangedAttack(target);
 
-        this.creep.heal(this.creep);
+        if(this.creep.hits < this.creep.hitsMax) {
+            this.creep.heal(this.creep);
+        }
     }
 
     goNearTarget(target) {
         let path = this.creep.room.findPath(this.creep.pos, target.pos, {
             ignoreDestructibleStructures: true,
             costCallback: (roomName, matrix) => {
-                let room = maps.getRoomCache(roomName);
+                let cache = maps.getRoomCache(roomName);
 
-                room.find().forEach(struct => {
+                if(!cache) {
+                    return matrix;
+                }
+
+                cache.find().forEach(struct => {
                     let r = Game.rooms[roomName];
 
                     let cost;
@@ -167,6 +194,12 @@ class DefenderMind extends mind.CreepMindBase {
         let body = [TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK];
         if(manager.room.energyCapacityAvailable > 1000) {
             body = [TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK];
+        }
+
+        if(manager.room.energyCapacityAvailable > 3000) {
+            body = [TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,HEAL,HEAL];
         }
 
         if(options.breach) {

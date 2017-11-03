@@ -11,6 +11,8 @@ const availableMinds = {
     'claimer': require('mind.claimer').ClaimerMind,
     'settler': require('mind.settler').SettlerMind,
     'breach': require('mind.breach').BreachMind,
+    'skHunter': require('mind.sk-hunter').SKHunterMind,
+    'sk-hunter': require('mind.sk-hunter').SKHunterMind,
 };
 
 module.exports = {

@@ -14,7 +14,7 @@ class HarvesterMind extends mind.CreepMindBase {
 
         let job = this.getJob();
 
-        if(job && !this.creep.workRoom.danger) {
+        if(job && (this.creep.workRoom.isSKRoom || this.creep.workRoom.threat.getCombatCreeps().length === 0)) {
             job.execute();
             return;
         }
@@ -39,8 +39,11 @@ class HarvesterMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
+     * @param {{mineral, skBody}} options
      */
-    static getSpawnParams(manager, mineralHarvester) {
+    static getSpawnParams(manager, options) {
+        options = _.defaults(options || {}, {mineral: false, skBody: false});
+
         let body = [MOVE, WORK, WORK];
         if(manager.room.energyCapacityAvailable > 500) {
             body = [WORK, WORK, WORK, WORK, MOVE, MOVE];
@@ -52,14 +55,20 @@ class HarvesterMind extends mind.CreepMindBase {
             body = [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE];
         }
 
-        if(mineralHarvester) {
+        if(options.mineral) {
             body = bb.build([WORK, WORK, MOVE], manager.room.energyCapacityAvailable);
+        }
+        if(options.skBody) {
+            body = [MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,WORK,WORK,CARRY];
         }
 
         return {
             body: body,
             name: 'harvester',
-            memo: {'mind': 'harvester', mineral: !!mineralHarvester}
+            memo: {
+                'mind': 'harvester',
+                mineral: options.mineral
+            }
         };
     }
 }

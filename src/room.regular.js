@@ -4,7 +4,7 @@ const flags = require('utils.flags');
 const minds = require('mind');
 const population = require('room.population');
 const room_architect = require('room.architect');
-const room_remote = require('room.remote');
+const remote_manager = require('room.remote-manager');
 const room_labs = require('room.labs');
 const threat = require('combat.threat');
 const data = require('room.data');
@@ -96,7 +96,7 @@ class RoomManager extends utils.Executable {
         this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.labs);
         this.timer.stop();
 
-        this.remote = new room_remote.RemoteRoomsManager(this);
+        this.remote = new remote_manager.RemoteRoomsManager(this);
         this.stats = new stats.RoomStats(this, this.labs);
     }
 

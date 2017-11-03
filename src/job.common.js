@@ -75,19 +75,21 @@ class JobCommonActions {
      * @param [options.onDone] callback invoked after transfer
      * @param [options.onTick] callback invoked in each tick
      * @param [options.storage] Storage where unload to
+     * @param [options.pathOptions] Additional options passed to path calculation
      */
     unloadAllResources(options) {
         options = _.defaults(options || {}, {
             onDone: () => {},
             onTick: () => {},
-            storage: this.workRoom.storage
+            storage: this.workRoom.storage,
+            pathOptions: {},
         });
 
         options.onTick();
 
         if(!options.storage.canDeposit(this.creep)) {
             this.creep.mover.moveByPath(() =>{
-                return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, {});
+                return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, options.pathOptions);
             })
         }
         else {

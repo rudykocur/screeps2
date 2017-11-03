@@ -17,7 +17,7 @@ class TransferMind extends mind.CreepMindBase {
 
         let job = this.getJob();
 
-        if(job && !this.creep.workRoom.danger) {
+        if(job && (this.creep.workRoom.isSKRoom || this.creep.workRoom.threat.getCombatCreeps().length === 0)) {
             job.execute();
             return;
         }

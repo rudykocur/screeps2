@@ -45,6 +45,10 @@ class CreepMoveController {
             };
         }
 
+        if(this.creep.fatigue > 0) {
+            return;
+        }
+
         let path = this.unserializePath(this.memory._moverPath.path);
 
         let result = this.creep.moveByPath(path);

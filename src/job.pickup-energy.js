@@ -36,7 +36,9 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
 
         if(!this.creep.pos.isNearTo(resource)) {
             this.creep.mover.moveByPath(() =>{
-                return maps.getMultiRoomPath(this.creep.pos, resource.pos, {});
+                return maps.getMultiRoomPath(this.creep.pos, resource.pos, {
+                    ignoreAllLairs: this.creep.workRoom.isSKRoom,
+                });
             })
         }
         else {
@@ -65,6 +67,9 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
                 }
             },
             onDone: () => this.completeJob(),
+            pathOptions: {
+                ignoreAllLairs: this.creep.workRoom.isSKRoom,
+            }
         });
     }
 

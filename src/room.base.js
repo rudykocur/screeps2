@@ -38,6 +38,10 @@ class RoomBase extends utils.Executable {
         return _.size(minds);
     }
 
+    getCreeps(mind) {
+        return this.mindsByType[mind.name];
+    }
+
     getAllMinds() {
         return this.minds;
     }

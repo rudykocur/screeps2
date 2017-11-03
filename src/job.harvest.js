@@ -11,6 +11,7 @@ const JOB_TYPE = 'harvest-source';
 const STATE = {
     GOTO: 'goto',
     HARVEST: 'harvest',
+    KEEP_DISTANCE: 'keep_distance',
 };
 
 class HarvestJobHandler extends job_common.JobHandlerBase {
@@ -25,6 +26,10 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             },
             [STATE.HARVEST]: {
                 onTick: this.harvestSource.bind(this)
+            },
+            [STATE.KEEP_DISTANCE]: {
+                onEnter: this.pickSafeSpot.bind(this),
+                onTick: this.stayInSafeSpot.bind(this),
             }
         });
 
@@ -34,6 +39,11 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         let source = Game.getObjectById(this.data.targetId);
 
         let container = _.first(source.pos.findInRange(this.workRoom.data.containers, 1));
+        let lair = _.first(source.pos.findInRange(this.workRoom.data.lairs, 5));
+
+        if(lair) {
+            state.lairId = lair.id;
+        }
 
         if(container) {
             state.targetPos = container.pos;
@@ -57,20 +67,24 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
 
         if(state.exact) {
             if(this.creep.pos.isEqualTo(pos)) {
-                this.fsm.enter(STATE.HARVEST, {containerId: state.containerId});
+                this.fsm.enter(STATE.HARVEST, {containerId: state.containerId, lairId: state.lairId});
                 return;
             }
         }
         else {
             if(this.creep.pos.isNearTo(pos)) {
-                this.fsm.enter(STATE.HARVEST);
+                this.fsm.enter(STATE.HARVEST, {lairId: state.lairId});
                 return;
             }
         }
 
         this.creep.mover.moveByPath(() =>{
-            return maps.getMultiRoomPath(this.creep.pos, pos, {});
-        })
+            return maps.getMultiRoomPath(this.creep.pos, pos, {
+                ignoreLairs: [state.lairId],
+            });
+        });
+
+        this.creep.room.visual.line(this.creep.pos, pos);
     }
 
     harvestSource(state) {
@@ -102,6 +116,13 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
                 this.creep.repair(container);
             }
         }
+
+        if(state.lairId) {
+            let lair = Game.getObjectById(state.lairId);
+            if(lair && lair.ticksToSpawn < 15) {
+                this.fsm.enter(STATE.KEEP_DISTANCE, {lairId: state.lairId});
+            }
+        }
     }
 
     /**
@@ -124,10 +145,42 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
                 if(source.link.cooldown === 0) {
                     if(storage.link && storage.link.energy < storage.link.energyCapacity / 2) {
                         source.link.transferEnergy(storage.link.link);
-
                     }
                 }
             }
+        }
+    }
+
+    pickSafeSpot(state) {
+        let target = this.workRoom.parent.storage.target;
+
+        let path = maps.getMultiRoomPath(this.creep.pos, target.pos, {
+            ignoreLairs: [state.lairId],
+        });
+
+        let pos = _.last(path.slice(0, 10));
+
+        state.pos = {
+            x: pos.x,
+            y: pos.y,
+            roomName: pos.roomName,
+        }
+    }
+
+    stayInSafeSpot(state) {
+        let pos = new RoomPosition(state.pos.x, state.pos.y, state.pos.roomName);
+        let lair = Game.getObjectById(state.lairId);
+
+        if(!this.creep.pos.isEqualTo(pos)) {
+            this.creep.mover.moveTo(pos);
+        }
+        else {
+            let enemies = lair.pos.findInRange(this.creep.workRoom.threat.enemies, 5);
+            if(lair.ticksToSpawn > 10 && enemies.length === 0) {
+                this.fsm.enter(STATE.GOTO);
+                return;
+            }
+            this.creep.mover.enterStationary();
         }
     }
 

@@ -258,7 +258,7 @@ class RoomPopulation extends utils.Executable {
     }
 
     spawnMineralHarvester(spawn) {
-        let options = minds.available.harvester.getSpawnParams(this.manager, true);
+        let options = minds.available.harvester.getSpawnParams(this.manager, {mineral: true});
         this.doSpawn(spawn, options.body, options.name, options.memo);
     }
 

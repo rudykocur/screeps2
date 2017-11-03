@@ -16,118 +16,6 @@ let threat = require('combat.threat');
 
 const profiler = require('profiler');
 
-class RemoteRoomsManager extends utils.Executable {
-
-    /**
-     * @param {RoomManager} manager
-     */
-    constructor(manager) {
-        super();
-
-        this.manager = manager;
-        this.jobManager = manager.jobManager;
-
-        this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
-
-        if(this.manager.room.controller.level >= 3) {
-            this.handlers = (this.memory.roomNames || []).map(
-                name => new RemoteRoomHandler(name, this.manager));
-        }
-        else {
-            this.handlers = [];
-        }
-    }
-
-    get memory(){
-        return this.manager.room.memory.remoteRooms;
-    }
-
-    getAllMinds() {
-        let result = [];
-
-        for(let remote of this.handlers) {
-            result = result.concat(remote.minds);
-        }
-
-        return result;
-    }
-
-    update() {
-        for (let handler of this.handlers) {
-            handler.prioritySpawn();
-        }
-
-        for (let handler of this.handlers) {
-            handler.run();
-        }
-
-        this.memory.roomNames = this.getRemoteRoomNames();
-    }
-
-    getRemoteRoomNames() {
-        let toCheck = this.getExitRooms(this.manager.room.name);
-
-        let result = [];
-
-        while(toCheck.length > 0) {
-            let roomName = toCheck.pop();
-
-            result.push(roomName);
-
-            let newRooms = this.getExitRooms(roomName);
-
-            toCheck = toCheck.concat(newRooms);
-        }
-
-        return result;
-    }
-
-    /**
-     * @param roomName
-     */
-    getExitRooms(roomName) {
-        let exitFlags = _.filter(Game.flags, /**Flag*/ f => {
-            if(f.pos.roomName != roomName) {
-                return;
-            }
-
-            return f.color == COLOR_PURPLE && f.secondaryColor == COLOR_PURPLE;
-        });
-
-        let availableExits = Game.map.describeExits(roomName);
-        let exits = [];
-
-        exitFlags.forEach(/**Flag*/ flag => {
-            let exitDirection = this.getExitFlagDirection(flag);
-            exits.push(availableExits[exitDirection]);
-        });
-
-        return exits;
-    }
-
-    /**
-     * @param {Flag} flag
-     */
-    getExitFlagDirection(flag) {
-        if(flag.pos.x === 0) {
-            return LEFT;
-        }
-        if(flag.pos.y === 0) {
-            return TOP;
-        }
-        if(flag.pos.x === 49) {
-            return RIGHT;
-        }
-        if(flag.pos.y == 49) {
-            return BOTTOM;
-        }
-    }
-
-    toString() {
-        return `[RemoteRoomsManager for ${this.manager.room}]`;
-    }
-}
-
 class RemoteRoomHandler extends utils.Executable {
     /**
      * @param roomName
@@ -188,12 +76,6 @@ class RemoteRoomHandler extends utils.Executable {
 
         this.threat = new threat.ThreatAssesment(this.enemies);
 
-        if(this.enemies.length > 0) {
-            this.danger = this.enemies.filter(creep => {
-                return creep.getActiveBodyparts(ATTACK) > 0 || creep.getActiveBodyparts(RANGED_ATTACK) > 0
-            }).length > 0;
-        }
-
         for(let name of ['scoutName', 'defenderName', 'claimerName']) {
             if(this.memory[name] && !Game.creeps[this.memory[name]]) {
                 delete this.memory[name];
@@ -217,7 +99,7 @@ class RemoteRoomHandler extends utils.Executable {
 
     /**
      *
-     * @return {RoomPopulationMind}
+     * @return {RoomPopulation}
      */
     get spawner() {
         return this.parent.spawner;
@@ -387,9 +269,8 @@ class RemoteRoomHandler extends utils.Executable {
     }
 }
 
-profiler.registerClass(RemoteRoomsManager, RemoteRoomsManager.name);
 profiler.registerClass(RemoteRoomHandler, RemoteRoomHandler.name);
 
 module.exports = {
-    RemoteRoomsManager
+    RemoteRoomHandler
 };

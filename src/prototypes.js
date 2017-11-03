@@ -50,6 +50,23 @@ module.exports = {
             });
         }
 
+        if(!Creep.prototype.hasOwnProperty('enterRoom')) {
+            Creep.prototype.enterRoom = function() {
+                if(this.pos.x === 0) {
+                    this.move(RIGHT);
+                }
+                if(this.pos.y === 0) {
+                    this.move(BOTTOM);
+                }
+                if(this.pos.x === 49) {
+                    this.move(LEFT);
+                }
+                if(this.pos.y === 49) {
+                    this.move(TOP);
+                }
+            }
+        }
+
         if(!StructureStorage.prototype.hasOwnProperty('get')) {
             StructureStorage.prototype.get = function(resource, defaultValue) {
                 return this.store[resource] || defaultValue || 0;

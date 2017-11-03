@@ -178,6 +178,8 @@ module.exports = {
         _.defaults(options || {}, {
             avoidHostile: true,
             roomCallback: null,
+            ignoreLairs: [],
+            ignoreAllLairs: false,
         });
 
         let myUser = utils.myUsername();
@@ -238,15 +240,18 @@ module.exports = {
                         }
                     }
 
-                    let sources = cache.find(FIND_SOURCES);
-                    if(sources.length == 3) {
-                        let mineral = _.first(cache.find(FIND_MINERALS));
-                        sources.push(mineral);
-                        for(let src of sources) {
-                            let unsafe = utils.getAround(src.pos, 5);
-                            for(let point of unsafe) {
-                                matrix.set(point.x, point.y, 0xFF);
+                    if(!options.ignoreAllLairs) {
+                        let lairs = cache.findStructures(STRUCTURE_KEEPER_LAIR);
+
+                        for(let lair of lairs) {
+                            if(options.ignoreLairs.length === 0 || options.ignoreLairs.indexOf(lair.id) < 0 ) {
+                                let unsafe = utils.getAround(lair.pos, 5);
+
+                                for (let point of unsafe) {
+                                    matrix.set(point.x, point.y, 0xFF);
+                                }
                             }
+
                         }
                     }
                 }
