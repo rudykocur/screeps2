@@ -52,6 +52,11 @@ class HarvestExtractorJobHandler extends job_common.JobHandlerBase {
         let mineral = Game.getObjectById(this.data.mineralId);
         let container = Game.getObjectById(state.containerId);
 
+        if(!this.creep.pos.isEqualTo(container)) {
+            this.fsm.enter(STATE.GOTO);
+            return;
+        }
+
         if(_.sum(container.store) + 100 > container.storeCapacity) {
             return;
         }

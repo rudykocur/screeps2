@@ -3,6 +3,8 @@ const fsmModule = require('fsm');
 const utils = require('utils');
 const maps = require('maps');
 
+const profiler = require('profiler');
+
 class JobHandlerBase extends utils.Loggable {
     constructor(creep, jobData) {
         super();
@@ -204,6 +206,8 @@ class JobDTO {
 
     }
 }
+
+profiler.registerClass(JobCommonActions, JobCommonActions.name);
 
 module.exports = {
     JobDTO, JobHandlerBase

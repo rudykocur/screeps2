@@ -1,6 +1,8 @@
 var _ = require('lodash');
 const utils = require('utils');
 
+const profiler = require('profiler');
+
 function hydrate(item) {
     if(_.isString(item.pos)) {
         let parts = item.pos.split(',');
@@ -124,6 +126,30 @@ function getRoomCache(roomName) {
     });
 }
 
+/**
+ *
+ * @param {Room} room
+ * @param from
+ * @param to
+ */
+function getLocalPath(room, from, to) {
+    let path = room.findPath(from, to, {
+        ignoreCreeps: true,
+        maxRooms: 1,
+        costCallback: (roomName, matrix) => {
+            if(roomName == room.name) {
+                _.each(Game.creeps, creep => {
+                    if(creep.room == room && creep.memory.isStationary){
+                        matrix.set(creep.pos.x, creep.pos.y, 0xFF);
+                    }
+                })
+            }
+        }
+    });
+
+    return path.map(step => new RoomPosition(step.x, step.y, room.name));
+}
+
 module.exports = {
     getRoomCache,
 
@@ -181,6 +207,11 @@ module.exports = {
             ignoreLairs: [],
             ignoreAllLairs: false,
         });
+
+        let fromRoom = Game.rooms[from.roomName];
+        if(fromRoom && from.roomName === to.roomName) {
+            return getLocalPath(fromRoom, from, to);
+        }
 
         let myUser = utils.myUsername();
 
@@ -309,3 +340,6 @@ module.exports = {
         }
     }
 };
+
+module.exports.getMultiRoomPath = profiler.registerFN(module.exports.getMultiRoomPath, 'maps.getMultiRoomPath');
+getLocalPath = profiler.registerFN(getLocalPath, 'maps.getLocalPath');

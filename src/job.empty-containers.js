@@ -1,6 +1,7 @@
 var _ = require('lodash');
 const minds = require('mind');
 const job_common = require('job.common');
+const maps = require('maps');
 
 const profiler = require('profiler');
 
@@ -34,12 +35,17 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(this.creep.pos.isNearTo(container)) {
-            this.creep.withdraw(container, _.findKey(container.store));
-            this.fsm.enter(STATE.DEPOSIT);
+        if(!this.creep.pos.isNearTo(container)) {
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, container.pos, {
+                    ignoreAllLairs: this.creep.workRoom.isSKRoom,
+                });
+            })
         }
         else {
-            this.creep.mover.moveTo(container);
+            this.creep.withdraw(container, _.findKey(container.store));
+            this.unclaim();
+            this.fsm.enter(STATE.DEPOSIT);
         }
     }
 
@@ -53,16 +59,20 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
             storage = this.roomMgr.storage;
         }
 
-        if(!storage.canDeposit(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
-        }
-        else {
-            if(_.sum(this.creep.carry) > 0) {
-                storage.deposit(this.creep);
+        this.actions.unloadAllResources({
+            storage: storage,
+            onTick: () => this.repairRoad(),
+            onDone: () => this.completeJob(),
+            pathOptions: {
+                ignoreAllLairs: this.creep.workRoom.isSKRoom,
             }
-            else {
-                this.completeJob();
-            }
+        });
+    }
+
+    repairRoad() {
+        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
+        if(struct && struct.hits < struct.hitsMax) {
+            this.creep.repair(struct);
         }
     }
 

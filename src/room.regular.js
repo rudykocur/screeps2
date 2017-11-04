@@ -10,43 +10,48 @@ const threat = require('combat.threat');
 const data = require('room.data');
 const stats = require('room.stats');
 const market = require('room.market');
+const roombase = require('room.base');
 
 const wrappers = require('room.wrappers');
 const profiler = require('profiler');
 
 const procdef = require('process.roomDefence');
 
-class RoomManager extends utils.Executable {
+class RoomManager extends roombase.RoomBase {
     /**
      * @param {Room} room
      * @param jobManager
      * @param {ProcessManager} procMgr
      */
     constructor(room, jobManager, procMgr) {
-        super();
+        super(room.name);
 
         this.timer.start();
-
-        this.room = room;
-        this.roomName = room.name;
-        room.manager = this;
 
         this.initMemory();
 
         this.jobManager = jobManager;
         this.processManager = procMgr;
 
-        this.creeps = _.filter(Game.creeps, "memory.roomName", this.room.name);
-        this.minds = this.creeps.map((c) => minds.getMind(c, this));
+        this.initalizeRoom();
+    }
 
-        this.mindsByType = _.groupBy(this.minds, 'constructor.name');
+    initalizeRoom() {
+
+        this.stopwatch.start();
 
         this.flags = _.filter(Game.flags, 'pos.roomName', this.roomName);
         let storageFlag = _.first(this.flags.filter(flags.isStorage));
 
+        this.stopwatch.lap('flags');
+
         this.data = new data.RoomData(this, this.room, storageFlag);
 
+        this.stopwatch.lap('room data');
+
         this.links = this.data.links.map(l => new wrappers.LinkWrapper(l));
+
+        this.stopwatch.lap('links');
 
         if(this.room.storage) {
             this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.links);
@@ -58,29 +63,44 @@ class RoomManager extends utils.Executable {
             console.log('OMG NO LOGIC FOR STORAGE !!!');
         }
 
+        this.stopwatch.lap('storage');
+
         this.mineral = null;
         if(this.room.controller.level > 5) {
             this.mineral = new wrappers.MineralWrapper(this.data.mineral, this.data.extractor, this.data.containers);
         }
 
-        this.sources = _.transform(this.data.sources, (result, source) => {
-            result[source.id] = new wrappers.SourceWrapper(source, this.data.containers, this.data.links);
+        this.stopwatch.lap('mineral');
+
+        this.sources = {};
+        this.data.sources.forEach((source) => {
+            this.sources[source.id] = new wrappers.SourceWrapper(source, this.data.containers, this.data.links);
         });
+
+        this.stopwatch.lap('sources');
 
         this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
 
         this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
+
+        this.stopwatch.lap('construction sites');
 
         this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
         this.enemiesInside = this.enemies.filter(/**Creep*/creep => {
             return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
         });
 
+        this.stopwatch.lap('enemies');
+
         this.terminal = this.room.terminal;
 
         this.threat = new threat.ThreatAssesment(this.enemies);
+
+        this.stopwatch.lap('threat');
+
         this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
 
+        this.stopwatch.lap('controller');
 
         this.towers = this.data.towers.map(tower => {
             let mind = new minds.available.tower(tower, this);
@@ -88,16 +108,31 @@ class RoomManager extends utils.Executable {
             return mind;
         });
 
+        this.stopwatch.lap('towers');
+
         this.extensionsClusters = this.getExtensionsClusters();
+
+        this.stopwatch.lap('extensions');
 
         this.architect = new room_architect.RoomArchitect(this);
         this.spawner = new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns);
+
+        this.stopwatch.lap('spawner');
+
         this.labs  = new room_labs.LabManager(this, this.data.labs, this.terminal);
+
+        this.stopwatch.lap('labs');
+
         this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.labs);
         this.timer.stop();
 
         this.remote = new remote_manager.RemoteRoomsManager(this);
+        this.stopwatch.lap('remote');
         this.stats = new stats.RoomStats(this, this.labs);
+        this.stopwatch.lap('stats');
+
+        // this.warn('STOPWATCH');
+        // this.stopwatch.print();
     }
 
     initMemory() {
@@ -114,18 +149,6 @@ class RoomManager extends utils.Executable {
 
     getCreepName(name) {
         return 'creep_'+(this.room.memory.counter++) + '_' + name;
-    }
-
-    getCreepCount(type) {
-        if(!this.mindsByType[type.name]) {
-            return 0;
-        }
-
-        return this.mindsByType[type.name].length;
-    }
-
-    getMinds(type) {
-        return this.mindsByType[type.name] || [];
     }
 
     getAllMinds() {
@@ -193,7 +216,7 @@ class RoomManager extends utils.Executable {
 
     getExtensionsClusters() {
         return this.flags.filter(flags.isExtensionCluster).map(
-            f => new wrappers.ExtensionCluster(f.pos, this, this.data));
+            f => new wrappers.ExtensionCluster(f, this, this.data));
     }
 
     runDef() {

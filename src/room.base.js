@@ -27,15 +27,19 @@ class RoomBase extends utils.Executable {
     }
 
     getCreepCount(type, memo) {
+        return _.size(this.getMinds(type, memo));
+    }
+
+    getMinds(type, memo) {
         memo = memo || {};
 
-        let minds = this.mindsByType[type.name];
+        let minds = this.mindsByType[type.name] || [];
         if(minds && _.size(memo) > 0) {
             let filterFn = _.matches(memo);
-            minds = minds.filter(mind => filterFn(mind.creep.memory));
+            minds = _.filter(minds, mind => filterFn(mind.creep.memory));
         }
 
-        return _.size(minds);
+        return minds;
     }
 
     getCreeps(mind) {

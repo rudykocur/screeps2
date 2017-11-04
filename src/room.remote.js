@@ -23,6 +23,7 @@ class RemoteRoomHandler extends utils.Executable {
      */
     constructor(roomName, parentManager) {
         super();
+        this.stopwatch.start();
         this.timer.start();
 
         this.roomName = roomName;
@@ -37,34 +38,35 @@ class RemoteRoomHandler extends utils.Executable {
             Memory.rooms[this.roomName] = {type: 'remote'};
         }
 
-        _.defaults(this.memory, {
-            squads: []
-        });
+        this.stopwatch.lap('init');
 
         this.creeps = _.filter(Game.creeps, "memory.roomName", this.roomName);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
 
-        this.enemies = [];
+        this.stopwatch.lap('creeps');
 
-        this.memory.squads.forEach(squadId => {
-            let squad = squads.CombatSquad.getSquad(squadId);
-            if(squad) {
-                this.minds.push(squad);
-            }
-        });
+        this.enemies = [];
 
         if(this.room) {
             this.room.manager = this;
             this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
+            this.stopwatch.lap('controller');
+
             this.data = new data.RoomData(this, this.room);
 
+            this.stopwatch.lap('room data');
+
             this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
+
+            this.stopwatch.lap('enemies');
 
             this.extensionsClusters = [];
             this.towers = [];
             this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
+
+            this.stopwatch.lap('constructions');
 
             this.hostileStructures = this.room.find(FIND_HOSTILE_STRUCTURES)
                 .filter(s => {
@@ -72,9 +74,13 @@ class RemoteRoomHandler extends utils.Executable {
                     if(s.structureType === STRUCTURE_RAMPART) return false;
                     return true;
                 });
+
+            this.stopwatch.lap('hostile structrues');
         }
 
         this.threat = new threat.ThreatAssesment(this.enemies);
+
+        this.stopwatch.lap('threat');
 
         for(let name of ['scoutName', 'defenderName', 'claimerName']) {
             if(this.memory[name] && !Game.creeps[this.memory[name]]) {
@@ -82,7 +88,12 @@ class RemoteRoomHandler extends utils.Executable {
             }
         }
 
+        this.stopwatch.lap('cleanup');
+
         this.timer.stop();
+
+        // this.warn('STOPWATCH');
+        // this.stopwatch.print();
     }
 
     get memory() {

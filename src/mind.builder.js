@@ -49,7 +49,7 @@ class BuilderMind extends mind.CreepMindBase {
                 return;
             }
 
-            if(!this.workRoom.storage && this.workRoom.data.droppedEnergy.length > 0) {
+            if(this.workRoom.data.droppedEnergy.length > 0) {
                 this.enterState(STATE_REFILL);
                 return;
             }
@@ -59,7 +59,7 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     pickRefillSource(state) {
-        if(this.workRoom.storage) {
+        if(this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
             return;
         }
         let target;
@@ -80,7 +80,7 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     doRefill(state) {
-        if(this.workRoom.storage) {
+        if(this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
             if(this.workRoom.room.storage) {
                 this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1500);
             }

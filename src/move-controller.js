@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+const profiler = require('profiler');
+
 class CreepMoveController {
     constructor(creep) {
         this.creep = creep;
@@ -27,21 +29,26 @@ class CreepMoveController {
             return [];
         }
 
+        if(path.length > 13*5) {
+            let idx = path.indexOf(';', 13*4);
+            path = path.substr(0, idx);
+        }
+
         let steps = path.split(';');
-        return steps.map(step => {
-            let parts = step.split(',');
+        return steps.map(RoomPosition.unserialize)
+    }
 
-            return new RoomPosition(parts[0], parts[1], parts[2]);
-
-        })
+    runPathCallback(pathCallback) {
+        return pathCallback().map(this.serializeStep).join(';');
     }
 
     moveByPath(pathCallback) {
         if(!this.memory._moverPath) {
             this.memory._moverPath = {
-                path: pathCallback().map(this.serializeStep).join(';'),
+                path: this.runPathCallback(pathCallback),
                 currentPos: this.creep.pos,
                 blockCounter: 0,
+                type: 'pathfinder',
             };
         }
 
@@ -64,6 +71,13 @@ class CreepMoveController {
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
             delete this.memory._moverPath;
+        }
+
+        if(result === OK) {
+            if(path.length > 5 && !path[0].isEqualTo(this.creep.pos) && !path[1].isEqualTo(this.creep.pos)) {
+                let mem = this.memory._moverPath.path;
+                this.memory._moverPath.path = mem.substr(mem.indexOf(';')+1, mem.length);
+            }
         }
     }
 
@@ -90,6 +104,7 @@ class CreepMoveController {
         this.memory.isStationary = false;
     }
 }
+profiler.registerClass(CreepMoveController, CreepMoveController.name);
 
 module.exports = {
     CreepMoveController

@@ -10,7 +10,10 @@ class HarvesterMind extends mind.CreepMindBase {
 
     update() {
         if(this.creep.spawning) {return}
-        if(!this.creep.workRoom) {return}
+        if(!this.creep.workRoom) {
+            this.creep.mover.enterStationary();
+            return
+        }
 
         let job = this.getJob();
 
@@ -20,7 +23,6 @@ class HarvesterMind extends mind.CreepMindBase {
         }
 
         this.actions.gotoMeetingPoint();
-
     }
 
     *findNewJob() {

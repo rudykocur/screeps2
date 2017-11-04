@@ -60,17 +60,19 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
 
         this.actions.unloadAllResources({
             storage: storage,
-            onTick: () => {
-                let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
-                if(struct && struct.hits < struct.hitsMax) {
-                    this.creep.repair(struct);
-                }
-            },
+            onTick: () => this.repairRoad(),
             onDone: () => this.completeJob(),
             pathOptions: {
                 ignoreAllLairs: this.creep.workRoom.isSKRoom,
             }
         });
+    }
+
+    repairRoad() {
+        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
+        if(struct && struct.hits < struct.hitsMax) {
+            this.creep.repair(struct);
+        }
     }
 
     /**

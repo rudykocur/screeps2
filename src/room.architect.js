@@ -213,8 +213,9 @@ class RoomArchitect extends utils.Executable {
                         }
                     });
                     let mgr = room.manager;
+                    let allStructs = [].concat(mgr.data.spawns, mgr.data.extensions, mgr.data.links, mgr.data.towers);
                     if(mgr) {
-                        for(let struct of mgr.data.allStructures) {
+                        for(let struct of allStructs) {
                             costs.set(struct.pos.x, struct.pos.y, 0xFF);
                         }
                     }

@@ -31,6 +31,32 @@ class CompoundTimer {
     }
 }
 
+class Stopwatch {
+    constructor() {
+        this.lapStart = null;
+        this.laps = [];
+    }
+
+    start() {
+        this.lapStart = Game.cpu.getUsed();
+    }
+
+    lap(label) {
+        this.laps.push({label: label, time: Game.cpu.getUsed() - this.lapStart});
+        this.lapStart = Game.cpu.getUsed();
+    }
+
+    print() {
+        let total = 0;
+        for(let lap of this.laps) {
+            console.log('    ', lap.label, 'took', lap.time);
+            total += lap.time;
+        }
+
+        console.log('TOTAL:', total);
+    }
+}
+
 class Loggable {
     err(...messages) {
         messages.unshift(`<span style="color:lightcoral; font-weight: bold;">[ERROR] ${this}</span>`);
@@ -69,6 +95,7 @@ class Executable extends Loggable{
 
         this.updateTime = null;
         this.timer = new Timer();
+        this.stopwatch = new Stopwatch();
     }
 
     update() {}

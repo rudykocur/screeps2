@@ -15,6 +15,12 @@ class TransferMind extends mind.CreepMindBase {
 
         if(!this.creep.workRoom) {return}
 
+        if(this.shouldDespawn()) {
+            this.warn('Im no longer needed ... Bye cruel world!');
+            this.creep.suicide();
+            return;
+        }
+
         let job = this.getJob();
 
         if(job && (this.creep.workRoom.isSKRoom || this.creep.workRoom.threat.getCombatCreeps().length === 0)) {
@@ -35,6 +41,22 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         return this.workRoom.storage;
+    }
+
+    shouldDespawn() {
+        if(!this.creep.memory.emergency) {
+            return false;
+        }
+
+        let others = _.without(this.workRoom.getMinds(TransferMind), this);
+
+        let alive = others.filter(mind => !mind.creep.spawning);
+
+        if(alive.length > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     *findNewJob() {

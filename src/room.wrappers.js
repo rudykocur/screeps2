@@ -1,7 +1,23 @@
 var _ = require("lodash");
 const utils = require('utils');
+const cache = require('utils.cache');
 
 const profiler = require('profiler');
+
+class StructureWrapper extends utils.Executable {
+    constructor(id) {
+        super();
+
+        this.structureId = id;
+
+        _.defaults(Memory, {structures: {}});
+        _.defaults(Memory.structures, {[this.structureId]: {}});
+    }
+
+    get memory() {
+        return Memory.structures[this.structureId];
+    }
+}
 
 class FlagStorageWrapper extends utils.Executable {
     constructor(room, flag) {
@@ -36,7 +52,7 @@ class FlagStorageWrapper extends utils.Executable {
     }
 }
 
-class StorageWrapper extends utils.Executable {
+class StorageWrapper extends StructureWrapper {
     /**
      *
      * @param manager
@@ -44,10 +60,12 @@ class StorageWrapper extends utils.Executable {
      * @param {Array<LinkWrapper>} links
      */
     constructor(manager, storage, links) {
-        super();
+        super(storage.id);
 
         this.manager = manager;
         this.target = storage;
+
+        let data = new cache.CachedData(this.memory);
 
         let t1 = this.target.pos == null, t2 = _.isUndefined(this.target.pos);
 
@@ -62,6 +80,11 @@ class StorageWrapper extends utils.Executable {
 
         if(!this.target.pos) {this.warn('WHY NO POS? 222', this.target);}
         // if(!this.target.pos) {this.warn('WHY NO POS?', this.target, '::', this.target.pos);}
+
+
+        this.link = data.cachedObj('link', 500, () => {
+            return _.first(this.target.pos.findInRange(links, 3));
+        });
 
         this.link = _.first(this.target.pos.findInRange(links, 3));
     }
@@ -99,18 +122,23 @@ class StorageWrapper extends utils.Executable {
     }
 }
 
-class ExtensionCluster {
+class ExtensionCluster extends StructureWrapper {
     /**
-     * @param {RoomPosition} centerPoint
+     * @param {Flag} flag
      * @param {RoomManager} manager
      * @param {RoomData} roomData
      */
-    constructor(centerPoint, manager, roomData) {
-        this.id = 'extcluster-' + centerPoint.toString();
+    constructor(flag, manager, roomData) {
+        super('extcluster-' + flag.pos.toString());
 
-        this.center = centerPoint;
-        this.extensions = this.center.findInRange(roomData.extensions, 1);
-        this.extensionsMax = this.countPlainsAround(centerPoint) - 1;
+        _.defaults(this.memory, {extensions: []});
+
+        this.id = 'extcluster-' + flag.pos.toString();
+
+        this.center = flag.pos;
+        this.extensions = this.getExtensions(roomData);
+        this.extensionsMax = this.countPlainsAround(this.center) - 1;
+        this.storagePos = manager.storage.target.pos;
 
         let capacity = _.size(this.extensions) * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
         let storedEnergy = _.sum(this.extensions, 'energy');
@@ -118,8 +146,26 @@ class ExtensionCluster {
         this.needsEnergy = (storedEnergy < capacity);
         this.energyNeeded = capacity - storedEnergy;
 
-        let vis = new RoomVisual(centerPoint.roomName);
-        vis.text(this.extensionsMax, centerPoint);
+        let vis = new RoomVisual(this.center.roomName);
+        vis.text(this.extensionsMax, this.center);
+    }
+
+    getExtensions(roomData) {
+        let interval = 50;
+
+        if(this.memory.extensions.length ===0 ) {
+            interval = 5;
+        }
+
+        utils.every(interval, () => {
+            this.memory.extensions = this.center.findInRange(roomData.extensions, 1).map(s => s.id);
+        });
+
+        return this.memory.extensions.map(sId => Game.getObjectById(sId));
+    }
+
+    get distanceToStorage() {
+        return this.center.getRangeTo(this.storagePos);
     }
 
     /**
@@ -190,35 +236,43 @@ class LinkWrapper extends utils.Executable {
     }
 }
 
-class ControllerWrapper {
+class ControllerWrapper extends StructureWrapper {
     constructor(manager, ctrl, links) {
+        super(ctrl.id);
+
         this.controller = ctrl;
         this.manager = manager;
 
+        let data = new cache.CachedData(this.memory);
+
         let pos = this.controller.pos;
 
-        let around = manager.room.lookAtArea(pos.y - 3, pos.x - 3, pos.y + 3, pos.x + 3, true);
+        this.points = data.cachedPositions('points', 300, () => {
+            let around = manager.room.lookAtArea(pos.y - 3, pos.x - 3, pos.y + 3, pos.x + 3, true);
 
-        this.points = around.filter(item => {
+            let points = around.filter(item => {
 
-            if(item.type != LOOK_TERRAIN) {
-                return false;
-            }
+                if(item.type != LOOK_TERRAIN) {
+                    return false;
+                }
 
-            if(item.terrain != 'plain') {
-                return false;
-            }
+                if(item.terrain != 'plain') {
+                    return false;
+                }
 
-            if(pos.getRangeTo(item.x, item.y) < 2) {
-                return false;
-            }
+                if(pos.getRangeTo(item.x, item.y) < 2) {
+                    return false;
+                }
 
-            return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
-        }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
+                return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
+            }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
 
-        this.points = _.sortBy(this.points, p => pos.getRangeTo(p)*-1);
+            return _.sortBy(points, p => pos.getRangeTo(p)*-1);
+        });
 
-        this.link = _.first(pos.findInRange(links, 4));
+        this.link = data.cachedObj('link', 500, () => {
+            return _.first(pos.findInRange(links, 4));
+        });
 
         if(this.link) {
             this.manager.room.visual.line(this.controller.pos, this.link.pos, {});
@@ -246,12 +300,19 @@ class ControllerWrapper {
     }
 }
 
-class MineralWrapper {
+class MineralWrapper extends StructureWrapper {
     constructor(mineral, extractor, containers) {
+        super(mineral.id);
+
         this.mineral = mineral;
         this.extractor = extractor;
         this.pos = this.mineral.pos;
-        this.container = _.first(this.pos.findInRange(containers, 1));
+
+        let data = new cache.CachedData(this.memory);
+
+        this.container = data.cachedObj('container', 100, () => {
+            return _.first(this.pos.findInRange(containers, 1));
+        });
     }
 
     pickContainerPlace() {
@@ -276,11 +337,21 @@ class MineralWrapper {
     }
 }
 
-class SourceWrapper {
+class SourceWrapper extends StructureWrapper {
     constructor(source, containers, links) {
+        super(source.id);
+
         this.source = source;
-        this.container = _.first(this.source.pos.findInRange(containers, 1));
-        this.link = _.first(this.source.pos.findInRange(links, 2));
+
+        let data = new cache.CachedData(this.memory);
+
+        this.container = data.cachedObj('container', 100, () => {
+            return _.first(this.source.pos.findInRange(containers, 1));
+        });
+
+        this.link = data.cachedObj('link', 100, () => {
+            return _.first(this.source.pos.findInRange(links, 2));
+        });
     }
 }
 
