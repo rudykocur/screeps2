@@ -34,6 +34,11 @@ class CachedData {
         this._getOrSet(key, ttl,callback, points => points.map(p => p.serialize()));
         return this.cache[key].data.map(val => RoomPosition.unserialize(val));
     }
+
+    cachedCostMatrix(key, ttl, callback) {
+        this._getOrSet(key, ttl, callback, obj => obj && obj.serialize().join(','));
+        return PathFinder.CostMatrix.deserialize(this.cache[key].data.split(','));
+    }
 }
 
 profiler.registerClass(CachedData, CachedData.name);

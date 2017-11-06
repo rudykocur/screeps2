@@ -23,7 +23,7 @@ class RemoteRoomsManager extends utils.Executable {
             this.handlers = (this.memory.roomNames || []).map(
                 name => {
                     let cache = maps.getRoomCache(name);
-                    if(cache.find(FIND_SOURCES).length > 2) {
+                    if(cache && cache.find(FIND_SOURCES).length > 2) {
                         return new remoteSK.RemoteSKRoomHandler(name, this.manager);
                     }
 

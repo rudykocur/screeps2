@@ -1,5 +1,6 @@
 var _ = require('lodash');
 const utils = require('utils');
+const CachedData= require('utils.cache').CachedData;
 
 const profiler = require('profiler');
 
@@ -213,6 +214,14 @@ module.exports = {
             return getLocalPath(fromRoom, from, to);
         }
 
+        if(!Memory.cache.maps) {Memory.cache.maps = {}}
+
+        let data = new CachedData(Memory.cache.maps);
+
+        let sw = new utils.Stopwatch();
+        let timer = new utils.NamedTimer();
+        sw.start();
+
         let myUser = utils.myUsername();
 
         let allowedRooms = { [ from.roomName ]: true };
@@ -239,6 +248,8 @@ module.exports = {
             }
         });
 
+        sw.lap('roomRoute');
+
         if(roomRoute === ERR_NO_PATH) {
             console.log('WARNING - no route', from, 'to', to);
             return null;
@@ -257,35 +268,46 @@ module.exports = {
                     return false;
                 }
 
-                let matrix = new PathFinder.CostMatrix;
+                timer.start('static');
 
-                let cache = getRoomCache(roomName);
-                if(cache) {
+                let matrix = data.cachedCostMatrix('cm-'+roomName, 500, () => {
+                    let result = new PathFinder.CostMatrix;
 
-                    for(let struct of cache.find(FIND_STRUCTURES)) {
-                        if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
-                            matrix.set(struct.pos.x, struct.pos.y, 0xff);
-                        }
-                        else if (struct.structureType === STRUCTURE_ROAD) {
-                            matrix.set(struct.pos.x, struct.pos.y, 1);
-                        }
-                    }
+                    let cache = getRoomCache(roomName);
+                    if(cache) {
 
-                    if(!options.ignoreAllLairs) {
-                        let lairs = cache.findStructures(STRUCTURE_KEEPER_LAIR);
-
-                        for(let lair of lairs) {
-                            if(options.ignoreLairs.length === 0 || options.ignoreLairs.indexOf(lair.id) < 0 ) {
-                                let unsafe = utils.getAround(lair.pos, 5);
-
-                                for (let point of unsafe) {
-                                    matrix.set(point.x, point.y, 0xFF);
-                                }
+                        for(let struct of cache.find(FIND_STRUCTURES)) {
+                            if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
+                                result.set(struct.pos.x, struct.pos.y, 0xff);
                             }
+                            else if (struct.structureType === STRUCTURE_ROAD) {
+                                result.set(struct.pos.x, struct.pos.y, 1);
+                            }
+                        }
 
+                        if(!options.ignoreAllLairs) {
+                            let lairs = cache.findStructures(STRUCTURE_KEEPER_LAIR);
+
+                            for(let lair of lairs) {
+                                if(options.ignoreLairs.length === 0 || options.ignoreLairs.indexOf(lair.id) < 0 ) {
+                                    let unsafe = utils.getAround(lair.pos, 5);
+
+                                    for (let point of unsafe) {
+                                        result.set(point.x, point.y, 0xFF);
+                                    }
+                                }
+
+                            }
                         }
                     }
-                }
+
+                    return result;
+                });
+
+
+
+                timer.stop('static');
+                timer.start('creeps');
 
                 let room = Game.rooms[roomName];
                 if(room) {
@@ -296,13 +318,23 @@ module.exports = {
                     })
                 }
 
+                timer.stop('creeps');
+                timer.start('dynamic');
+
                 if(options.roomCallback) {
                     options.roomCallback(roomName, matrix)
                 }
 
+                timer.stop('dynamic');
+
                 return matrix;
             }
         });
+
+        sw.lap('pathfinder');
+
+        // console.log('------------ PATH FROM', from, 'to', to, 'roomCallback:', timer);
+        // sw.print();
 
         for(let step of ret.path) {
             let vis = new RoomVisual(step.roomName);

@@ -4,6 +4,7 @@ class Timer {
     constructor() {
         this.usedTime = 0;
         this.usedTimeStart = 0;
+        this.counts = 0;
     }
 
     start() {
@@ -17,13 +18,35 @@ class Timer {
     }
 
     stop() {
+        this.counts += 1;
         this.usedTime += Game.cpu.getUsed() - this.usedTimeStart;
     }
 }
 
-class CompoundTimer {
-    constructor(timers) {
-        this.timers = timers;
+class NamedTimer {
+    constructor() {
+        this.timers = {};
+    }
+
+    start(name) {
+        if(!this.timers[name]) {
+            this.timers[name] = new Timer();
+        }
+        this.timers[name].start();
+    }
+
+    stop(name) {
+        this.timers[name].stop();
+    }
+
+    toString() {
+        let times = [];
+        let total = 0;
+        _.each(this.timers, (timer, name) => {
+            total += timer.usedTime;
+            times.push(`${name} (x${timer.counts})=${timer.usedTime.toFixed(2)}`);
+        });
+        return `TOTAL: ${total.toFixed(2)}; `+times.join(', ');
     }
 
     get usedTime() {
@@ -114,7 +137,7 @@ class Executable extends Loggable{
 }
 
 module.exports = {
-    Executable, Timer, CompoundTimer, Loggable,
+    Executable, Timer, NamedTimer, Stopwatch, Loggable,
 
     throttle(ticks, callback) {
         return () => {

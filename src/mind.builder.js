@@ -80,7 +80,7 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     doRefill(state) {
-        if(this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
+        if(this.workRoom && this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
             if(this.workRoom.room.storage) {
                 this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1500);
             }
