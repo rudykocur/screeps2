@@ -131,8 +131,6 @@ class ExtensionCluster extends StructureWrapper {
     constructor(flag, manager, roomData) {
         super('extcluster-' + flag.pos.toString());
 
-        _.defaults(this.memory, {extensions: []});
-
         this.id = 'extcluster-' + flag.pos.toString();
 
         this.center = flag.pos;
@@ -141,18 +139,24 @@ class ExtensionCluster extends StructureWrapper {
     }
 
     initWrapper(manager, roomData) {
-        this.extensions = this.getExtensions(roomData);
-        this.extensionsMax = this.countPlainsAround(this.center) - 1;
+        let data = new cache.CachedData(this.memory);
+
+        this.extensions = data.cachedObjCollection('extenions', 50, () => {
+            return this.center.findInRange(roomData.extensions, 1);
+        });
+
+        this.extensionsMax = data.cachedValue('extensionsMax', 1000, () => {
+            return this.countPlainsAround(this.center) - 1;
+        });
+
         this.storagePos = manager.storage.target.pos;
 
-        let capacity = _.size(this.extensions) * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
+        let capacity = this.extensions.length * EXTENSION_ENERGY_CAPACITY[manager.room.controller.level];
         let storedEnergy = _.sum(this.extensions, 'energy');
 
         this.needsEnergy = (storedEnergy < capacity);
         this.energyNeeded = capacity - storedEnergy;
 
-        let vis = new RoomVisual(this.center.roomName);
-        vis.text(this.extensionsMax, this.center);
     }
 
     getExtensions(roomData) {

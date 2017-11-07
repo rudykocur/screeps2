@@ -21,10 +21,37 @@ class RoomSiege extends base.RoomBase {
 
             this.threat = new threat.ThreatAssesment(this.enemies);
         }
+
+        let cache = maps.getRoomCache(this.roomName);
+
+        if(cache && this.requireAssistance(cache)) {
+            this.supportRoom.setSupporting(this);
+        }
+    }
+
+    requireAssistance(cache) {
+        if(cache.getSafeModeUntill() - 400 > Game.time) {
+            return false;
+        }
+
+        if(cache.findStructures(STRUCTURE_SPAWN).length === 0) {
+            return false;
+        }
+
+        return true;
     }
 
     pickSupportRoom() {
-        let rooms = this.managers.filter(mgr => mgr.room.controller.level > 6);
+        let rooms = this.managers.filter(mgr => {
+            if(mgr.room.controller.level <= 6) {
+                return false;
+            }
+            if(mgr.labs.labs.length < 4) {
+                return false;
+            }
+
+            return true;
+        });
         rooms = _.sortBy(rooms, (manager) => Game.map.getRoomLinearDistance(manager.roomName, this.roomName));
 
         return _.first(rooms);
@@ -49,8 +76,6 @@ class RoomSiege extends base.RoomBase {
 
     update() {
 
-        let cache = maps.getRoomCache(this.roomName);
-
         if(!this.room) {
             if (this.getCreepCount(minds.available.scout) === 0) {
                 if (this.spawn(minds.available.scout)) {
@@ -63,6 +88,8 @@ class RoomSiege extends base.RoomBase {
         }
 
         if (this.shouldSpawnBreacher()) {
+            this.supportRoom.labs.loadBoosts(Memory.siegeCreep.boosts);
+
             if (this.spawn(minds.available.breach)) {
                 this.important('Spawned breach creep');
             }
@@ -82,7 +109,7 @@ class RoomSiege extends base.RoomBase {
     }
 
     shouldSpawnBreacher() {
-        if(this.getCreepCount(minds.available.breach) > 0) {
+        if(this.getCreepCount(minds.available.breach) > 1) {
             return false;
         }
 
@@ -112,7 +139,7 @@ class RoomSiege extends base.RoomBase {
             return false;
         }
 
-        if(this.getCreepCount(minds.available.breach, {withBoosts: false}) > 0) {
+        if(this.getCreepCount(minds.available.breach, {withBoosts: false}) > 1) {
             return false;
         }
 

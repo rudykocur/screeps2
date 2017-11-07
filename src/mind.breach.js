@@ -232,7 +232,7 @@ class BreachMind extends mind.CreepMindBase {
                     return matrix;
                 }
 
-                room.find().forEach(struct => {
+                room.find(FIND_STRUCTURES).forEach(struct => {
                     let r = Game.rooms[roomName];
 
                     let cost = 1;
@@ -243,9 +243,10 @@ class BreachMind extends mind.CreepMindBase {
 
                     if(cost) {
                         if(r) {
-                            r.visual.text('c:'+cost, struct.pos.x, struct.pos.y, {color: 'red'});
+                            // r.visual.text('c:'+cost, struct.pos.x, struct.pos.y, {color: 'red'});
                         }
-                        matrix.set(struct.x, struct.y, cost);
+
+                        matrix.set(struct.pos.x, struct.pos.y, cost);
                     }
                 });
 

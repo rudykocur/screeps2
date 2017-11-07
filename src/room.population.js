@@ -209,6 +209,10 @@ class RoomPopulation extends utils.Executable {
     }
 
     needUpgrader() {
+        if(this.manager.isSupporting) {
+            return false;
+        }
+
         if(this.manager.room.controller.level === 8) {
             return false;
         }

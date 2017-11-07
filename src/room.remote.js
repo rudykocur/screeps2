@@ -4,6 +4,7 @@ const utils = require('utils');
 const maps = require('maps');
 const wrappers = require('room.wrappers');
 const data = require('room.data');
+const RoomBase = require('room.base').RoomBase;
 
 let mind_scout = require('mind.scout');
 let mind_defender = require('mind.defender');
@@ -16,23 +17,21 @@ let threat = require('combat.threat');
 
 const profiler = require('profiler');
 
-class RemoteRoomHandler extends utils.Executable {
+class RemoteRoomHandler extends RoomBase {
     /**
      * @param roomName
      * @param {RoomManager} parentManager
      */
     constructor(roomName, parentManager) {
-        super();
+        super(roomName);
+
         this.stopwatch.start();
         this.timer.start();
 
-        this.roomName = roomName;
         this.parent = parentManager;
         this.jobManager = parentManager.jobManager;
 
         this.isRemote = true;
-
-        this.room = Game.rooms[this.roomName];
 
         if (!Memory.rooms[this.roomName]) {
             Memory.rooms[this.roomName] = {type: 'remote'};
@@ -43,12 +42,6 @@ class RemoteRoomHandler extends utils.Executable {
 
     init() {
         this.stopwatch.lap('init');
-
-        this.creeps = _.filter(Game.creeps, "memory.roomName", this.roomName);
-        this.minds = this.creeps.map((c) => minds.getMind(c, this));
-        this.mindsByType = _.groupBy(this.minds, 'constructor.name');
-
-        this.stopwatch.lap('creeps');
 
         this.enemies = [];
 

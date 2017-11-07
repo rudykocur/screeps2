@@ -25,12 +25,23 @@ class TickCache {
         this.cache = {};
     }
 
-    get(key, callback) {
+    get(key, callback, defaultValue) {
         if(!this.cache[key]) {
+            if(!callback) {
+                if(!defaultValue) {
+                    throw new Error('No callback in TickCache.get');
+                }
+
+                return defaultValue;
+            }
             this.cache[key] = callback();
         }
 
         return this.cache[key];
+    }
+
+    set(key, value) {
+        this.cache[key] = value;
     }
 }
 
@@ -73,6 +84,11 @@ module.exports = {
                 delete Memory.creeps[name];
             }
         }
+
+        let creepsByRoom = _.groupBy(Game.creeps, 'memory.roomName');
+        _.each(creepsByRoom, (creeps, roomName) => {
+            tickCache.set('creeps-'+roomName, creeps);
+        });
 
         _.each(Game.rooms, room => {
             maps.updateRoomCache(room, 500);

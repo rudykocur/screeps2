@@ -32,6 +32,7 @@ class RoomManager extends roombase.RoomBase {
 
         this.jobManager = jobManager;
         this.processManager = procMgr;
+        this.isSupporting = false;
 
         this.initalizeRoom();
     }
@@ -173,6 +174,10 @@ class RoomManager extends roombase.RoomBase {
         return _.first(sources);
     }
 
+    setSupporting(supportedRoom) {
+        this.isSupporting = true;
+    }
+
     update(exchange) {
         this.timer.count(()=> {
 
@@ -190,7 +195,6 @@ class RoomManager extends roombase.RoomBase {
 
 
             }
-
         });
         this.jobManager.run(this);
 
@@ -212,6 +216,10 @@ class RoomManager extends roombase.RoomBase {
 
             this.stats.run();
         });
+
+        if(!this.isSupporting) {
+            this.labs.unloadBoosts();
+        }
     }
 
     getExtensionsClusters() {

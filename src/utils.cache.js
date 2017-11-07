@@ -20,6 +20,11 @@ class CachedData {
         }
     }
 
+    cachedValue(key, ttl, callback) {
+        this._getOrSet(key, ttl, callback, obj => obj);
+        return this.cache[key].data;
+    }
+
     cachedObj(key, ttl, callback) {
         this._getOrSet(key, ttl, callback, obj => obj && obj.id);
         return Game.getObjectById(this.cache[key].data);

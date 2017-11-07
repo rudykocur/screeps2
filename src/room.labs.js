@@ -38,7 +38,7 @@ class LabManager extends utils.Executable {
                  onTick: this.checkLabsEmpty.bind(this),
             },
             [STATE.LOAD_BOOST]: {
-                onEnter: () => {this.important('Entered boost load state.')},
+                onEnter: () => {this.important('Entered boost load state:', this.memory.boostsToLoad)},
                  onTick: () => {},
             },
             [STATE.EMPTY_BOOST]: {
@@ -93,14 +93,22 @@ class LabManager extends utils.Executable {
     loadBoosts(resources) {
         this.memory.boostsToLoad = resources;
 
-        if(this.fsm.state === STATE.PROCESS || this.fsm.state.LOAD) {
+        if(this.fsm.state === STATE.PROCESS || this.fsm.state === STATE.LOAD) {
             this.warn('Interrupting cooking. Time to prepare boosts:', resources);
 
             this.fsm.enter(STATE.EMPTY);
         }
+
+        if(this.fsm.state === STATE.EMPTY_BOOST) {
+            this.fsm.enter(STATE.LOAD_BOOST);
+        }
     }
 
     unloadBoosts() {
+        if(this.fsm.state !== STATE.LOAD_BOOST) {
+            return;
+        }
+
         this.fsm.enter(STATE.EMPTY_BOOST);
     }
 

@@ -17,6 +17,10 @@ class RemoteRoomsManager extends utils.Executable {
         this.manager = manager;
         this.jobManager = manager.jobManager;
 
+        this.initRooms();
+    }
+
+    initRooms() {
         this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
 
         if(this.manager.room.controller.level >= 3) {

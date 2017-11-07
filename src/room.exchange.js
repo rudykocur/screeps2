@@ -43,6 +43,11 @@ class InterRoomExchange extends utils.Executable {
             }
 
             let toTransfer = Math.min(remaining, available.amount);
+
+            if(toTransfer < 100) {
+                continue;
+            }
+
             let status = available.manager.terminal.send(available.resource, toTransfer, target.roomName);
 
             if(status === OK) {

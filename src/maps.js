@@ -61,6 +61,10 @@ class CachedRoom {
     constructor(roomName) {
         this.name = roomName;
 
+        this.initCache(roomName);
+    }
+
+    initCache(roomName) {
         this.cache = getCacheForRoom(roomName);
         this.cache.data = this.cache.data.map(hydrate);
     }
@@ -378,3 +382,4 @@ module.exports = {
 
 module.exports.getMultiRoomPath = profiler.registerFN(module.exports.getMultiRoomPath, 'maps.getMultiRoomPath');
 getLocalPath = profiler.registerFN(getLocalPath, 'maps.getLocalPath');
+profiler.registerClass(CachedRoom, CachedRoom.name);
