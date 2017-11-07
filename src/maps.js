@@ -259,8 +259,11 @@ module.exports = {
             allowedRooms[info.room] = true;
         });
 
+        // let maxOps = Math.max(100, (Game.cpu.limit - Game.cpu.getUsed()) * 1000);
+
         let ret = PathFinder.search(from, to, {
-            maxOps: Math.min(_.size(allowedRooms) * 1500, 15000),
+            maxOps: Math.min(_.size(allowedRooms) * 1500, 10000),
+            // maxOps: Math.min(_.size(allowedRooms) * 1500, 10000, maxOps),
             plainCost: 2,
             swampCost:5,
             roomCallback(roomName) {

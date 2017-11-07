@@ -34,10 +34,14 @@ class RemoteRoomHandler extends utils.Executable {
 
         this.room = Game.rooms[this.roomName];
 
-        if(!Memory.rooms[this.roomName]) {
+        if (!Memory.rooms[this.roomName]) {
             Memory.rooms[this.roomName] = {type: 'remote'};
         }
 
+        this.init();
+    }
+
+    init() {
         this.stopwatch.lap('init');
 
         this.creeps = _.filter(Game.creeps, "memory.roomName", this.roomName);

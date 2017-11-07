@@ -136,6 +136,11 @@ class ExtensionCluster extends StructureWrapper {
         this.id = 'extcluster-' + flag.pos.toString();
 
         this.center = flag.pos;
+
+        this.initWrapper(manager, roomData);
+    }
+
+    initWrapper(manager, roomData) {
         this.extensions = this.getExtensions(roomData);
         this.extensionsMax = this.countPlainsAround(this.center) - 1;
         this.storagePos = manager.storage.target.pos;
@@ -243,6 +248,10 @@ class ControllerWrapper extends StructureWrapper {
         this.controller = ctrl;
         this.manager = manager;
 
+        this.initWrapper(manager, links);
+    }
+
+    initWrapper(manager, links) {
         let data = new cache.CachedData(this.memory);
 
         let pos = this.controller.pos;
@@ -308,6 +317,10 @@ class MineralWrapper extends StructureWrapper {
         this.extractor = extractor;
         this.pos = this.mineral.pos;
 
+        this.initMineralWrapper(containers);
+    }
+
+    initMineralWrapper(containers) {
         let data = new cache.CachedData(this.memory);
 
         this.container = data.cachedObj('container', 100, () => {
@@ -343,6 +356,10 @@ class SourceWrapper extends StructureWrapper {
 
         this.source = source;
 
+        this.initWrapper(containers, links);
+    }
+
+    initWrapper(containers, links) {
         let data = new cache.CachedData(this.memory);
 
         this.container = data.cachedObj('container', 100, () => {
