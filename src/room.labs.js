@@ -82,7 +82,9 @@ class LabManager extends utils.Executable {
         }
 
         if(this.mustRegenerateLayout() && this.fsm.state === STATE.IDLE) {
-            this.regenerateLabLayout();
+            utils.every(10, () => {
+                this.regenerateLabLayout();
+            });
         }
 
         this.fsm.run(exchange);
@@ -99,7 +101,7 @@ class LabManager extends utils.Executable {
             this.fsm.enter(STATE.EMPTY);
         }
 
-        if(this.fsm.state === STATE.EMPTY_BOOST) {
+        if(this.fsm.state === STATE.EMPTY_BOOST || this.fsm.state === STATE.IDLE) {
             this.fsm.enter(STATE.LOAD_BOOST);
         }
     }
@@ -291,6 +293,10 @@ class LabManager extends utils.Executable {
                 let resource = this.memory.boostsToLoad[i];
                 let lab = this.labs[i];
 
+                if(!lab) {
+                    continue;
+                }
+
                 if(lab.mineralAmount < 2000) {
                     result.push({
                         lab, resource
@@ -444,19 +450,19 @@ class LabManager extends utils.Executable {
     }
 
     decorateLabs() {
-        if(this.mustRegenerateLayout()) {
-            for(let lab of this.labs) {
-                lab.room.visual.circle(lab.pos, {
-                    fill: 'transparent',
-                    stroke: 'yellow',
-                    strokeWidth: 0.2,
-                    radius: 0.6
-                })
+        if(this.fsm.state === STATE.LOAD || this.fsm.state === STATE.PROCESS) {
+            if(this.mustRegenerateLayout()) {
+                for(let lab of this.labs) {
+                    lab.room.visual.circle(lab.pos, {
+                        fill: 'transparent',
+                        stroke: 'yellow',
+                        strokeWidth: 0.2,
+                        radius: 0.6
+                    })
+                }
             }
-        }
-        else {
-            if(this.fsm.state === STATE.LOAD || this.fsm.state === STATE.PROCESS) {
-                for(let labId of this.memory.layout.inputLabs) {
+            else {
+                for (let labId of this.memory.layout.inputLabs) {
                     let lab = Game.getObjectById(labId);
                     lab.room.visual.circle(lab.pos, {
                         fill: 'transparent',
@@ -466,31 +472,34 @@ class LabManager extends utils.Executable {
                     })
                 }
             }
+        }
 
-            if(this.fsm.state === STATE.LOAD_BOOST) {
-                for(let i = 0; i < this.memory.boostsToLoad.length; i++) {
-                    let resource = this.memory.boostsToLoad[i];
-                    let lab = this.labs[i];
+        if(this.fsm.state === STATE.LOAD_BOOST) {
+            for(let i = 0; i < this.memory.boostsToLoad.length; i++) {
+                let resource = this.memory.boostsToLoad[i];
+                let lab = this.labs[i];
+                if(!lab) {
+                    continue;
+                }
 
-                    if(lab.mineralAmount  === 0 || lab.energy < 800) {
-                        lab.room.visual.circle(lab.pos, {
-                            fill: 'transparent',
-                            stroke: 'red',
-                            strokeWidth: 0.2,
-                            radius: 0.6,
-                            opacity: 0.7,
-                        });
-                        lab.room.visual.text(resource, lab.pos, {font: 0.5});
-                    }
-                    else {
-                        lab.room.visual.circle(lab.pos, {
-                            fill: 'transparent',
-                            stroke: 'green',
-                            strokeWidth: 0.2,
-                            radius: 0.6,
-                            opacity: 0.7,
-                        });
-                    }
+                if(lab.mineralAmount  === 0 || lab.energy < 800) {
+                    lab.room.visual.circle(lab.pos, {
+                        fill: 'transparent',
+                        stroke: 'red',
+                        strokeWidth: 0.2,
+                        radius: 0.6,
+                        opacity: 0.7,
+                    });
+                    lab.room.visual.text(resource, lab.pos, {font: 0.5});
+                }
+                else {
+                    lab.room.visual.circle(lab.pos, {
+                        fill: 'transparent',
+                        stroke: 'green',
+                        strokeWidth: 0.2,
+                        radius: 0.6,
+                        opacity: 0.7,
+                    });
                 }
             }
         }

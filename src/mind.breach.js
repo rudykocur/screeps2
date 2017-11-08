@@ -2,6 +2,7 @@ let _ = require('lodash');
 let mind = require('mind.common');
 let maps = require('maps');
 const bb = require('utils.bodybuilder');
+const utils = require('utils');
 
 const profiler = require('profiler');
 
@@ -115,8 +116,8 @@ class BreachMind extends mind.CreepMindBase {
     }
 
     getTarget() {
-        let target = this.workRoom.threat.getClosestEnemy(this.creep);
-        // let target = this.creep.pos.findClosestByPath(this.workRoom.threat.getCombatCreeps());
+        // let target = this.workRoom.threat.getClosestEnemy(this.creep);
+        let target = this.creep.pos.findClosestByPath(this.workRoom.threat.getCombatCreeps());
         let room = this.workRoom.room;
 
         if(!target) {
@@ -255,6 +256,8 @@ class BreachMind extends mind.CreepMindBase {
         });
 
         if( path.length ) {
+            // utils.debugPath(path);
+
             let step = path[0];
             this.creep.room.visual.circle(step.x, step.y, {
                 color: 'blue',

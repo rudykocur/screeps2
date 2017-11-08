@@ -65,6 +65,10 @@ class TransferMind extends mind.CreepMindBase {
                 type: 'terminal-fill-energy'
             });
 
+            yield this.tryClaimJob(1, {
+                type: 'empty-storage-link'
+            });
+
             if(this.creep.ticksToLive > 100) {
 
                 yield this.tryClaimJob(1, {
@@ -75,10 +79,6 @@ class TransferMind extends mind.CreepMindBase {
                     type: 'lab-load'
                 });
             }
-
-            yield this.tryClaimJob(1, {
-                type: 'empty-storage-link'
-            });
 
             yield this.tryClaimJob(1, {
                 type: 'controller-link'

@@ -7,6 +7,16 @@ class ThreatAssesment {
             || c.getActiveBodyparts(RANGED_ATTACK) || c.getActiveBodyparts(HEAL));
 
         this.rangedCreeps = this.combatCreeps.filter(c => c.getActiveBodyparts(RANGED_ATTACK));
+
+        this.unprotected = null;
+    }
+
+    calculateUprotectedCreeps() {
+        this.unprotected = this.enemies.filter(creep => {
+            if(creep.pos.lookFor(LOOK_STRUCTURES).filter(s => s.structureType === STRUCTURE_RAMPART).length > 0) {
+                return false;
+            }
+        })
     }
 
     rangedPower() {

@@ -34,7 +34,7 @@ class LabLoadJobHandler extends job_common.JobHandlerBase {
 
         let source;
 
-        if(this.roomMgr.room.storage.get(this.data.resource) > 0) {
+        if(this.roomMgr.room.storage.get(this.data.resource) > 1000) {
             source = this.roomMgr.room.storage;
         }
         else if(this.roomMgr.terminal.get(this.data.resource) > 0) {

@@ -87,8 +87,11 @@ class RoomSiege extends base.RoomBase {
             this.memory.hasCombatCreeps = this.threat.getCombatCreeps().length > 0;
         }
 
-        if (this.shouldSpawnBreacher()) {
+        if(this.willNeedBreacher()) {
             this.supportRoom.labs.loadBoosts(Memory.siegeCreep.boosts);
+        }
+
+        if (this.shouldSpawnBreacher()) {
 
             if (this.spawn(minds.available.breach)) {
                 this.important('Spawned breach creep');
@@ -108,15 +111,7 @@ class RoomSiege extends base.RoomBase {
         }
     }
 
-    shouldSpawnBreacher() {
-        if(this.getCreepCount(minds.available.breach) > 1) {
-            return false;
-        }
-
-        if(!this.supportRoom.labs.areBoostsReady()) {
-            return false;
-        }
-
+    willNeedBreacher() {
         let cache = maps.getRoomCache(this.roomName);
 
         if(!cache) {
@@ -132,6 +127,18 @@ class RoomSiege extends base.RoomBase {
         }
 
         return false;
+    }
+
+    shouldSpawnBreacher() {
+        if(this.getCreepCount(minds.available.breach) > 1) {
+            return false;
+        }
+
+        if(!this.supportRoom.labs.areBoostsReady()) {
+            return false;
+        }
+
+        return this.willNeedBreacher();
     }
 
     shouldSpawnDefender() {
