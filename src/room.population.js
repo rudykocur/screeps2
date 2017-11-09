@@ -217,6 +217,12 @@ class RoomPopulation extends utils.Executable {
             return false;
         }
 
+        if(this.manager.room.controller.level === 7) {
+            if(this.manager.getCreepCount(minds.available.upgrader) >= 2) {
+                return false;
+            }
+        }
+
         if(this.getSpawnCooldown('upgrader') < 200) {
             return false;
         }
@@ -271,7 +277,6 @@ class RoomPopulation extends utils.Executable {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
         if(this.manager.creeps.length < 1) {
             options.body = [MOVE, WORK, WORK];
-            options.memo.emergency = true;
         }
         this.doSpawn(spawn, options.body, options.name, options.memo, blocking);
     }
@@ -285,6 +290,7 @@ class RoomPopulation extends utils.Executable {
         let options = minds.available.transfer.getSpawnParams(this.manager);
         if(this.manager.creeps.length < 2) {
             options.body = [MOVE, MOVE, CARRY, CARRY];
+            options.memo.emergency = true;
         }
         this.doSpawn(spawn, options.body, options.name, options.memo, blocking);
     }

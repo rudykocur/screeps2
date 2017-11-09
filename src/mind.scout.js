@@ -24,14 +24,18 @@ class ScoutMind extends mind.CreepMindBase {
         let roomName = this.creep.memory.roomName;
 
         if(this.creep.room.name != roomName) {
-            let room = maps.getRoomCache(roomName);
-            if(!room) {
+            let cache = maps.getRoomCache(roomName);
+            if(!cache) {
                 let exitDir = this.creep.room.findExitTo(roomName);
                 let exit = this.creep.pos.findClosestByRange(exitDir);
                 this.creep.mover.moveTo(exit);
             }
             else {
-                this.creep.mover.moveTo(room.controller.pos);
+                this.creep.mover.moveByPath(() =>{
+                    return maps.getMultiRoomPath(this.creep.pos, cache.controller.pos, {
+                        avoidHostile: false,
+                    });
+                })
             }
         }
         else {
