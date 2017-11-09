@@ -117,7 +117,9 @@ class JobCommonActions {
         let storage = this.workRoom.storage;
 
         if(!storage.isNear(this.creep)) {
-            this.creep.mover.moveTo(storage.target);
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, storage.target.pos, {});
+            })
         }
         else {
             storage.withdraw(this.creep, resource);
@@ -147,7 +149,9 @@ class JobCommonActions {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, target.pos, {});
+            })
         }
         else {
             this.creep.withdraw(target, resource, options.getAmount());
@@ -175,7 +179,9 @@ class JobCommonActions {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, target.pos, {});
+            })
         }
         else {
             this.creep.transfer(target, resource);

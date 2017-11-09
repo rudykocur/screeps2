@@ -85,6 +85,10 @@ module.exports = {
             }
         }
 
+        for(let creep of _.values(Game.creeps)) {
+            creep.memory.isStationary = true;
+        }
+
         let creepsByRoom = _.groupBy(Game.creeps, 'memory.roomName');
         _.each(creepsByRoom, (creeps, roomName) => {
             tickCache.set('creeps-'+roomName, creeps);

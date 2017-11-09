@@ -147,6 +147,10 @@ class BreachMind extends mind.CreepMindBase {
             if(!target) {
                 target = _.first(structures);
             }
+
+            if(!target) {
+                target = _.first(this.workRoom.threat.enemies);
+            }
         }
 
         return target;

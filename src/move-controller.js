@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+const utils = require('utils');
+
 const profiler = require('profiler');
 
 class CreepMoveController {
@@ -29,13 +31,17 @@ class CreepMoveController {
             return [];
         }
 
-        if(path.length > 13*5) {
-            let idx = path.indexOf(';', 13*4);
-            path = path.substr(0, idx);
+        let steps = this.getSlicedPath(path).split(';');
+        return steps.map(RoomPosition.unserialize)
+    }
+
+    getSlicedPath(path) {
+        if(path.length > 13*8) {
+            let idx = path.indexOf(';', 13*7);
+            return path.substring(0, idx);
         }
 
-        let steps = path.split(';');
-        return steps.map(RoomPosition.unserialize)
+        return path;
     }
 
     runPathCallback(pathCallback) {
@@ -58,6 +64,8 @@ class CreepMoveController {
 
         let path = this.unserializePath(this.memory._moverPath.path);
 
+        //utils.debugPath(path);
+
         let result = this.creep.moveByPath(path);
 
         if(this.memory._moverPath.blockCounter > 4) {
@@ -70,15 +78,41 @@ class CreepMoveController {
         this._updateCurrentStep(this.memory._moverPath);
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
+            new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'green', radius: 0.7, opacity: 1});
             delete this.memory._moverPath;
         }
 
         if(result === OK) {
-            if(path.length > 5 && !path[0].isEqualTo(this.creep.pos) && !path[1].isEqualTo(this.creep.pos)) {
-                let mem = this.memory._moverPath.path;
-                this.memory._moverPath.path = mem.substr(mem.indexOf(';')+1, mem.length);
+            if(path.length > 5) {
+
+                let idx = this.getIndexOnPath(path);
+                if(idx >= 0) {
+                    let mem = this.memory._moverPath.path;
+                    let sliceIdx = this.nthIndex(mem, ';', idx + 1);
+                    this.memory._moverPath.path = mem.substr(sliceIdx+1, mem.length);
+                }
+
             }
         }
+    }
+
+    getIndexOnPath(path) {
+        for(let i = 0; i < path.length; i++) {
+            if(this.creep.pos.isEqualTo(path[i])) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    nthIndex(str, pat, n){
+        let L= str.length, i= -1;
+        while(n-- && i++<L){
+            i= str.indexOf(pat, i);
+            if (i < 0) break;
+        }
+        return i;
     }
 
     _updateCurrentStep(state) {

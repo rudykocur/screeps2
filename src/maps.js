@@ -206,7 +206,7 @@ module.exports = {
      * @param {Object} options
      */
     getMultiRoomPath(from, to, options) {
-        _.defaults(options || {}, {
+        options = _.defaults(options || {}, {
             avoidHostile: true,
             roomCallback: null,
             ignoreLairs: [],
