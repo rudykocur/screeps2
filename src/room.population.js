@@ -121,7 +121,7 @@ class RoomPopulation extends utils.Executable {
                 });
                 return;
             }
-            console.log('Failed to spawn', name, '::', options.bod, '::',result);
+            console.log('Failed to spawn', name, '::', options.body, '::',result);
         }
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);

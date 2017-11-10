@@ -19,7 +19,7 @@ module.exports = {
         do {
             result = result.concat(pattern);
             spentBudget += patternCost;
-        } while(spentBudget + patternCost <= budget && result.length + pattern.length < MAX_CREEP_SIZE);
+        } while(spentBudget + patternCost <= budget && result.length + suffix.length + pattern.length < MAX_CREEP_SIZE);
 
         return prefix.concat(result, suffix);
     }
