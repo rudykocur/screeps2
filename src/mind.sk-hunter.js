@@ -68,7 +68,7 @@ class SKHunterMind extends mind.CreepMindBase {
             let keeper = _.first(lair.pos.findInRange(this.workRoom.threat.enemies, 5));
 
             if(keeper) {
-                this.enterState(STATE.HUNT, {keeperId: keeper.id});
+                this.enterState(STATE.HUNT, {enemyId: keeper.id});
             }
         }
     }
@@ -87,20 +87,24 @@ class SKHunterMind extends mind.CreepMindBase {
             this.creep.heal(this.creep);
         }
 
-        if(this.creep.pos.getRangeTo(lair) > 3) {
-            this.creep.moveTo(lair);
-        }
-        else {
-            let keeper = _.first(lair.pos.findInRange(this.workRoom.threat.enemies, 5));
+        let keeper = _.first(lair.pos.findInRange(this.workRoom.threat.enemies, 5));
 
-            if(keeper) {
-                this.enterState(STATE.HUNT, {keeperId: keeper.id});
-            }
+        if(keeper) {
+            this.enterState(STATE.HUNT, {enemyId: keeper.id});
+        }
+
+        if(this.creep.pos.getRangeTo(lair) > 3) {
+            // this.creep.moveTo(lair);
+            this.creep.mover.moveByPath(() =>{
+                return maps.getMultiRoomPath(this.creep.pos, lair.pos, {
+                    ignoreAllLairs: true,
+                });
+            })
         }
     }
 
     attackTarget(state) {
-        let target = Game.getObjectById(state.keeperId);
+        let target = Game.getObjectById(state.enemyId);
 
         if(!target) {
             this.enterState(STATE.LURK);
