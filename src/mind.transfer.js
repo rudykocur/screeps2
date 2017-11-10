@@ -161,7 +161,7 @@ class TransferMind extends mind.CreepMindBase {
      * @param {{hauler}} options
      */
     static getSpawnParams(manager, options) {
-        options = _.defaults(options || {}, {hauler: false});
+        options = _.defaults(options || {}, {hauler: false, maxBody: false});
 
         let body = [MOVE, MOVE, CARRY, CARRY];
         if(manager.room.energyCapacityAvailable > 500) {
@@ -178,6 +178,10 @@ class TransferMind extends mind.CreepMindBase {
 
         if(manager.room.energyCapacityAvailable > 1600) {
             body = bb.build([CARRY, CARRY, MOVE], 1600, [WORK, CARRY, MOVE]);
+        }
+
+        if(options.maxBody) {
+            body = bb.build([CARRY, CARRY, MOVE], manager.room.energyCapacityAvailable, [WORK, CARRY, MOVE])
         }
 
         return {

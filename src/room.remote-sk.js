@@ -80,8 +80,8 @@ class RemoteSKRoomHandler extends roomBase.RoomBase {
                 }
                 else if (_.sum(this.data.droppedEnergy, 'amount') > 4000 &&
                         this.getSpawnCooldown(minds.available.transfer) > 200 &&
-                        this.getCreepCount(minds.available.transfer) < 5) {
-                        this.spawnMind(minds.available.transfer);
+                        this.getCreepCount(minds.available.transfer) <= 8) {
+                        this.spawnMind(minds.available.transfer, {maxBody: true});
                     }
             }
 
