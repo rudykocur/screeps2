@@ -117,11 +117,11 @@ module.exports = {
 
         for(let creep of _.values(Game.creeps)) {
             if(creep.memory.isStationary) {
-                creep.room.visual.rect(creep.pos.x - 0.5, creep.pos.y - 0.5, 1.1, 1.1, {
+                creep.room.visual.rect(creep.pos.x - 0.55, creep.pos.y - 0.55, 1.1, 1.1, {
                     stroke: "green",
                     fill: "transparent",
-                    opacity: 0.5,
-                    radius: 0.7,
+                    opacity: 0.8,
+                    strokeWidth: 0.15,
                 });
             }
         }

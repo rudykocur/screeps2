@@ -31,13 +31,25 @@ class CachedData {
     }
 
     cachedObjCollection(key, ttl, callback) {
-        this._getOrSet(key, ttl,callback, objs => objs.map(o => o.id));
-        return this.cache[key].data.map(val => Game.getObjectById(val));
+        this._getOrSet(key, ttl,callback, objs => objs.map(o => o.id).join(';'));
+
+        let data = this.cache[key].data;
+        if(data) {
+            return data.split(';').map(val => Game.getObjectById(val));
+        }
+
+        return [];
     }
 
     cachedPositions(key, ttl, callback) {
-        this._getOrSet(key, ttl,callback, points => points.map(p => p.serialize()));
-        return this.cache[key].data.map(val => RoomPosition.unserialize(val));
+        this._getOrSet(key, ttl,callback, points => points.map(p => p.serialize()).join(';'));
+
+        let data = this.cache[key].data;
+        if(data) {
+            return data.split(';').map(val => RoomPosition.unserialize(val));
+        }
+
+        return [];
     }
 
     cachedCostMatrix(key, ttl, callback) {

@@ -141,6 +141,10 @@ class BreachMind extends mind.CreepMindBase {
             }
 
             if(!target) {
+                target = this.workRoom.threat.getClosestEnemy(this.creep);
+            }
+
+            if(!target) {
                 target = _.first(structures.filter(s => s.structureType == STRUCTURE_EXTENSION));
             }
 
@@ -149,7 +153,7 @@ class BreachMind extends mind.CreepMindBase {
             }
 
             if(!target) {
-                target = _.first(this.workRoom.threat.enemies);
+                target = this.creep.pos.findClosestByRange(this.workRoom.threat.enemies);
             }
         }
 
@@ -242,7 +246,7 @@ class BreachMind extends mind.CreepMindBase {
 
                     let cost = 1;
 
-                    if(struct.structureType === STRUCTURE_RAMPART) {
+                    if(struct.structureType === STRUCTURE_RAMPART || struct.structureType === STRUCTURE_WALL) {
                         cost = 30;
                     }
 

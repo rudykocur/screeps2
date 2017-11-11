@@ -66,6 +66,7 @@ class CachedRoom {
 
     initCache(roomName) {
         this.cache = getCacheForRoom(roomName);
+        this.cache.lastAccessTime = Game.time;
         this.cache.data = this.cache.data.map(hydrate);
     }
 

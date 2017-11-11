@@ -57,6 +57,10 @@ class RoomSiege extends base.RoomBase {
         return _.first(rooms);
     }
 
+    getScoutTargetPos() {
+        return this.flag.pos;
+    }
+
     getSpawner() {
         let spawn = this.supportRoom.spawner.getFreeSpawn();
 

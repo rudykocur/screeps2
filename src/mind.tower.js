@@ -81,16 +81,20 @@ class TowerMind extends utils.Executable {
         }
 
         if(!repairTarget) {
-            repairTarget = _.first(this.roomMgr.data.roads.filter(road => {
-                return (road.hits / road.hitsMax) < 0.5;
-            }));
+            utils.every(51, () => {
+                repairTarget = _.first(this.roomMgr.data.roads.filter(road => {
+                    return (road.hits / road.hitsMax) < 0.5;
+                }));
+            })
         }
 
         if(!repairTarget) {
-            repairTarget = _.min(this.roomMgr.data.ramparts, r => r.hits);
-            if(repairTarget.hits > 1000) {
-                repairTarget = null;
-            }
+            utils.every(67, () => {
+                repairTarget = _.min(this.roomMgr.data.ramparts, r => r.hits);
+                if(repairTarget.hits > 1000) {
+                    repairTarget = null;
+                }
+            });
         }
 
         if(repairTarget) {

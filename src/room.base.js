@@ -23,8 +23,7 @@ class RoomBase extends utils.Executable {
             this.room = room;
         }
 
-        this.creeps = _.filter(Game.creeps, "memory.roomName", this.roomName);
-        // this.creeps = tickCache.get('creeps-'+this.roomName, null, []);
+        this.creeps = tickCache.get('creeps-'+this.roomName, null, []);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
     }

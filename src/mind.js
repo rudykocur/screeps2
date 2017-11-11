@@ -1,3 +1,4 @@
+const profiler = require('profiler');
 
 const availableMinds = {
     'harvester': require('mind.harvester').HarvesterMind,
@@ -26,3 +27,5 @@ module.exports = {
 
     available: availableMinds
 };
+
+module.exports.getMind = profiler.registerFN(module.exports.getMind, module.exports.getMind.name);

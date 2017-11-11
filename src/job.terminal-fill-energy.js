@@ -56,6 +56,9 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
             if(storage.get(resource) > 20000 && terminal.get(resource) < 25000) {
                 jobs.push(new TerminalFillEnergyJobDTO(terminal, resource));
             }
+            else if(storage.get(resource) > 100000 && terminal.get(resource) < 50000) {
+                jobs.push(new TerminalFillEnergyJobDTO(terminal, resource));
+            }
         }
 
         return jobs;
