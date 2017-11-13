@@ -54,7 +54,19 @@ class SKHunterMind extends mind.CreepMindBase {
     }
 
     pickNextLair(state) {
-        let lair = this.creep.pos.findClosestByPath(this.workRoom.lairs.filter(lair => !lair.ticksToSpawn));
+        let lair;
+
+        if(!lair) {
+            lair = _.first(this.workRoom.lairs.filter(lair => {
+                let creeps = lair.pos.findInRange(this.workRoom.enemies, 6);
+
+                return creeps.length > 0;
+            }));
+        }
+
+        if(!lair) {
+            lair = this.creep.pos.findClosestByPath(this.workRoom.lairs.filter(lair => !lair.ticksToSpawn))
+        }
 
         if(!lair) {
             lair = _.first(_.sortBy(this.workRoom.lairs, 'ticksToSpawn'));

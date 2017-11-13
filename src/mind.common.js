@@ -1,4 +1,5 @@
 const utils = require('utils');
+const actions = require('common-actions');
 
 const profiler = require('profiler');
 
@@ -23,7 +24,7 @@ class CreepMindBase extends utils.Executable {
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;
 
-        this.actions = new MindCommonActions(this, this.creep, this.workRoom);
+        this.actions = new actions.CreepCommonActions(this.creep, roomManager);
     }
 
     setStateMachine(fsm, initalState) {
@@ -147,61 +148,6 @@ class CreepMindBase extends utils.Executable {
 
     toString() {
         return `[${this.constructor.name} for ${this.creep}]`;
-    }
-}
-
-class MindCommonActions {
-
-    constructor(mind, creep, roomManager) {
-        this.mind = mind;
-        this.creep = creep;
-        this.workRoom = roomManager;
-    }
-
-    isEnoughStoredEnergy(minThreshold) {
-        minThreshold = minThreshold || 0;
-        return (this.workRoom.storage.getStoredEnergy() - minThreshold) > this.creep.carryCapacity/2;
-    }
-
-    refillFromStorage(nextState, idleState, minThreshold) {
-        if(!this.isEnoughStoredEnergy(minThreshold)) {
-            this.mind.enterState(idleState);
-            return;
-        }
-
-        if(this.workRoom.storage.isNear(this.creep)) {
-            this.workRoom.storage.withdraw(this.creep);
-            this.mind.enterState(nextState);
-        }
-        else {
-            this.creep.mover.moveTo(this.workRoom.storage.target);
-        }
-    }
-
-    gotoMeetingPoint() {
-        let point;
-        if(this.mind.workRoom.isRemote) {
-            point = this.mind.workRoom.parent.meetingPoint.pos;
-        }
-        else {
-            point = this.mind.workRoom.meetingPoint.pos;
-        }
-
-        if(!point) {
-            return;
-        }
-
-        if(!point.inRangeTo(this.creep, 2)) {
-            this.creep.mover.moveTo(point);
-        }
-        else {
-            let creep = this.creep;
-            let t1 = creep.memory.roomName.substr(0, 3);
-            let t2 = creep.memory.roomName.substr(3, 3);
-            creep.room.visual.text(t1, creep.pos, {font: '8px', stroke: 'black'});
-            creep.room.visual.text(t2, creep.pos.x, creep.pos.y + 0.5, {font: '8px', stroke: 'black'});
-            this.creep.mover.enterStationary();
-        }
     }
 }
 

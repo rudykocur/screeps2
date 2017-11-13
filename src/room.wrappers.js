@@ -105,7 +105,7 @@ class StorageWrapper extends StructureWrapper {
      * @param {Creep} fromCreep
      */
     deposit(fromCreep) {
-        fromCreep.transfer(this.target, _.findKey(fromCreep.carry));
+        return fromCreep.transfer(this.target, _.findKey(fromCreep.carry));
     }
 
     /**

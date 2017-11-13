@@ -214,6 +214,13 @@ module.exports = {
         return result;
     },
 
+    /**
+     * @param {RoomPosition} pos
+     */
+    hasRoad(pos) {
+        return pos.lookFor(LOOK_STRUCTURES).filter(s => s.structureType === STRUCTURE_ROAD).length > 0;
+    },
+
     reverseReactions(reactions) {
         let results = {};
 

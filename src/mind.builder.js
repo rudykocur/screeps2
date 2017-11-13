@@ -81,12 +81,20 @@ class BuilderMind extends mind.CreepMindBase {
 
     doRefill(state) {
         if(this.workRoom && this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
+            let minAmount = 600;
             if(this.workRoom.room.storage) {
-                this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 1500);
+                minAmount = 1500;
+            }
+
+            if(this.actions.isEnoughStoredEnergy(minAmount)) {
+                this.actions.withdrawFromStorage(RESOURCE_ENERGY, {
+                    onDone: () => this.enterState(STATE_BUILD)
+                })
             }
             else {
-                this.actions.refillFromStorage(STATE_BUILD, STATE_IDLE, 600);
+                this.enterState(STATE_IDLE);
             }
+
             return;
         }
 
@@ -144,6 +152,9 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         if(target.pos.inRangeTo(this.creep, 3)) {
+            if(!state.outOfRoad) {
+                state.outOfRoad = this.actions.pickOffRoadPosition(target.pos, 3);
+            }
             this.creep.mover.enterStationary();
 
             if(target instanceof ConstructionSite) {

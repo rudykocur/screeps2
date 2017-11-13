@@ -195,9 +195,10 @@ class BreachMind extends mind.CreepMindBase {
         if(this.creep.hits < this.creep.hitsMax) {
             this.creep.heal(this.creep);
         }
-
-        if(this.creep.pos.isNearTo(target)) {
-            this.creep.attack(target);
+        else {
+            if(this.creep.pos.isNearTo(target)) {
+                this.creep.attack(target);
+            }
         }
 
         this.creep.rangedAttack(target);

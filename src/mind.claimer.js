@@ -23,7 +23,7 @@ class ClaimerMind extends mind.CreepMindBase {
         }, STATE.RESERVE);
     }
 
-    reserveController() {
+    reserveController(state) {
 
         if(this.creep.memory.claim && this.creep.memory.roomName != this.creep.pos.roomName) {
             this.creep.mover.moveByPath(() => {

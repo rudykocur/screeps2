@@ -126,7 +126,7 @@ module.exports = {
             }
         }
 
-        stats.countStats(initTime, managers, jobBoard);
+        // stats.countStats(initTime, managers, jobBoard);
 
         utils_console.installConsoleFunctions(global);
 

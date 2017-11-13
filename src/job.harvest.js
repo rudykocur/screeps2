@@ -172,10 +172,14 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         let pos = new RoomPosition(state.pos.x, state.pos.y, state.pos.roomName);
         let lair = Game.getObjectById(state.lairId);
 
-        if(!this.creep.pos.isEqualTo(pos)) {
+        if(!state.stationary && !this.creep.pos.isEqualTo(pos)) {
             this.creep.mover.moveTo(pos);
         }
         else {
+            state.stationary = true;
+            // if(!state.outOfRoad) {
+            //     state.outOfRoad = this.actions.pickOffRoadPosition(lair, 10);
+            // }
             let enemies = lair.pos.findInRange(this.creep.workRoom.threat.enemies, 5);
             if(lair.ticksToSpawn > 10 && enemies.length === 0) {
                 this.fsm.enter(STATE.GOTO);

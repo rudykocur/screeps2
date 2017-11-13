@@ -134,7 +134,7 @@ class RoomSiege extends base.RoomBase {
     }
 
     shouldSpawnBreacher() {
-        if(this.getCreepCount(minds.available.breach) > 1) {
+        if(this.getCreepCount(minds.available.breach) >= 2) {
             return false;
         }
 

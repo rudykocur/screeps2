@@ -94,6 +94,8 @@ class CreepMoveController {
 
             }
         }
+
+        return result;
     }
 
     getIndexOnPath(path) {

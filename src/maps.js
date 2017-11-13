@@ -344,6 +344,10 @@ module.exports = {
         // console.log('------------ PATH FROM', from, 'to', to, 'roomCallback:', timer);
         // sw.print();
 
+        if(ret.incomplete && ret.path.length < 5) {
+            console.log("INCOMPLETE PATH !!!", from, 'to', to, JSON.stringify(options), '::', JSON.stringify(ret), '::', Math.min(_.size(allowedRooms) * 1500, 10000));
+        }
+
         for(let step of ret.path) {
             let vis = new RoomVisual(step.roomName);
             vis.circle(step, {});
