@@ -221,6 +221,10 @@ module.exports = {
         return pos.lookFor(LOOK_STRUCTURES).filter(s => s.structureType === STRUCTURE_ROAD).length > 0;
     },
 
+    hasRampart(pos) {
+        return pos.lookFor(LOOK_STRUCTURES).filter(s => s.structureType === STRUCTURE_RAMPART).length > 0;
+    },
+
     reverseReactions(reactions) {
         let results = {};
 

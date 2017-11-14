@@ -94,7 +94,10 @@ module.exports = {
         if(!RoomPosition.unserialize) {
             RoomPosition.unserialize = function(posStr) {
                 let parts = posStr.split(',');
-                return new RoomPosition(parts[0], parts[1], parts[2]);
+                let obj = {x: parts[0], y: parts[1], roomName: parts[2]};
+                obj.__proto__ = RoomPosition.prototype;
+                return obj;
+                // return new RoomPosition(parts[0], parts[1], parts[2]);
             }
         }
 

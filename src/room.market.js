@@ -150,7 +150,7 @@ class RoomMarket extends utils.Executable {
                     result[resource] = this.terminal.get(resource) - this.terminalLimit;
                 }
             }
-            else if(this.terminal.get(resource) > 3000) {
+            else if(this.terminal.get(resource) > 1000) {
                 result[resource] = this.terminal.get(resource);
             }
         }

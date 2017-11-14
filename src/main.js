@@ -94,6 +94,11 @@ module.exports = {
             tickCache.set('creeps-'+roomName, creeps);
         });
 
+        let constructionsByRoom = _.groupBy(Game.constructionSites, 'pos.roomName');
+        _.each(constructionsByRoom, (sites, roomName) => {
+            tickCache.set('sites-'+roomName, sites);
+        });
+
         _.each(Game.rooms, room => {
             maps.updateRoomCache(room, 500);
         });

@@ -35,7 +35,7 @@ class CachedData {
 
         let data = this.cache[key].data;
         if(data) {
-            return data.split(';').map(val => Game.getObjectById(val));
+            return _.filter(data.split(';').map(val => Game.getObjectById(val)));
         }
 
         return [];

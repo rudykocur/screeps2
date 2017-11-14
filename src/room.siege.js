@@ -4,6 +4,7 @@ const minds = require('mind');
 const maps = require('maps');
 const base = require('room.base');
 const threat = require('combat.threat');
+const cache = require('utils.cache');
 
 const profiler = require('profiler');
 
@@ -22,9 +23,9 @@ class RoomSiege extends base.RoomBase {
             this.threat = new threat.ThreatAssesment(this.enemies);
         }
 
-        let cache = maps.getRoomCache(this.roomName);
+        let roomCache = maps.getRoomCache(this.roomName);
 
-        if(cache && this.requireAssistance(cache)) {
+        if(roomCache && this.requireAssistance(roomCache)) {
             this.supportRoom.setSupporting(this);
         }
     }

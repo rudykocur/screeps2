@@ -61,7 +61,7 @@ class RemoteRoomHandler extends RoomBase {
 
             this.extensionsClusters = [];
             this.towers = [];
-            this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
+            this.constructionSites = tickCache.get('sites-'+this.roomName, null, []);
 
             this.stopwatch.lap('constructions');
 
