@@ -20,23 +20,24 @@ class RemoteRoomsManager extends utils.Executable {
         this.initRooms();
     }
 
-    initRooms() {
+    analyzeRooms() {
         this.manager.room.memory.remoteRooms = this.manager.room.memory.remoteRooms || {};
 
         if(this.manager.room.controller.level >= 3) {
-            this.handlers = (this.memory.roomNames || []).map(
+            return (this.memory.roomNames || []).map(
                 name => {
-                    let cache = maps.getRoomCache(name);
-                    if(cache && cache.find(FIND_SOURCES).length > 2) {
-                        return new remoteSK.RemoteSKRoomHandler(name, this.manager);
-                    }
-
-                    return new remote.RemoteRoomHandler(name, this.manager)
+                    return {handler: remote.RemoteRoomHandler, name: name};
                 });
         }
         else {
-            this.handlers = [];
+            return [];
         }
+    }
+
+    initRooms() {
+        this.handlers = this.analyzeRooms().map(data => {
+            return new data.handler(data.name, this.manager);
+        })
     }
 
     get memory(){

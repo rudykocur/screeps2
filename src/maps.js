@@ -156,6 +156,8 @@ function getLocalPath(room, from, to) {
     return path.map(step => new RoomPosition(step.x, step.y, room.name));
 }
 
+getRoomCache = profiler.registerFN(getRoomCache, 'maps.getRoomCache');
+
 module.exports = {
     getRoomCache,
 
