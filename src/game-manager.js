@@ -54,7 +54,9 @@ class GameManager extends utils.Executable {
 
         this.updateRoomsCache();
 
-        this.runRoomManagers(jobBoard, processManager);
+        let managers = this.runRoomManagers(jobBoard, processManager);
+
+        this.runMinds(managers);
 
         jobBoard.cleanup();
 
@@ -115,6 +117,10 @@ class GameManager extends utils.Executable {
             manager.run(exch);
         }
 
+        return managers;
+    }
+
+    runMinds(managers) {
         managers.forEach((manager) => {
             manager.getAllMinds().forEach((mind) => {
                 mind.run();
