@@ -57,7 +57,11 @@ class SettlerMind extends mind.CreepMindBase {
         }
 
         if(!source) {
-            source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_DROPPED_RESOURCES));
+            source = this.creep.pos.findClosestByPath(
+                this.workRoom.room.find(FIND_DROPPED_RESOURCES, {
+                    filter: /**Resource*/res => res.amount > 50
+                })
+            );
         }
         if(!source) {
             source = this.creep.pos.findClosestByPath(this.workRoom.room.find(FIND_SOURCES_ACTIVE));

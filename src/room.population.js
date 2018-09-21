@@ -203,10 +203,10 @@ class RoomPopulation extends utils.Executable {
         let options = minds.available.harvester.getSpawnParams(this.manager);
         let workParts = _.filter(options.body, b => b === WORK).length;
 
-        let souresTotalCapacity = _.sum(this.manager.data.sources.filter(s =>
-            s.pos.findInRange(this.manager.data.lairs, 7).length === 0).map(/**Source*/s => s.energyCapacity));
-
-        let neededWorkers = Math.floor((souresTotalCapacity / 300 / 2) / workParts);
+        let neededWorkers = _.sum(
+            this.manager.data.sources
+                .filter(s => s.pos.findInRange(this.manager.data.lairs, 7).length === 0)
+                .map(/**Source*/s => Math.floor(s.energyCapacity / 300 / 2 / workParts)));
 
         return this.manager.getCreepCount(minds.available.harvester) < neededWorkers;
     }
