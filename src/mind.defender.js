@@ -1,4 +1,4 @@
-let _ = require('lodash');
+var _ = require('lodash');
 let mind = require('mind.common');
 let maps = require('maps');
 const bb = require('utils.bodybuilder');

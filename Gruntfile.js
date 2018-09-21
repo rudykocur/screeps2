@@ -12,7 +12,7 @@ module.exports = function(grunt) {
                 options: {
                     email: screepsConfig.login,
                     password: screepsConfig.password,
-                    branch: 'default',
+                    branch: 'screeps2',
                     ptr: false
                 },
                 src: ['src/*.js']

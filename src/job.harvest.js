@@ -194,7 +194,13 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.data.sources.map((energy) => {
+        let sources = manager.data.sources;
+
+        if(manager.room.name === 'sim') {
+            sources = _.filter(sources, /**Source*/s => s.pos.findInRange(FIND_HOSTILE_CREEPS, 6))
+        }
+
+        return sources.map((energy) => {
             return new HarvestJobDTO(energy);
         });
     }
@@ -205,7 +211,9 @@ class HarvestJobDTO extends job_common.JobDTO {
      * @param {Source} source
      */
     constructor(source) {
-        super('harvest-'+source.id, JOB_TYPE, minds.available.harvester);
+        let slots = source.energyCapacity/300/2;
+
+        super('harvest-'+source.id, JOB_TYPE, minds.available.harvester, slots);
 
         this.targetId = source.id;
     }

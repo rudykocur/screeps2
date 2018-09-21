@@ -32,8 +32,10 @@ class HarvesterMind extends mind.CreepMindBase {
             });
         }
         else {
-            yield this.tryClaimJob(1, {
+            let claims = _.filter(this.creep.body, b => b.type === WORK).length;
+            yield this.tryClaimJob(claims, {
                 type: 'harvest-source',
+                minAmount: claims,
             });
 
         }

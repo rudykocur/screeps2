@@ -291,6 +291,9 @@ module.exports = {
     },
 
     roomNameToInt(name) {
+        if(name === 'sim') {
+            return 31;
+        }
         return parseInt(name.replace('W', 'A').replace('E', 'B').replace('N', 'C').replace('S', 'D'), 16)
     }
 };

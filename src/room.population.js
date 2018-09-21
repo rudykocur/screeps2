@@ -53,6 +53,9 @@ class RoomPopulation extends utils.Executable {
             else if(this.manager.getCreepCount(minds.available.upgrader) < 1) {
                 this.spawnUpgrader(spawn)
             }
+            else if(this.needHarvester()) {
+                this.spawnHarvester(spawn, true);
+            }
             else if(this.needMineralHarvester()) {
                 this.spawnMineralHarvester(spawn);
             }
@@ -194,6 +197,18 @@ class RoomPopulation extends utils.Executable {
         let buildersNeeded = pointsLeft / builderLifetimePower;
 
         return totalBuilders < Math.min(buildersNeeded, 3);
+    }
+
+    needHarvester() {
+        let options = minds.available.harvester.getSpawnParams(this.manager);
+        let workParts = _.filter(options.body, b => b === WORK).length;
+
+        let souresTotalCapacity = _.sum(this.manager.data.sources.filter(s =>
+            s.pos.findInRange(this.manager.data.lairs, 7).length === 0).map(/**Source*/s => s.energyCapacity));
+
+        let neededWorkers = Math.floor((souresTotalCapacity / 300 / 2) / workParts);
+
+        return this.manager.getCreepCount(minds.available.harvester) < neededWorkers;
     }
 
     needMineralHarvester() {

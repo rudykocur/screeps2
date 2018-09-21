@@ -18,6 +18,15 @@ const jobModules = {};
     jobModules[mod.JOB_TYPE] = handler;
 });
 
+/**
+ * @typedef {Object} JobBoardSearchQuery
+ * @property type
+ * @property {CreepMindBase} mind
+ * @property {Room} room
+ * @property {Number} minAmount
+ * @property {Function} filter
+ */
+
 class JobBoard extends utils.Executable {
     constructor() {
         super();
@@ -37,12 +46,7 @@ class JobBoard extends utils.Executable {
 
     /**
      *
-     * @param {Object} options
-     * @param {Object} options.type
-     * @param {CreepMindBase} options.mind
-     * @param {Room} options.room
-     * @param {Object} options.minAmount
-     * @param {Object} options.filter
+     * @param {JobBoardSearchQuery} options
      * @return {Array}
      */
     find(options) {

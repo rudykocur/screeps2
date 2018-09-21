@@ -125,6 +125,8 @@ class CreepMindBase extends utils.Executable {
 
     /**
      * Run given job search query and claim given amount from this job
+     * @param {Number} amount
+     * @param {JobBoardSearchQuery} query
      */
     tryClaimJob(amount, query) {
         let job = this.findJob(query);
@@ -138,6 +140,7 @@ class CreepMindBase extends utils.Executable {
 
     /**
      * Do job search and return first found job
+     * @param {JobBoardSearchQuery} options
      */
     findJob(options) {
         options.room = this.room;

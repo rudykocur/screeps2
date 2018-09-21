@@ -167,7 +167,6 @@ class CreepCommonActions {
 
     pickOffRoadPosition(target, range) {
         if(!utils.hasRoad(this.creep.pos)) {
-            console.log(this.creep, '::', this.creep.pos, '::', 'ALREADY OUT OF ROAD');
             return true;
         }
 

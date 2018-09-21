@@ -20,7 +20,7 @@ const procdef = require('process.roomDefence');
 class RoomManager extends roombase.RoomBase {
     /**
      * @param {Room} room
-     * @param jobManager
+     * @param {JobBoard} jobManager
      * @param {ProcessManager} procMgr
      */
     constructor(room, jobManager, procMgr) {
@@ -90,6 +90,10 @@ class RoomManager extends roombase.RoomBase {
         this.enemiesInside = this.enemies.filter(/**Creep*/creep => {
             return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
         });
+        
+        if(this.room.name === 'sim') {
+            this.enemies = this.enemies.filter(/**Creep*/creep => creep.owner.username !== 'Source Keeper')
+        }
 
         this.stopwatch.lap('enemies');
 
@@ -131,6 +135,14 @@ class RoomManager extends roombase.RoomBase {
         this.stopwatch.lap('remote');
         this.stats = new stats.RoomStats(this, this.labs);
         this.stopwatch.lap('stats');
+
+        if(!this.meetingPoint) {
+            this.err('No meeting point! (green/green)');
+        }
+
+        if(!this.room.storage && !storageFlag) {
+            this.err('No storage flag! (blue/blue)');
+        }
 
         // this.warn('STOPWATCH');
         // this.stopwatch.print();
