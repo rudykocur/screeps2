@@ -36,7 +36,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         }
 
         if(!this.creep.pos.isNearTo(container)) {
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(container, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, container.pos, {
                     ignoreAllLairs: this.creep.workRoom.isSKRoom,
                 });

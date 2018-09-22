@@ -36,7 +36,7 @@ class CreepCommonActions {
 
 
         if(!options.storage.canDeposit(this.creep)) {
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(options.storage.target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, options.pathOptions);
             })
         }
@@ -68,7 +68,7 @@ class CreepCommonActions {
         let storage = this.workRoom.storage;
 
         if(!storage.isNear(this.creep)) {
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(storage.target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, storage.target.pos, {});
             })
         }
@@ -102,7 +102,7 @@ class CreepCommonActions {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, target.pos, {});
             })
         }
@@ -134,7 +134,7 @@ class CreepCommonActions {
         }
 
         if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, target.pos, {});
             })
         }

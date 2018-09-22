@@ -29,7 +29,7 @@ class ScoutMind extends mind.CreepMindBase {
             if(!cache) {
                 if(targetPos) {
 
-                    this.creep.mover.moveByPath(() =>{
+                    this.creep.mover.moveByPath(targetPos, () =>{
                         return maps.getMultiRoomPath(this.creep.pos, targetPos, {
                             avoidHostile: false,
                         });
@@ -41,7 +41,7 @@ class ScoutMind extends mind.CreepMindBase {
                 this.creep.mover.moveTo(exit);
             }
             else {
-                this.creep.mover.moveByPath(() =>{
+                this.creep.mover.moveByPath(cache.controller, () =>{
                     return maps.getMultiRoomPath(this.creep.pos, cache.controller.pos, {
                         avoidHostile: false,
                     });

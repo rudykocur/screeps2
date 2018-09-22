@@ -107,7 +107,7 @@ class SKHunterMind extends mind.CreepMindBase {
 
         if(this.creep.pos.getRangeTo(lair) > 3) {
             // this.creep.moveTo(lair);
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(lair.pos, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, lair.pos, {
                     ignoreAllLairs: true,
                 });

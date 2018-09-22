@@ -1,6 +1,7 @@
 var _ = require('lodash');
 let mind = require('mind.common');
 let throttle = require('utils').throttle;
+const maps = require('maps');
 let bb = require('utils.bodybuilder');
 
 const profiler = require('profiler');
@@ -105,12 +106,15 @@ class BuilderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(!this.creep.pos.isNearTo(target)) {
-            this.creep.mover.moveTo(target);
+        if(this.creep.pickup(target) === OK) {
+            this.enterState(STATE_BUILD);
         }
         else {
-            this.creep.pickup(target);
-            this.enterState(STATE_BUILD);
+            this.creep.mover.moveByPath(target, () =>{
+                return maps.getMultiRoomPath(this.creep.pos, target.pos, {
+                    ignoreAllLairs: this.creep.workRoom.isSKRoom,
+                });
+            })
         }
     }
 

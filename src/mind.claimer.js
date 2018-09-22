@@ -26,7 +26,7 @@ class ClaimerMind extends mind.CreepMindBase {
     reserveController(state) {
 
         if(this.creep.memory.claim && this.creep.memory.roomName != this.creep.pos.roomName) {
-            this.creep.mover.moveByPath(() => {
+            this.creep.mover.moveByPath(cacheCtrl.pos, () => {
                 let cache = maps.getRoomCache(this.creep.memory.roomName);
                 let cacheCtrl = cache.controller;
                 maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
@@ -40,7 +40,7 @@ class ClaimerMind extends mind.CreepMindBase {
             let target = this.workRoom.room.controller;
 
             if(!this.creep.pos.isNearTo(target)) {
-                this.creep.mover.moveByPath(() =>{
+                this.creep.mover.moveByPath(target, () =>{
                     return maps.getMultiRoomPath(this.creep.pos, target.pos, {
                         avoidHostile: false,
                     });
@@ -66,7 +66,7 @@ class ClaimerMind extends mind.CreepMindBase {
             let cache = maps.getRoomCache(this.creep.memory.roomName);
             let target = cache.controller;
 
-            this.creep.mover.moveByPath(() =>{
+            this.creep.mover.moveByPath(target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, target.pos, {
                     avoidHostile: false,
                 });

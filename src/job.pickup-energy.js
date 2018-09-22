@@ -34,17 +34,16 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(!this.creep.pos.isNearTo(resource)) {
-            this.creep.mover.moveByPath(() =>{
+        if(this.creep.pickup(resource) === OK) {
+            this.unclaim();
+            this.fsm.enter(STATE_DEPOSIT);
+        }
+        else {
+            this.creep.mover.moveByPath(resource, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, resource.pos, {
                     ignoreAllLairs: this.creep.workRoom.isSKRoom,
                 });
             })
-        }
-        else {
-            this.creep.pickup(resource);
-            this.unclaim();
-            this.fsm.enter(STATE_DEPOSIT);
         }
     }
 

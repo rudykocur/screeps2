@@ -34,7 +34,7 @@ class SettlerMind extends mind.CreepMindBase {
             return;
         }
 
-        this.creep.mover.moveByPath(() => {
+        this.creep.mover.moveByPath(cacheCtrl.pos, () => {
             let cache = maps.getRoomCache(this.creep.memory.roomName);
             let cacheCtrl = cache.controller;
 

@@ -78,7 +78,7 @@ class BreachMind extends mind.CreepMindBase {
         if(this.creep.pos.roomName != roomName) {
             let cache = maps.getRoomCache(roomName);
             if(cache) {
-                this.creep.mover.moveByPath(() =>{
+                this.creep.mover.moveByPath(cache.controller.pos, () =>{
                     return maps.getMultiRoomPath(this.creep.pos, cache.controller.pos, {
                         avoidHostile: false,
                     });

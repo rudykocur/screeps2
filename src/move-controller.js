@@ -4,6 +4,15 @@ const utils = require('utils');
 
 const profiler = require('profiler');
 
+/**
+ * @typedef {Object} MoverMemory
+ * @property {String} path
+ * @property {RoomPosition} currentPos
+ * @property {String} target serialized RoomPosition
+ * @property {Number} blockCounter
+ * @property {String} type
+ */
+
 class CreepMoveController {
     constructor(creep) {
         this.creep = creep;
@@ -11,6 +20,21 @@ class CreepMoveController {
 
     get memory() {
         return this.creep.memory;
+    }
+
+    /**
+     * @return {MoverMemory}
+     */
+    get pathMemory() {
+        return this.memory._moverPath;
+    }
+
+    set pathMemory(val) {
+        this.memory._moverPath = val;
+    }
+
+    get blockCounter() {
+        return this.memory._moverPath.blockCounter;
     }
 
     moveTo(target, options) {
@@ -48,34 +72,51 @@ class CreepMoveController {
         return pathCallback().map(this.serializeStep).join(';');
     }
 
-    moveByPath(pathCallback) {
-        if(!this.memory._moverPath) {
-            this.memory._moverPath = {
+    /**
+     *
+     * @param {RoomPosition|RoomObject} target
+     * @param pathCallback
+     */
+    moveByPath(target, pathCallback) {
+
+        if(!pathCallback && target) {
+            pathCallback = target;
+            target = null;
+        }
+
+        if(target && target.pos) {
+            target = target.pos
+        }
+
+        if(target && this.pathMemory && this.pathMemory.target) {
+            if(target.serialize() !== this.pathMemory.target) {
+                this.invalidatePath();
+            }
+        }
+
+        if(!this.pathMemory) {
+            this.pathMemory = {
                 path: this.runPathCallback(pathCallback),
                 currentPos: this.creep.pos,
+                target: target ? target.serialize() : null,
                 blockCounter: 0,
                 type: 'pathfinder',
             };
         }
 
         if(this.creep.fatigue > 0) {
-            return;
+            return ERR_TIRED;
         }
 
-        let path = this.unserializePath(this.memory._moverPath.path);
-
-        //utils.debugPath(path);
+        let path = this.unserializePath(this.pathMemory.path);
 
         let result = this.creep.moveByPath(path);
 
-        if(this.memory._moverPath.blockCounter > 4) {
-            new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'red', radius: 0.7});
-            delete this.memory._moverPath;
-            this.enterStationary();
-            return;
+        if(this.pathMemory.blockCounter > 4) {
+            return this.invalidatePath();
         }
 
-        this._updateCurrentStep(this.memory._moverPath);
+        this._updateCurrentStep(this.pathMemory);
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
             new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'green', radius: 0.7, opacity: 1});
@@ -87,15 +128,23 @@ class CreepMoveController {
 
                 let idx = this.getIndexOnPath(path);
                 if(idx >= 0) {
-                    let mem = this.memory._moverPath.path;
+                    let mem = this.pathMemory.path;
                     let sliceIdx = this.nthIndex(mem, ';', idx + 1);
-                    this.memory._moverPath.path = mem.substr(sliceIdx+1, mem.length);
+                    this.pathMemory.path = mem.substr(sliceIdx+1, mem.length);
                 }
 
             }
         }
 
         return result;
+    }
+
+    invalidatePath() {
+        new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'red', radius: 0.7});
+        delete this.memory._moverPath;
+        this.enterStationary();
+
+        return ERR_NO_PATH;
     }
 
     getIndexOnPath(path) {
