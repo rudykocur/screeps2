@@ -91,6 +91,22 @@ module.exports = {
             }
         }
 
+        if(!RoomPosition.prototype.hasOwnProperty('findStructuresInRange')) {
+            RoomPosition.prototype.findStructuresInRange = function(structType, range) {
+                return this.findInRange(FIND_STRUCTURES, range, {
+                    filter: s => s.structureType === structType
+                });
+            }
+        }
+
+        if(!RoomPosition.prototype.hasOwnProperty('findConstructionsInRange')) {
+            RoomPosition.prototype.findConstructionsInRange = function(structType, range) {
+                return this.findInRange(FIND_CONSTRUCTION_SITES, range, {
+                    filter: /**ConstructionSite*/c => c.structureType === structType
+                });
+            }
+        }
+
         if(!RoomPosition.unserialize) {
             RoomPosition.unserialize = function(posStr) {
                 let parts = posStr.split(',');

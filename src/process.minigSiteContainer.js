@@ -21,20 +21,20 @@ class MiningSiteContainer extends procbase.ProcessBase {
         let room = Game.rooms[this.state.roomName];
         let /**MiningSite*/ site = room.manager.mines[this.state.siteId];
 
-        let containerInProgress = _.first(site.source.pos.findInRange(FIND_CONSTRUCTION_SITES, 1, {
-            filter: /**ConstructionSite*/construction => construction.structureType === STRUCTURE_CONTAINER
-        }));
+        let existingContainer = _.first(site.source.pos.findStructuresInRange(STRUCTURE_CONTAINER, 1));
+
+        if(existingContainer) {
+            return;
+        }
+
+        let containerInProgress = _.first(site.source.pos.findConstructionsInRange(STRUCTURE_CONTAINER, 1));
 
         if(containerInProgress) {
             return;
         }
 
-        let roads = site.source.pos.findInRange(FIND_STRUCTURES, 2, {
-            filter: struct => struct.structureType === STRUCTURE_ROAD
-        });
-        let roadsInProgress = site.source.pos.findInRange(FIND_CONSTRUCTION_SITES, 2, {
-            filter: /**ConstructionSite*/construction => construction.structureType === STRUCTURE_ROAD
-        });
+        let roads = site.source.pos.findStructuresInRange(STRUCTURE_ROAD, 2);
+        let roadsInProgress = site.source.pos.findConstructionsInRange(STRUCTURE_ROAD, 2);
 
         let anhors = roads.map(r => r.pos).concat(roadsInProgress.map(r => r.pos));
 
