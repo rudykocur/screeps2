@@ -76,6 +76,10 @@ class BuilderMind extends mind.CreepMindBase {
                     filter: /**StructureContainer*/cnt => cnt.store[RESOURCE_ENERGY] > 100
                 });
             }
+
+            if(!target) {
+                target = this.creep.room.storage;
+            }
         }
 
         if(!target) {
@@ -116,10 +120,10 @@ class BuilderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(target instanceof Source && this.creep.pickup(target) === OK) {
+        if(target instanceof Resource && (this.creep.pickup(target) === OK)) {
             this.enterState(STATE_BUILD);
         }
-        else if (target instanceof Structure && this.creep.withdraw(target, RESOURCE_ENERGY) === OK) {
+        else if (target instanceof Structure && (this.creep.withdraw(target, RESOURCE_ENERGY) === OK)) {
             this.enterState(STATE_BUILD);
         }
         else {
