@@ -5,6 +5,7 @@ const maps = require('maps');
 
 const profiler = require('profiler');
 const procMSC = require('process.minigSiteContainer');
+const procBR = require('process.buildRoad');
 
 class RoomArchitect extends utils.Executable {
     /**
@@ -182,7 +183,7 @@ class RoomArchitect extends utils.Executable {
 
         for(let source of this.manager.data.sources) {
             this.generateRoad(storagePos, source.pos, {
-                targetRange: 2,
+                cutoffRange: -1,
             });
         }
 
@@ -192,7 +193,8 @@ class RoomArchitect extends utils.Executable {
 
         for(let cluster of this.manager.extensionsClusters) {
             this.generateRoad(storagePos, cluster.center, {
-                targetRange: 0
+                targetRange: 0,
+                withTarget: true,
             });
         }
 
@@ -213,7 +215,9 @@ class RoomArchitect extends utils.Executable {
             }
 
             for(let source of handler.data.sources) {
-                this.generateRoad(source.pos, storagePos);
+                this.generateRoad(storagePos, source.pos, {
+                    cutoffRange: -1,
+                });
             }
         }
     }
@@ -221,73 +225,10 @@ class RoomArchitect extends utils.Executable {
     /**
      * @param {RoomPosition} from
      * @param {RoomPosition} to
-     * @param options
+     * @param [options]
      */
     generateRoad(from, to, options) {
-        options = options || {};
-
-        let path = PathFinder.search(from, {pos: to, range: options.targetRange || 1}, {
-            plainCost: 2,
-            swampCost: 5,
-            roomCallback: (roomName) => {
-                let room = Game.rooms[roomName];
-
-                let costs = new PathFinder.CostMatrix;
-
-                costs = maps.blockHostileRooms(roomName, costs);
-
-                if(!costs) {
-                    return false;
-                }
-
-                maps.getCostMatrix(roomName, costs);
-
-                if(room) {
-                    room.find(FIND_CONSTRUCTION_SITES).forEach(/**ConstructionSite*/site => {
-                        if(site.structureType == STRUCTURE_ROAD) {
-                            costs.set(site.pos.x, site.pos.y, 1);
-                        }
-                    });
-                    let mgr = room.manager;
-                    let allStructs = [].concat(mgr.data.spawns, mgr.data.extensions, mgr.data.links, mgr.data.towers);
-                    if(mgr) {
-                        for(let struct of allStructs) {
-                            costs.set(struct.pos.x, struct.pos.y, 0xFF);
-                        }
-                    }
-                }
-
-
-                return costs;
-            }
-        });
-
-        let placedStructures = 0;
-
-        for(let step of path.path) {
-            if(from.isEqualTo(step) || to.isEqualTo(step)) {
-                continue;
-            }
-
-            let room = Game.rooms[step.roomName];
-
-            if(!room) {
-                this.err('Cannot place road in room', step.roomName);
-                continue;
-            }
-
-            let visual = new RoomVisual(step.roomName);
-            visual.circle(step, {
-                fill: "red",
-                opacity: 0.7
-            });
-
-            if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {
-                placedStructures ++;
-            }
-        }
-
-        return placedStructures;
+        this.manager.processManager.addProcess(procBR.BuildRoad.factory(from, to, options));
     }
 
     toString() {
