@@ -167,7 +167,7 @@ class CreepMoveController {
     }
 
     _updateCurrentStep(state) {
-        let step = new RoomPosition(state.currentPos.x, state.currentPos.y, state.currentPos.roomName);
+        let step = RoomPosition.asPosition(state.currentPos);
 
         if(step.isEqualTo(this.creep.pos)) {
             state.blockCounter += 1;

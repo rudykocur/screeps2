@@ -175,7 +175,7 @@ class DefenderMind extends mind.CreepMindBase {
             this.creep.room.visual.circle(step.x, step.y, {
                 color: 'blue',
             });
-            let struct = _.first(new RoomPosition(step.x, step.y, this.creep.room.name)
+            let struct = _.first(RoomPosition.asPosition(step, this.creep.room.name)
                 .lookFor(LOOK_STRUCTURES).filter(s => s.structureType !== STRUCTURE_ROAD));
             if (struct) {
                 this.creep.attack(struct);

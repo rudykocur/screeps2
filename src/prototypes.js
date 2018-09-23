@@ -94,10 +94,22 @@ module.exports = {
         if(!RoomPosition.unserialize) {
             RoomPosition.unserialize = function(posStr) {
                 let parts = posStr.split(',');
-                let obj = {x: parts[0], y: parts[1], roomName: parts[2]};
-                obj.__proto__ = RoomPosition.prototype;
-                return obj;
-                // return new RoomPosition(parts[0], parts[1], parts[2]);
+                // let obj = {x: parts[0], y: parts[1], roomName: parts[2]};
+                // obj.__proto__ = RoomPosition.prototype;
+                // return obj;
+                return new RoomPosition(parts[0], parts[1], parts[2]);
+            }
+        }
+
+        if(!RoomPosition.asPosition) {
+            RoomPosition.asPosition = function(obj, roomName) {
+                return new RoomPosition(obj.x, obj.y, roomName || obj.roomName);
+            }
+        }
+
+        if(!Room.Terrain.prototype.isWalkable) {
+            Room.Terrain.prototype.isWalkable = function(x, y) {
+                return this.get(x, y) === TERRAIN_MASK_SWAMP || this.get(x, y) === TERRAIN_MASK_PLAIN;
             }
         }
 

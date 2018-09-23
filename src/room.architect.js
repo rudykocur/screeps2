@@ -4,6 +4,7 @@ const flags = require('utils.flags');
 const maps = require('maps');
 
 const profiler = require('profiler');
+const procMSC = require('process.minigSiteContainer');
 
 class RoomArchitect extends utils.Executable {
     /**
@@ -51,6 +52,8 @@ class RoomArchitect extends utils.Executable {
 
         if(this.manager.room.controller.level > 2) {
             utils.everyMod(1000, this.id, () => this.planRoads());
+
+            utils.everyMod(300, this.id, () => this.buildMiningSites(this.manager));
         }
     }
 
@@ -64,7 +67,9 @@ class RoomArchitect extends utils.Executable {
         );
 
         for(let cluster of clusters) {
-            let storagePath = cluster.center.findPathTo(this.manager.storage.target);
+            let storagePath = cluster.center.findPathTo(this.manager.storage.target,{
+                ignoreCreeps: true,
+            });
 
             let pointInPath = _.first(storagePath.filter(
                 pos => cluster.center.getRangeTo(pos.x, pos.y) === 1
@@ -97,6 +102,29 @@ class RoomArchitect extends utils.Executable {
         for(let flag of this.manager.flags.filter(flags.isSpawn)) {
             if(OK === room.createConstructionSite(flag.pos, STRUCTURE_SPAWN)) {
                 flag.remove();
+            }
+        }
+    }
+
+    /**
+     * @param {RoomManager} manager
+     */
+    buildMiningSites(manager) {
+        for(let site of Object.values(manager.mines)) {
+            if(!site.container) {
+                manager.processManager.addProcess(procMSC.MiningSiteContainer.factory(site));
+            }
+        }
+
+        for(let handler of this.manager.remote.handlers) {
+            if(!handler.data) {
+                continue;
+            }
+
+            for(let site of Object.values(handler.mines)) {
+                if(!site.container) {
+                    manager.processManager.addProcess(procMSC.MiningSiteContainer.factory(site));
+                }
             }
         }
     }
@@ -163,7 +191,9 @@ class RoomArchitect extends utils.Executable {
         }
 
         for(let cluster of this.manager.extensionsClusters) {
-            this.generateRoad(cluster.center, storagePos);
+            this.generateRoad(storagePos, cluster.center, {
+                targetRange: 0
+            });
         }
 
         if(this.manager.room.controller.level > 5) {

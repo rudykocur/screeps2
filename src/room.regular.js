@@ -73,9 +73,12 @@ class RoomManager extends roombase.RoomBase {
 
         this.stopwatch.lap('mineral');
 
-        this.sources = {};
+        /**
+         * @type {Object<string, MiningSite>}
+         */
+        this.sources = this.mines = {};
         this.data.sources.forEach((source) => {
-            this.sources[source.id] = new wrappers.SourceWrapper(source, this.data.containers, this.data.links);
+            this.sources[source.id] = new wrappers.MiningSite(source, this.data.containers, this.data.links);
         });
 
         this.stopwatch.lap('sources');

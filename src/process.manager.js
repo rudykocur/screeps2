@@ -11,7 +11,7 @@ class ProcessManager extends utils.Executable {
         Memory.processManager = Memory.processManager || {};
         _.defaultsDeep(this.memory, {queue: []});
 
-        this.connections = {};
+        // this.connections = {};
         this.processes = [];
 
         this.startIndex = 0;
@@ -34,14 +34,15 @@ class ProcessManager extends utils.Executable {
             }
             else if(!procGen) {
                 procGen = process.run();
-                this.debug('Running process', process);
             }
 
             try {
+                let usedStart = Game.cpu.getUsed();
                 let step  = procGen.next();
+                let usedEnd = Game.cpu.getUsed();
 
                 if(step.done) {
-                    this.debug('Process', process, 'is completed');
+                    this.debug('Process', process, 'finished in', (usedEnd - usedStart));
                     this.memory.queue.splice(this.startIndex, 1);
                     process = procGen = null;
                 }
@@ -61,12 +62,6 @@ class ProcessManager extends utils.Executable {
      */
     addProcess(process) {
         this.memory.queue.push(process.serialize());
-    }
-
-    connectToProcess(processId, callback) {
-        this.connections[processId] = {
-            callback: callback,
-        }
     }
 
     getNextProcess() {

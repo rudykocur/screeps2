@@ -63,7 +63,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        let pos = new RoomPosition(state.targetPos.x, state.targetPos.y, state.targetPos.roomName);
+        let pos = RoomPosition.asPosition(state.targetPos);
 
         if(state.exact) {
             if(this.creep.pos.isEqualTo(pos)) {
@@ -105,9 +105,9 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
         this.creep.harvest(source);
 
         if(this.workRoom.sources) {
-            let sourceWrapper = this.workRoom.sources[source.id];
-            if(sourceWrapper) {
-                this.handleSourceLink(sourceWrapper, this.workRoom.controller, this.workRoom.storage);
+            let miningSite = this.workRoom.sources[source.id];
+            if(miningSite) {
+                this.handleSourceLink(miningSite, this.workRoom.controller, this.workRoom.storage);
             }
         }
 
@@ -127,25 +127,25 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
     }
 
     /**
-     * @param {SourceWrapper} source
+     * @param {MiningSite} miningSite
      * @param {ControllerWrapper} controller
      * @param {StorageWrapper} storage
      */
-    handleSourceLink(source, controller, storage) {
+    handleSourceLink(miningSite, controller, storage) {
         if(_.sum(this.creep.carry) < this.creep.carryCapacity) {
-            this.creep.withdraw(source.container, RESOURCE_ENERGY);
+            this.creep.withdraw(miningSite.container, RESOURCE_ENERGY);
         }
 
-        if(source.link) {
-            let energyNeed = source.link.energyCapacity - source.link.energy;
+        if(miningSite.link) {
+            let energyNeed = miningSite.link.energyCapacity - miningSite.link.energy;
             if(energyNeed > 0 && this.creep.carryMax) {
-                this.creep.transfer(source.link, RESOURCE_ENERGY);
+                this.creep.transfer(miningSite.link, RESOURCE_ENERGY);
             }
 
             if(energyNeed === 0) {
-                if(source.link.cooldown === 0) {
+                if(miningSite.link.cooldown === 0) {
                     if(storage.link && storage.link.energy < storage.link.energyCapacity / 2) {
-                        source.link.transferEnergy(storage.link.link);
+                        miningSite.link.transferEnergy(storage.link.link);
                     }
                 }
             }
@@ -169,7 +169,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
     }
 
     stayInSafeSpot(state) {
-        let pos = new RoomPosition(state.pos.x, state.pos.y, state.pos.roomName);
+        let pos = RoomPosition.asPosition(state.pos);
         let lair = Game.getObjectById(state.lairId);
 
         if(!state.stationary && !this.creep.pos.isEqualTo(pos)) {

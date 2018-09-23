@@ -6,13 +6,11 @@ const profiler = require('profiler');
 
 function hydrate(item) {
     if(_.isString(item.pos)) {
-        let parts = item.pos.split(',');
-        item.pos = new RoomPosition(parts[0], parts[1], parts[2]);
+        item.pos = RoomPosition.unserialize(item.pos);
     }
     else {
-        item.pos = new RoomPosition(item.pos.x, item.pos.y, item.pos.roomName);
+        item.pos = RoomPosition.asPosition(item.pos);
     }
-    // item.pos.__proto__ = RoomPosition.prototype;
     return item;
 }
 
@@ -153,7 +151,7 @@ function getLocalPath(room, from, to) {
         }
     });
 
-    return path.map(step => new RoomPosition(step.x, step.y, room.name));
+    return path.map(step => RoomPosition.asPosition(step, room.name));
 }
 
 getRoomCache = profiler.registerFN(getRoomCache, 'maps.getRoomCache');

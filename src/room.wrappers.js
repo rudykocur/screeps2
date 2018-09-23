@@ -283,7 +283,7 @@ class ControllerWrapper extends StructureWrapper {
                 }
 
                 return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
-            }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
+            }).map(item => RoomPosition.asPosition(item, manager.room.name));
 
             let sorted = _.sortBy(points, p => pos.getRangeTo(p)*-1);
 
@@ -298,6 +298,11 @@ class ControllerWrapper extends StructureWrapper {
             let withoutRoads = sorted.filter(p => nearRoad.indexOf(p) < 0);
 
             return withoutRoads.concat(nearRoad);
+        });
+
+        this.points.slice(-10).forEach((point, i) => {
+            this.manager.room.visual.circle(point);
+            this.manager.room.visual.text(""+i, point, {color: 'white', stroke: 'black', font: 0.8});
         });
 
         this.link = data.cachedObj('link', 500, () => {
@@ -373,7 +378,12 @@ class MineralWrapper extends StructureWrapper {
     }
 }
 
-class SourceWrapper extends StructureWrapper {
+class MiningSite extends StructureWrapper {
+    /**
+     * @param {Source} source
+     * @param containers
+     * @param links
+     */
     constructor(source, containers, links) {
         super(source.id);
 
@@ -385,13 +395,23 @@ class SourceWrapper extends StructureWrapper {
     initWrapper(containers, links) {
         let data = new cache.CachedData(this.memory);
 
+        /**
+         * @type StructureContainer
+         */
         this.container = data.cachedObj('container', 100, () => {
             return _.first(this.source.pos.findInRange(containers, 1));
         });
 
+        /**
+         * @type StructureLink
+         */
         this.link = data.cachedObj('link', 100, () => {
             return _.first(this.source.pos.findInRange(links, 2));
         });
+    }
+
+    toString() {
+        return `[MiningSite for ${this.source.id} in ${this.source.pos.roomName}]`;
     }
 }
 
@@ -401,7 +421,7 @@ profiler.registerClass(ExtensionCluster, ExtensionCluster.name);
 profiler.registerClass(ControllerWrapper, ControllerWrapper.name);
 profiler.registerClass(LinkWrapper, LinkWrapper.name);
 profiler.registerClass(MineralWrapper, MineralWrapper.name);
-profiler.registerClass(SourceWrapper, SourceWrapper.name);
+profiler.registerClass(MiningSite, MiningSite.name);
 
 module.exports = {
     FlagStorageWrapper,
@@ -410,5 +430,5 @@ module.exports = {
     ControllerWrapper,
     LinkWrapper,
     MineralWrapper,
-    SourceWrapper,
+    MiningSite,
 };

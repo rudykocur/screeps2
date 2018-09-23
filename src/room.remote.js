@@ -63,6 +63,11 @@ class RemoteRoomHandler extends RoomBase {
             this.towers = [];
             this.constructionSites = tickCache.get('sites-'+this.roomName, null, []);
 
+            this.sources = this.mines = {};
+            this.data.sources.forEach((source) => {
+                this.sources[source.id] = new wrappers.MiningSite(source, this.data.containers, []);
+            });
+
             this.stopwatch.lap('constructions');
 
             this.hostileStructures = this.room.find(FIND_HOSTILE_STRUCTURES)
