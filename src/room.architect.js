@@ -26,6 +26,7 @@ class RoomArchitect extends utils.Executable {
         let availableSpawns = this.getMaxStructuresCount(STRUCTURE_SPAWN);
         let availableExtractors = this.getMaxStructuresCount(STRUCTURE_EXTRACTOR);
         let availableLabs = this.getMaxStructuresCount(STRUCTURE_LAB);
+        let availableLinks = this.getMaxStructuresCount(STRUCTURE_LINK);
 
         if(this.manager.data.extensions.length < availableExtensions) {
             utils.every(15, () => this.buildExtensions(this.manager.room));
@@ -41,6 +42,10 @@ class RoomArchitect extends utils.Executable {
 
         if(this.manager.data.labs.length < availableLabs) {
             utils.every(50, () => this.buildLabs(this.manager.room));
+        }
+
+        if(this.manager.data.links.length < availableLinks) {
+            utils.every(50, () => this.buildLinks(this.manager.room));
         }
 
         if(availableStorages > 0 && !this.manager.room.storage) {
@@ -100,11 +105,14 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildSpawns(room) {
-        for(let flag of this.manager.flags.filter(flags.isSpawn)) {
-            if(OK === room.createConstructionSite(flag.pos, STRUCTURE_SPAWN)) {
-                flag.remove();
-            }
-        }
+        this.flagsToSites(flags.isSpawn, STRUCTURE_SPAWN);
+    }
+
+    /**
+     * @param {Room} room
+     */
+    buildLinks(room) {
+        this.flagsToSites(flags.isLink, STRUCTURE_LINK);
     }
 
     /**
@@ -134,19 +142,11 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildTowers(room) {
-        for(let flag of this.manager.flags.filter(flags.isTower)) {
-            if(OK === room.createConstructionSite(flag.pos, STRUCTURE_TOWER)) {
-                flag.remove();
-            }
-        }
+        this.flagsToSites(flags.isTower, STRUCTURE_TOWER);
     }
 
     buildLabs(room) {
-        for(let flag of this.manager.flags.filter(flags.isLab)) {
-            if(OK === room.createConstructionSite(flag.pos, STRUCTURE_LAB)) {
-                flag.remove();
-            }
-        }
+        this.flagsToSites(flags.isLab, STRUCTURE_LAB);
     }
 
     buildStorage(room) {
@@ -218,6 +218,14 @@ class RoomArchitect extends utils.Executable {
                 this.generateRoad(storagePos, source.pos, {
                     cutoffRange: -1,
                 });
+            }
+        }
+    }
+
+    flagsToSites(flagCallback, constructionSiteType) {
+        for(let flag of this.manager.flags.filter(flagCallback)) {
+            if(OK === room.createConstructionSite(flag.pos, constructionSiteType)) {
+                flag.remove();
             }
         }
     }

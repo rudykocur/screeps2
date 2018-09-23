@@ -23,6 +23,16 @@ class RoomStats extends utils.Executable {
         }});
 
         this.messages = [];
+
+        this.flagColors = {
+            [COLOR_YELLOW]: 'yellow',
+            [COLOR_PURPLE]: 'purple',
+            [COLOR_BLUE]: 'blue',
+            [COLOR_GREEN]: 'green',
+            [COLOR_BROWN]: 'brown',
+            [COLOR_RED]: 'red',
+            [COLOR_WHITE]: 'white',
+        };
     }
 
     get memory() {
@@ -41,6 +51,47 @@ class RoomStats extends utils.Executable {
         this.labs.addDiagnosticMessages(this.messages);
 
         this.printDiagnostics();
+
+        let flags = [
+            [COLOR_BLUE, COLOR_BLUE, 'storage'],
+            [COLOR_GREEN, COLOR_GREEN, 'meeting point'],
+            [COLOR_YELLOW, COLOR_YELLOW, 'extension'],
+            [COLOR_YELLOW, COLOR_BROWN, 'link'],
+            [COLOR_YELLOW, COLOR_RED, 'tower'],
+            [COLOR_YELLOW, COLOR_PURPLE, 'spawn'],
+            [COLOR_YELLOW, COLOR_WHITE, 'lab'],
+            [COLOR_RED, COLOR_WHITE, 'claim room'],
+            [COLOR_RED, COLOR_GREEN, 'attack room'],
+        ];
+
+        flags.forEach((flagInfo, i) => {
+            this.printFlagInfo(new RoomPosition(48, 1 + i, ''), ...flagInfo);
+        });
+    }
+
+    printFlagInfo(pos, primaryColor, secondaryColor, label) {
+
+        this.room.visual.rect(pos.x - 0.4, pos.y - 0.4, 0.4, 0.8, {
+            fill: this.flagColors[primaryColor],
+            opacity: 1,
+        });
+
+        this.room.visual.rect(pos.x, pos.y - 0.4, 0.4 , 0.8, {
+            fill: this.flagColors[secondaryColor],
+            opacity: 1,
+        });
+
+        this.room.visual.rect(pos.x - 0.4, pos.y - 0.4, 0.8, 0.8, {
+            stroke: 'black',
+            fill: 'transparent',
+            opacity: 1,
+            strokeWidth: 0.05
+        });
+
+        this.room.visual.text(label, pos.x - 1, pos.y + 0.25, {
+            align: 'right',
+            stroke: 'black',
+        });
     }
 
     printDiagnostics() {

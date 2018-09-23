@@ -53,8 +53,14 @@ class BuildRoad extends procbase.ProcessBase {
                             costs.set(site.pos.x, site.pos.y, 1);
                         }
                     });
-                    let mgr = room.manager;
-                    let allStructs = [].concat(mgr.data.spawns, mgr.data.extensions, mgr.data.links, mgr.data.towers);
+                    let /**RoomManager*/ mgr = room.manager;
+                    if(!mgr) {
+                        this.err('No manager for room', room);
+                        return costs;
+                    }
+
+                    let allStructs = [].concat(mgr.data.spawns, mgr.data.extensions, mgr.data.links,
+                        mgr.data.towers, mgr.data.containers);
                     if(mgr) {
                         for(let struct of allStructs) {
                             costs.set(struct.pos.x, struct.pos.y, 0xFF);
