@@ -153,7 +153,9 @@ class RoomArchitect extends utils.Executable {
         let storagePos = this.manager.storage.target.pos;
 
         for(let source of this.manager.data.sources) {
-            this.generateRoad(source.pos, storagePos);
+            this.generateRoad(storagePos, source.pos, {
+                targetRange: 2,
+            });
         }
 
         for(let spawn of this.manager.data.spawns) {
@@ -171,7 +173,9 @@ class RoomArchitect extends utils.Executable {
             }
         }
 
-        this.generateRoad(this.manager.room.controller.pos, storagePos);
+        this.generateRoad(storagePos, this.manager.room.controller.pos, {
+            targetRange: 3,
+        });
 
         for(let handler of this.manager.remote.handlers) {
             if(!handler.data) {
@@ -187,10 +191,12 @@ class RoomArchitect extends utils.Executable {
     /**
      * @param {RoomPosition} from
      * @param {RoomPosition} to
+     * @param options
      */
-    generateRoad(from, to) {
+    generateRoad(from, to, options) {
+        options = options || {};
 
-        let path = PathFinder.search(from, {pos: to, range: 1}, {
+        let path = PathFinder.search(from, {pos: to, range: options.targetRange || 1}, {
             plainCost: 2,
             swampCost: 5,
             roomCallback: (roomName) => {
@@ -243,7 +249,7 @@ class RoomArchitect extends utils.Executable {
             let visual = new RoomVisual(step.roomName);
             visual.circle(step, {
                 fill: "red",
-                opacity: 0.3
+                opacity: 0.7
             });
 
             if(room.createConstructionSite(step.x, step.y, STRUCTURE_ROAD) === OK) {

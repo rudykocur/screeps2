@@ -34,7 +34,7 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
-        if(this.creep.pickup(resource) === OK) {
+        if(this.creep.pickup(resource) === OK || this.creep.carryMax) {
             this.unclaim();
             this.fsm.enter(STATE_DEPOSIT);
         }
@@ -59,19 +59,12 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
 
         this.actions.unloadAllResources({
             storage: storage,
-            onTick: () => this.repairRoad(),
+            onTick: () => this.actions.repairRoad(),
             onDone: () => this.completeJob(),
             pathOptions: {
                 ignoreAllLairs: this.creep.workRoom.isSKRoom,
             }
         });
-    }
-
-    repairRoad() {
-        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
-        if(struct && struct.hits < struct.hitsMax) {
-            this.creep.repair(struct);
-        }
     }
 
     /**

@@ -182,8 +182,10 @@ class ExtensionCluster extends StructureWrapper {
      */
     countPlainsAround(center) {
         let result = 0;
+        let terrain = Game.map.getRoomTerrain(center.roomName);
+
         for(let pos of utils.getPositionsAround(center)) {
-            if(Game.map.getTerrainAt(pos) !== 'wall') {
+            if(terrain.get(pos.x, pos.y) !== TERRAIN_MASK_WALL) {
                 result += 1;
             }
         }
@@ -260,6 +262,9 @@ class ControllerWrapper extends StructureWrapper {
 
         let pos = this.controller.pos;
 
+        /**
+         * @type {Array<RoomPosition>}
+         */
         this.points = data.cachedPositions('points', 300, () => {
             let around = manager.room.lookAtArea(pos.y - 3, pos.x - 3, pos.y + 3, pos.x + 3, true);
 
@@ -269,7 +274,7 @@ class ControllerWrapper extends StructureWrapper {
                     return false;
                 }
 
-                if(item.terrain != 'plain') {
+                if(item.terrain != 'plain' && item.terrain != 'swamp') {
                     return false;
                 }
 
@@ -280,7 +285,19 @@ class ControllerWrapper extends StructureWrapper {
                 return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
             }).map(item => new RoomPosition(item.x, item.y, manager.room.name));
 
-            return _.sortBy(points, p => pos.getRangeTo(p)*-1);
+            let sorted = _.sortBy(points, p => pos.getRangeTo(p)*-1);
+
+            let nearRoad = sorted.filter(/**RoomPosition*/p => {
+                let roads = p.findInRange(FIND_STRUCTURES, 1, {
+                    filter: s => s.structureType === STRUCTURE_ROAD
+                });
+
+                return roads.length > 0;
+            });
+
+            let withoutRoads = sorted.filter(p => nearRoad.indexOf(p) < 0);
+
+            return withoutRoads.concat(nearRoad);
         });
 
         this.link = data.cachedObj('link', 500, () => {
@@ -335,8 +352,10 @@ class MineralWrapper extends StructureWrapper {
     pickContainerPlace() {
         let around = utils.getPositionsAround(this.pos);
 
+        let terrain = Game.map.getRoomTerrain(this.pos.roomName);
+
         for(let point of around) {
-            if(Game.map.getTerrainAt(point) == 'plain') {
+            if(terrain.get(point.x, point.y) === TERRAIN_MASK_PLAIN) {
                 let struct = point.lookFor(LOOK_STRUCTURES);
 
                 if(struct.length > 0) {

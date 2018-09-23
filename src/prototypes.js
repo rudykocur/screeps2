@@ -113,5 +113,9 @@ module.exports = {
                 RESOURCE_ENERGY
             ];
         }
+
+        if(!('TERRAIN_MASK_PLAIN' in global)) {
+            global.TERRAIN_MASK_PLAIN = 0;
+        }
     }
 };

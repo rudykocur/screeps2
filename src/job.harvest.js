@@ -211,7 +211,7 @@ class HarvestJobDTO extends job_common.JobDTO {
      * @param {Source} source
      */
     constructor(source) {
-        let slots = source.energyCapacity/300/2;
+        let slots = Math.max(source.energyCapacity, 3000)/300/2;
 
         super('harvest-'+source.id, JOB_TYPE, minds.available.harvester, slots);
 

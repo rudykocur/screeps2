@@ -168,9 +168,13 @@ module.exports = {
     },
 
     myUsername() {
-        let myRoom = _.first(_.filter(Game.rooms, r => r.controller && r.controller.my));
+        if(!Memory.myUsername) {
+            let myRoom = _.first(_.filter(Game.rooms, r => r.controller && r.controller.my));
 
-        return myRoom.controller.owner.username;
+            Memory.myUsername = myRoom.controller.owner.username;
+        }
+
+        return Memory.myUsername
     },
 
     /**

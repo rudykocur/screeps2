@@ -9,7 +9,7 @@ const profiler = require('profiler');
 class CreepMindBase extends utils.Executable {
     /**
      *
-     * @param creep
+     * @param {Creep} creep
      * @param {RoomManager} roomManager
      */
     constructor(creep, roomManager) {

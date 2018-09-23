@@ -44,7 +44,7 @@ class UpgraderMind extends mind.CreepMindBase {
     }
 
     isEnoughStoredEnergy() {
-        let reservedEnergy = 700;
+        let reservedEnergy = 500;
         if(this.roomMgr.room.storage) {
             reservedEnergy = 2000;
         }
@@ -104,6 +104,8 @@ class UpgraderMind extends mind.CreepMindBase {
         }
 
         this.creep.upgradeController(target);
+
+        this.actions.repairRoad();
     }
 
     static getSpawnParams(manager) {

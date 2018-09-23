@@ -16,6 +16,13 @@ class CreepCommonActions {
         // this.workRoom = workRoom;
     }
 
+    repairRoad() {
+        let struct = _.first(this.creep.pos.lookFor(LOOK_STRUCTURES));
+        if(struct && struct.hits < struct.hitsMax) {
+            this.creep.repair(struct);
+        }
+    }
+
     /**
      * @param [options] Options
      * @param [options.onDone] callback invoked after transfer
@@ -188,7 +195,7 @@ class CreepCommonActions {
      * @param {RoomPosition} pos
      */
     isEmpty(pos) {
-        if(Game.map.getTerrainAt(pos) === 'wall') {
+        if(Game.map.getRoomTerrain(pos.roomName).get(pos.x, pos.y) === TERRAIN_MASK_WALL) {
             return false;
         }
 

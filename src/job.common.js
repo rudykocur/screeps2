@@ -7,6 +7,10 @@ const actions = require('common-actions');
 const profiler = require('profiler');
 
 class JobHandlerBase extends utils.Loggable {
+    /**
+     * @param {Creep} creep
+     * @param jobData
+     */
     constructor(creep, jobData) {
         super();
 
