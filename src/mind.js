@@ -11,6 +11,7 @@ const availableMinds = {
     'rangedDefender': require('mind.rangedDefender').RangedDefenderMind,
     'claimer': require('mind.claimer').ClaimerMind,
     'settler': require('mind.settler').SettlerMind,
+    'thief': require('mind.thief').ThiefMind,
     'breach': require('mind.breach').BreachMind,
     'skHunter': require('mind.sk-hunter').SKHunterMind,
     'sk-hunter': require('mind.sk-hunter').SKHunterMind,

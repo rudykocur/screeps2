@@ -31,8 +31,6 @@ class BuildRoad extends procbase.ProcessBase {
             withTarget: false,
         });
 
-        console.log(this, '::', options.targetRange);
-
         let path = PathFinder.search(from, {pos: to, range: options.targetRange}, {
             plainCost: 2,
             swampCost: 5,

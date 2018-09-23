@@ -90,6 +90,9 @@ class CreepMindBase extends utils.Executable {
         }
     }
 
+    /**
+     * @return {RoomManager}
+     */
     get workRoom() {
         let workRoom = Game.rooms[this.creep.memory.roomName];
         if(workRoom) {

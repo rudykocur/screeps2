@@ -163,7 +163,11 @@ class RemoteRoomHandler extends RoomBase {
             }
 
             if(this.canSpawnWorkers()) {
-                if (this.getCreepCount(minds.available.harvester) < this.data.sources.length) {
+
+                if(this.shouldSpawnThief()) {
+                    this.spawnMind(minds.available.thief);
+                }
+                else if (this.getCreepCount(minds.available.harvester) < this.data.sources.length) {
                     this.spawnMind(minds.available.harvester);
                 }
                 else if (this.constructionSites.length > 0 && this.getCreepCount(minds.available.builder) < 2) {
@@ -178,6 +182,7 @@ class RemoteRoomHandler extends RoomBase {
                     this.spawnMind(minds.available.transfer);
                 }
             }
+
             this.timer.stop();
 
             this.jobManager.run(this);
@@ -186,6 +191,23 @@ class RemoteRoomHandler extends RoomBase {
         // for(let mind of this.minds) {
         //     mind.run();
         // }
+    }
+
+    shouldSpawnThief() {
+        if(!this.room.storage) {
+            return false;
+        }
+
+        if(this.room.storage.store[RESOURCE_ENERGY] < 50000) {
+            return false;
+        }
+
+        let energy = this.room.storage.store[RESOURCE_ENERGY];
+        let thiefs = this.getCreepCount(minds.available.thief);
+
+        let wantedThiefs = Math.floor(Math.min(energy / 50000, 3));
+
+        return thiefs < wantedThiefs;
     }
 
     canSpawnWorkers() {

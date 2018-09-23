@@ -70,6 +70,12 @@ class BuilderMind extends mind.CreepMindBase {
         }
         else {
             target = this.creep.pos.findClosestByPath(this.workRoom.data.droppedEnergy);
+
+            if(!target) {
+                target = this.creep.pos.findClosestByPath(this.workRoom.data.containers, {
+                    filter: /**StructureContainer*/cnt => cnt.store[RESOURCE_ENERGY] > 100
+                });
+            }
         }
 
         if(!target) {
@@ -81,6 +87,10 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     doRefill(state) {
+        if(this.creep.carryMax) {
+            return this.enterState(STATE_BUILD);
+        }
+
         if(this.workRoom && this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
             let minAmount = 600;
             if(this.workRoom.room.storage) {
@@ -106,7 +116,10 @@ class BuilderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(this.creep.pickup(target) === OK) {
+        if(target instanceof Source && this.creep.pickup(target) === OK) {
+            this.enterState(STATE_BUILD);
+        }
+        else if (target instanceof Structure && this.creep.withdraw(target, RESOURCE_ENERGY) === OK) {
             this.enterState(STATE_BUILD);
         }
         else {
