@@ -105,14 +105,14 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildSpawns(room) {
-        this.flagsToSites(flags.isSpawn, STRUCTURE_SPAWN);
+        this.flagsToSites(room, flags.isSpawn, STRUCTURE_SPAWN);
     }
 
     /**
      * @param {Room} room
      */
     buildLinks(room) {
-        this.flagsToSites(flags.isLink, STRUCTURE_LINK);
+        this.flagsToSites(room, flags.isLink, STRUCTURE_LINK);
     }
 
     /**
@@ -142,11 +142,11 @@ class RoomArchitect extends utils.Executable {
      * @param {Room} room
      */
     buildTowers(room) {
-        this.flagsToSites(flags.isTower, STRUCTURE_TOWER);
+        this.flagsToSites(room, flags.isTower, STRUCTURE_TOWER);
     }
 
     buildLabs(room) {
-        this.flagsToSites(flags.isLab, STRUCTURE_LAB);
+        this.flagsToSites(room, flags.isLab, STRUCTURE_LAB);
     }
 
     buildStorage(room) {
@@ -222,7 +222,7 @@ class RoomArchitect extends utils.Executable {
         }
     }
 
-    flagsToSites(flagCallback, constructionSiteType) {
+    flagsToSites(room, flagCallback, constructionSiteType) {
         for(let flag of this.manager.flags.filter(flagCallback)) {
             if(OK === room.createConstructionSite(flag.pos, constructionSiteType)) {
                 flag.remove();
