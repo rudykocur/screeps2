@@ -52,8 +52,6 @@ class GameManager extends utils.Executable {
         this.cleanupCreeps(jobBoard);
         this.fillTickCache(tickCache);
 
-        this.updateRoomsCache();
-
         let managers = this.runRoomManagers(jobBoard, processManager);
 
         this.runMinds(managers);
@@ -63,6 +61,8 @@ class GameManager extends utils.Executable {
         this.visualizeStationaryCreeps();
 
         utils_console.installConsoleFunctions(global);
+
+        this.updateRoomsCache();
 
         processManager.run();
     }

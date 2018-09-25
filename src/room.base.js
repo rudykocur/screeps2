@@ -23,9 +23,28 @@ class RoomBase extends utils.Executable {
             this.room = room;
         }
 
+        this.name = this.memory.roomName;
+        this.namingGroup = this.memory.namingGroup;
+
         this.creeps = tickCache.get('creeps-'+this.roomName, null, []);
         this.minds = this.creeps.map((c) => minds.getMind(c, this));
         this.mindsByType = _.groupBy(this.minds, 'constructor.name');
+    }
+
+    setNamingGroup(groupName) {
+        this.warn('Room associated with naming group', groupName);
+        this.memory.namingGroup = groupName;
+        this.namingGroup = groupName;
+    }
+
+    setRoomName(name) {
+        this.warn('Setting room name to', name);
+        this.memory.roomName = name;
+        this.name = name;
+    }
+
+    getRoomTitle() {
+        return this.name;
     }
 
     get memory() {

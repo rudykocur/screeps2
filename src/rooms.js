@@ -1,5 +1,6 @@
 var _ = require("lodash");
 let flags = require('utils.flags');
+const naming = require('utils.naming');
 
 const roomTypes = {
     regular: require('room.regular').RoomManager,
@@ -14,6 +15,38 @@ function safeCtor(callback, room) {
     catch(e) {
         console.log('Constructor failed:', room, '::', e, '.Stack trace:', e.stack);
         Game.notify(`Constructor failed: ${e}. Stack trace: ${e.stack}`, 5);
+    }
+}
+
+/**
+ * @param {Array<RoomManager>} managers
+ */
+function setRoomsNames(managers) {
+
+    let usedNamingGroups = managers.map(mgr => mgr.namingGroup).filter(x => x);
+
+    for(let mgr of managers) {
+        if(!mgr.name) {
+            naming.pickGroup(usedNamingGroups);
+
+            let group = naming.pickGroup(usedNamingGroups);
+
+            mgr.setNamingGroup(group);
+            usedNamingGroups.push(group);
+
+            mgr.setRoomName(naming.pickLocationName(group, [], true));
+        }
+
+        let usedNames = mgr.remote.handlers.map(h => h.name).filter(x => x);
+        usedNames.push(mgr.name);
+
+        for(let remote of mgr.remote.handlers) {
+            if(!remote.name) {
+                let remoteRoomName = naming.pickLocationName(mgr.namingGroup, usedNames, false);
+                remote.setRoomName(remoteRoomName);
+                usedNames.push(remoteRoomName);
+            }
+        }
     }
 }
 
@@ -32,6 +65,8 @@ module.exports = {
 
             safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard, procMgr)), room);
         });
+
+        setRoomsNames(managers);
 
         let result = [];
 

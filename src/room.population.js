@@ -104,12 +104,24 @@ class RoomPopulation extends utils.Executable {
 
         options.memo.roomName = targetRoom.roomName;
 
-        let name = this.manager.getCreepName(options.name);
+        let name = 'NOT SPAWNED';
 
-        let result = spawn.spawnCreep(options.body, name, {
+        let spawnTest = spawn.spawnCreep(options.body, 'TEST CREEP NAME', {
             memory: options.memo,
             energyStructures: this.energyStructures,
+            dryRun: true,
         });
+
+        let result = spawnTest;
+
+        if(spawnTest === OK) {
+            name = this.manager.getCreepName(options.name);
+
+            result = spawn.spawnCreep(options.body, name, {
+                memory: options.memo,
+                energyStructures: this.energyStructures,
+            });
+        }
 
         if(result != OK) {
             if(result == ERR_NOT_ENOUGH_ENERGY) {
@@ -131,7 +143,7 @@ class RoomPopulation extends utils.Executable {
 
             this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + options.memo.mind] = Game.time;
 
-            this.printSummarisedSpawn(targetRoom.roomName, name, options.body);
+            this.printSummarisedSpawn(targetRoom.getRoomTitle(), name, options.body);
 
             return name;
         }
@@ -167,7 +179,7 @@ class RoomPopulation extends utils.Executable {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
             this.room.memory.lastSpawnTick[memo.mind] = Game.time;
-            this.printSummarisedSpawn(memo.roomName, name, body);
+            this.printSummarisedSpawn(this.manager.getRoomTitle(), name, body);
         }
     }
 
@@ -339,7 +351,7 @@ class RoomPopulation extends utils.Executable {
     }
 
     toString() {
-        return `[Spawner ${this.manager.roomName}]`;
+        return `[Spawner ${this.manager.getRoomTitle()}]`;
     }
 }
 

@@ -96,6 +96,14 @@ class UpgraderMind extends mind.CreepMindBase {
             this.enterState(STATE_IDLE);
         }
 
+        let signText = this.workRoom.getRoomTitle();
+
+        if(!target.sign || target.sign.text !== signText) {
+            this.creep.mover.moveTo(target);
+            this.creep.signController(target, signText);
+            return;
+        }
+
         if(!this.creep.pos.isEqualTo(point)) {
             this.creep.mover.moveTo(point, {visualizePathStyle: {}});
         }

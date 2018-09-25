@@ -49,8 +49,10 @@ class ClaimerMind extends mind.CreepMindBase {
             }
             this.creep.mover.enterStationary();
 
-            if(target.sign && target.sign.username != utils.myUsername()) {
-                this.creep.signController(target, '');
+            let desiredSignMsg = this.workRoom.getRoomTitle();
+
+            if(!target.sign || target.sign.text !== desiredSignMsg) {
+                this.creep.signController(target, desiredSignMsg);
             }
 
             if(this.creep.memory.claim) {

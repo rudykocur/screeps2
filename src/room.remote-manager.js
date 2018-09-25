@@ -35,6 +35,9 @@ class RemoteRoomsManager extends utils.Executable {
     }
 
     initRooms() {
+        /**
+         * @type {Array<RemoteRoomHandler>}
+         */
         this.handlers = this.analyzeRooms().map(data => {
             return new data.handler(data.name, this.manager);
         })

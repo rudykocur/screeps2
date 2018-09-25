@@ -363,9 +363,8 @@ module.exports = {
         let currentTTL = Game.time - cache.lastUpdateTime;
 
         if(currentTTL > ttl) {
-            if(ttl > 0) {
-                console.log(`[maps] updating cache for room ${room.name}`);
-            }
+
+            let usedStart = Game.cpu.getUsed();
 
             cache.data = scanRoom(room);
             cache.owner = null;
@@ -381,6 +380,13 @@ module.exports = {
             }
 
             cache.lastUpdateTime = Game.time + utils.roomNameToInt(room.name) % 21;
+
+            let usedEnd = Game.cpu.getUsed();
+
+            if(ttl > 0) {
+                let roomName = room.manager && room.manager.getRoomTitle() || room.name;
+                console.log(`[maps] updated cache for room ${roomName} in ${usedEnd - usedStart}`);
+            }
         }
     }
 };

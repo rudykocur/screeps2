@@ -12,6 +12,8 @@ const stats = require('room.stats');
 const market = require('room.market');
 const roombase = require('room.base');
 
+const naming = require('utils.naming');
+
 const wrappers = require('room.wrappers');
 const profiler = require('profiler');
 
@@ -160,11 +162,31 @@ class RoomManager extends roombase.RoomBase {
             this.room.memory.counter = 0;
         }
 
+        if(_.isUndefined(this.room.memory.nameQueue)) {
+            this.room.memory.nameQueue = [];
+        }
+
         _.defaultsDeep(this.room.memory, {stats: {avgEnergy: []}});
     }
 
+    getNextCreepName() {
+        if(!this.memory.queueLoop) {
+            this.memory.queueLoop = 1;
+        }
+
+        if(this.memory.nameQueue.length === 0) {
+            this.memory.nameQueue = _.shuffle(naming.getGroup(this.namingGroup).names);
+            this.memory.queueLoop += 1;
+            this.memory.queueLoop = this.memory.queueLoop % 5;
+        }
+
+        return {name: this.memory.nameQueue.shift(), index: this.memory.queueLoop};
+    }
+
     getCreepName(name) {
-        return 'creep_'+(this.room.memory.counter++) + '_' + name;
+        let data = this.getNextCreepName();
+
+        return data.name + ': ' + name + data.index;
     }
 
     getAllMinds() {

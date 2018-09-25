@@ -42,6 +42,7 @@ class RoomStats extends utils.Executable {
     update() {
         this._updateDroppedEnergy();
 
+        this.messages.push(`Room: ${this.manager.getRoomTitle()}`);
         this.messages.push(`Energy avg: ${this.manager.getAvgEnergyToPickup()}`);
         this.messages.push(`Energy capacity: ${this.room.energyAvailable}/${this.room.energyCapacityAvailable}`);
 
