@@ -172,22 +172,28 @@ class CreepCommonActions {
     //     }
     // }
 
+    /**
+     * @param {RoomPosition} target
+     * @param range
+     * @return {boolean}
+     */
     pickOffRoadPosition(target, range) {
         if(!utils.hasRoad(this.creep.pos)) {
             return true;
         }
 
-        let points = utils.getPositionsAround(this.creep.pos);
+        let pts = utils.getAround(target, range).filter(pos => {
+            return !utils.hasRoad(pos) && this.isEmpty(pos);
+        });
 
-        for(let point of points) {
-            if(target.getRangeTo(point) <= range) {
-                if(!utils.hasRoad(point) && this.isEmpty(point)) {
-                    if(this.creep.mover.moveTo(point) === OK) {
-                        return true;
-                    }
-                }
-            }
+        let point = this.creep.pos.findClosestByRange(pts);
+
+        if(this.creep.pos.isEqualTo(point)) {
+            return true;
         }
+
+        this.creep.mover.moveTo(point);
+
         return false;
     }
 

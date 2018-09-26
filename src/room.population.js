@@ -38,13 +38,13 @@ class RoomPopulation extends utils.Executable {
             if(this.needSettler()) {
                 this.spawnSettler(spawn);
             }
-            else if (this.manager.getCreepCount(minds.available.harvester) < 1) {
+            else if (this.manager.getCreepCount(minds.available.harvester, {mineral: false}) < 1) {
                 this.spawnHarvester(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.transfer) < 2) {
                 this.spawnTransfer(spawn, true);
             }
-            else if(this.manager.getCreepCount(minds.available.harvester) < 2) {
+            else if(this.manager.getCreepCount(minds.available.harvester, {mineral: false}) < 2) {
                 this.spawnHarvester(spawn, true);
             }
             else if(this.needHauler()) {
@@ -136,7 +136,7 @@ class RoomPopulation extends utils.Executable {
                 });
                 return;
             }
-            console.log('Failed to spawn', name, '::', options.body, '::',result);
+            this.err('Failed to spawn', name, '::', options.body, '::',result);
         }
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
@@ -173,7 +173,7 @@ class RoomPopulation extends utils.Executable {
                 this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
                 return;
             }
-            console.log('Failed to spawn', name, '::', body, '::',result);
+            this.err('Failed to spawn', name, '::', body, '::',result);
         }
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);

@@ -54,6 +54,8 @@ class RoomData extends cache.CachedData {
             () => this._allStructures.filter(s => s.structureType == STRUCTURE_KEEPER_LAIR));
 
         this.droppedEnergy = this.getDroppedEnergy(storageFlag);
+
+        this.tombstones = this.room.find(FIND_TOMBSTONES);
     }
 
     get roads() {

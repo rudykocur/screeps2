@@ -98,5 +98,6 @@ class EmptyContainerJobDTO extends job_common.JobDTO {
 
 module.exports = {
     getHandler() {return EmptyContainerJobHandler},
-    JOB_TYPE
+    JOB_TYPE,
+    EmptyContainerJobHandler,
 };

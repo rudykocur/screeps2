@@ -80,10 +80,6 @@ class BuilderMind extends mind.CreepMindBase {
                     filter: /**StructureContainer*/cnt => cnt.store[RESOURCE_ENERGY] > 100
                 });
             }
-
-            if(!target) {
-                target = this.creep.room.storage;
-            }
         }
 
         if(!target) {
