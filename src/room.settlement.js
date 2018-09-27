@@ -89,8 +89,9 @@ class RoomSettlement extends base.RoomBase {
         let creepName = 'wanderer_' + this.roomName;
         let wanderer = Game.creeps[creepName];
         if(wanderer && !wanderer.pos.inRangeTo(this.flag.pos, 5)) {
-            let claimPath = maps.getMultiRoomPath(wanderer.pos, this.flag.pos);
-            let x = wanderer.moveByPath(claimPath);
+            wanderer.mover.moveByPath(this.flag.pos, () => {
+                return maps.getMultiRoomPath(wanderer.pos, this.flag.pos);
+            });
         }
 
     }

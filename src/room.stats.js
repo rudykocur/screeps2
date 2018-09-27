@@ -63,6 +63,7 @@ class RoomStats extends utils.Executable {
             [COLOR_YELLOW, COLOR_WHITE, 'lab'],
             [COLOR_RED, COLOR_WHITE, 'claim room'],
             [COLOR_RED, COLOR_GREEN, 'attack room'],
+            [COLOR_PURPLE, COLOR_WHITE, 'idle room'],
         ];
 
         flags.forEach((flagInfo, i) => {

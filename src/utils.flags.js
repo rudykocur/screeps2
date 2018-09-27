@@ -62,5 +62,9 @@ module.exports = {
      */
     isRoomAttack(flag) {
         return flag.color === COLOR_RED && flag.secondaryColor === COLOR_GREY;
-    }
+    },
+
+    isIdleRoom(flag) {
+        return flag.color === COLOR_PURPLE && flag.secondaryColor === COLOR_WHITE;
+    },
 };

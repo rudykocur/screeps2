@@ -77,7 +77,7 @@ class RoomData extends cache.CachedData {
     }
 
     getDroppedEnergy(storageFlag) {
-        return this.cachedObjCollection('resources', 1,
+        return this.cachedObjCollection('resources', 5,
             () => _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
                 if(res.resourceType != RESOURCE_ENERGY) {
                     return false;

@@ -65,7 +65,13 @@ class RoomMarket extends utils.Executable {
 
         let orders = this.getMarketOrders(toBuy);
 
+        let bought = false;
+
         _.each(toBuy, (maxPrice, resource) => {
+
+            if(bought) {
+                return;
+            }
 
             let order = this.findBuyOrder(orders, resource);
 
@@ -80,6 +86,7 @@ class RoomMarket extends utils.Executable {
 
             if(result === OK) {
                 this.important(`Bought ${toBuy} of ${resource} for ${order.price}. Energy cost: ${order.energyCost}`);
+                bought = true;
             }
         });
     }
@@ -117,7 +124,7 @@ class RoomMarket extends utils.Executable {
             return o.price < maxPrices[o.resourceType];
         });
 
-        orders = _.sortBy(orders, 'price');
+        orders = _.sortBy(orders, ['price', 'remainingAmount']);
 
         return orders;
     }
