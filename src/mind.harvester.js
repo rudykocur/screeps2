@@ -17,7 +17,9 @@ class HarvesterMind extends mind.CreepMindBase {
 
         let job = this.getJob();
 
-        if(job && (this.creep.workRoom.isSKRoom || this.creep.workRoom.threat.getCombatCreeps().length === 0)) {
+        if(job && (this.creep.workRoom.isSKRoom ||
+            this.creep.room.controller.safeMode ||
+            this.creep.workRoom.threat.getCombatCreeps().length === 0)) {
             job.execute();
             return;
         }

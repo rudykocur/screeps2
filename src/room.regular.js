@@ -28,8 +28,6 @@ class RoomManager extends roombase.RoomBase {
     constructor(room, jobManager, procMgr) {
         super(room.name);
 
-        this.timer.start();
-
         this.initMemory();
 
         this.jobManager = jobManager;
@@ -37,109 +35,54 @@ class RoomManager extends roombase.RoomBase {
         this.isSupporting = false;
 
         this.initalizeRoom();
+
+        this.remote = new remote_manager.RemoteRoomsManager(this);
     }
 
     initalizeRoom() {
 
-        this.stopwatch.start();
+        this.flags = this._getFlags();
+        let storageFlag = this._getStorageFlag();
 
-        this.flags = _.filter(Game.flags, 'pos.roomName', this.roomName);
-        let storageFlag = _.first(this.flags.filter(flags.isStorage));
+        this.data = this._getRoomData(storageFlag);
 
-        this.stopwatch.lap('flags');
+        this.links = this._getLinks();
 
-        this.data = new data.RoomData(this, this.room, storageFlag);
+        this.storage = this._getStorage(storageFlag);
 
-        this.stopwatch.lap('room data');
+        this.mineral = this._getMineral();
 
-        this.links = this.data.links.map(l => new wrappers.LinkWrapper(l));
+        this.sources = this.mines = this._getSources(this.data.sources);
 
-        this.stopwatch.lap('links');
+        this.meetingPoint = this._getMeetingPoint();
 
-        if(this.room.storage) {
-            this.storage = new wrappers.StorageWrapper(this, this.room.storage, this.links);
-        }
-        else if(storageFlag) {
-            this.storage = new wrappers.FlagStorageWrapper(this, storageFlag);
-        }
-        else {
-            console.log('OMG NO LOGIC FOR STORAGE !!!');
-        }
+        this.constructionSites = this._getConstructionSites();
 
-        this.stopwatch.lap('storage');
-
-        this.mineral = null;
-        if(this.room.controller.level > 5) {
-            this.mineral = new wrappers.MineralWrapper(this.data.mineral, this.data.extractor, this.data.containers);
-        }
-
-        this.stopwatch.lap('mineral');
-
-        /**
-         * @type {Object<string, MiningSite>}
-         */
-        this.sources = this.mines = {};
-        this.data.sources.forEach((source) => {
-            this.sources[source.id] = new wrappers.MiningSite(source, this.data.containers, this.data.links);
-        });
-
-        this.stopwatch.lap('sources');
-
-        this.meetingPoint = _.first(_.filter(this.flags, flags.isMeetingPoint));
-
-        this.constructionSites = _.filter(Game.constructionSites, 'room', this.room);
-
-        this.stopwatch.lap('construction sites');
-
-        this.enemies = this.room.find(FIND_HOSTILE_CREEPS);
-        this.enemiesInside = this.enemies.filter(/**Creep*/creep => {
-            return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
-        });
+        this.enemies = this._getEnemies();
+        this.enemiesInside = this._getEnemiesInside(this.enemies);
         
         if(this.room.name === 'sim') {
             this.enemies = this.enemies.filter(/**Creep*/creep => creep.owner.username !== 'Source Keeper')
         }
 
-        this.stopwatch.lap('enemies');
-
         this.terminal = this.room.terminal;
 
-        this.threat = new threat.ThreatAssesment(this.enemies);
+        this.threat = this._getThreatAssesment(this.enemies);
 
-        this.stopwatch.lap('threat');
+        this.controller = this._getControllerWrapper();
 
-        this.controller = new wrappers.ControllerWrapper(this, this.room.controller, this.links);
-
-        this.stopwatch.lap('controller');
-
-        this.towers = this.data.towers.map(tower => {
-            let mind = new minds.available.tower(tower, this);
-            this.minds.push(mind);
-            return mind;
-        });
-
-        this.stopwatch.lap('towers');
+        this.towers = this._getTowers(this.data.towers);
 
         this.extensionsClusters = this.getExtensionsClusters();
 
-        this.stopwatch.lap('extensions');
-
         this.architect = new room_architect.RoomArchitect(this);
-        this.spawner = new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns);
+        this.spawner = this._getSpawner();
 
-        this.stopwatch.lap('spawner');
+        this.labs  = this._getLabManager();
 
-        this.labs  = new room_labs.LabManager(this, this.data.labs, this.terminal);
+        this.market = this._getMarket();
 
-        this.stopwatch.lap('labs');
-
-        this.market = new market.RoomMarket(this, this.terminal, this.room.storage, this.labs);
-        this.timer.stop();
-
-        this.remote = new remote_manager.RemoteRoomsManager(this);
-        this.stopwatch.lap('remote');
-        this.stats = new stats.RoomStats(this, this.labs);
-        this.stopwatch.lap('stats');
+        this.stats = this._getRoomStats();
 
         if(!this.meetingPoint) {
             this.err('No meeting point! (green/green)');
@@ -148,9 +91,6 @@ class RoomManager extends roombase.RoomBase {
         if(!this.room.storage && !storageFlag) {
             this.err('No storage flag! (blue/blue)');
         }
-
-        // this.warn('STOPWATCH');
-        // this.stopwatch.print();
     }
 
     initMemory() {
@@ -260,16 +200,128 @@ class RoomManager extends roombase.RoomBase {
     }
 
     getExtensionsClusters() {
-        return this.flags.filter(flags.isExtensionCluster).map(
-            f => new wrappers.ExtensionCluster(f, this, this.data));
+        return this._createClusters(this._getClustersFlags());
+    }
+
+    _getClustersFlags() {
+        return this.flags.filter(flags.isExtensionCluster);
+    }
+
+    _createClusters(flags) {
+        return flags.map(f => this._createCluster(f));
+    }
+
+    _createCluster(f) {
+        return new wrappers.ExtensionCluster(f, this, this.data);
     }
 
     runDef() {
         this.processManager.addProcess(new procdef.RoomDefenceAnalysis(this.roomName, {roomName: this.roomName}));
     }
 
+    _getFlags() {
+        return _.filter(Game.flags, 'pos.roomName', this.roomName);
+    }
+
+    _getStorageFlag() {
+        return _.first(this.flags.filter(flags.isStorage));
+    }
+
+    _getRoomData(storageFlag) {
+        return new data.RoomData(this, this.room, storageFlag);
+    }
+
+    _getLinks() {
+        return this.data.links.map(l => new wrappers.LinkWrapper(l));
+    }
+
+    _getStorage(storageFlag) {
+        if(this.room.storage) {
+            return new wrappers.StorageWrapper(this, this.room.storage, this.links);
+        }
+        else if(storageFlag) {
+            return new wrappers.FlagStorageWrapper(this, storageFlag);
+        }
+        else {
+            console.log('OMG NO LOGIC FOR STORAGE !!!');
+        }
+    }
+
+    _getMineral() {
+        if(this.room.controller.level > 5) {
+            return new wrappers.MineralWrapper(this.data.mineral, this.data.extractor, this.data.containers);
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param sources
+     * @return {Object<string, MiningSite>}
+     * @private
+     */
+    _getSources(sources) {
+        let result = {};
+        sources.forEach((source) => {
+            result[source.id] = new wrappers.MiningSite(source, this.data.containers, this.data.links);
+        });
+
+        return result;
+    }
+
+    _getMeetingPoint() {
+        return _.first(_.filter(this.flags, flags.isMeetingPoint))
+    }
+
+    _getConstructionSites() {
+        return _.filter(Game.constructionSites, 'room', this.room);
+    }
+
+    _getEnemies() {
+        return this.room.find(FIND_HOSTILE_CREEPS);
+    }
+
+    _getEnemiesInside(enemies) {
+        return enemies.filter(/**Creep*/creep => {
+            return creep.pos.x > 1 && creep.pos.y > 1 && creep.pos.x < 48 && creep.pos.y < 48
+        })
+    }
+
+    _getThreatAssesment(enemies) {
+        return new threat.ThreatAssesment(enemies)
+    }
+
+    _getControllerWrapper() {
+        return new wrappers.ControllerWrapper(this, this.room.controller, this.links);
+    }
+
+    _getTowers(towers) {
+        return towers.map(tower => {
+            let mind = new minds.available.tower(tower, this);
+            this.minds.push(mind);
+            return mind;
+        })
+    }
+
+    _getSpawner() {
+        return new population.RoomPopulation(this, this.extensionsClusters, this.data.spawns)
+    }
+
+    _getLabManager() {
+        return new room_labs.LabManager(this, this.data.labs, this.terminal);
+    }
+
+    _getMarket() {
+        return new market.RoomMarket(this, this.terminal, this.room.storage, this.labs);
+    }
+
+    _getRoomStats() {
+        return new stats.RoomStats(this, this.labs);
+    }
+
     toString() {
-        return `[RoomManager ${this.room}]`;
+        return `[RoomManager ${this.getRoomTitle() || this.room}]`;
     }
 }
 

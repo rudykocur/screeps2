@@ -26,7 +26,7 @@ module.exports = {
     },
 
     pickLocationName: function(group, usedNames, isMain) {
-        let grp = module.export.getGroup(group);
+        let grp = module.exports.getGroup(group);
 
         if(isMain && grp.mainLocation) {
             return grp.mainLocation;

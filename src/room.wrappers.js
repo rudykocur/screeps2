@@ -10,14 +10,25 @@ class StructureWrapper extends utils.Executable {
 
         this.structureId = id;
 
-        _.defaults(Memory, {structures: {}});
-        _.defaults(Memory.structures, {[this.structureId]: {}});
+        this._initMemory();
+    }
+
+    _initMemory() {
+        if(!('structures' in Memory)) {
+            Memory.structures = {};
+        }
+
+        if(!(this.structureId in Memory.structures)) {
+            Memory.structures[this.structureId] = {};
+        }
     }
 
     get memory() {
         return Memory.structures[this.structureId];
     }
 }
+
+profiler.registerClass(StructureWrapper, StructureWrapper.name);
 
 class FlagStorageWrapper extends utils.Executable {
     constructor(room, flag) {
@@ -156,21 +167,6 @@ class ExtensionCluster extends StructureWrapper {
 
         this.needsEnergy = (storedEnergy < capacity);
         this.energyNeeded = capacity - storedEnergy;
-
-    }
-
-    getExtensions(roomData) {
-        let interval = 50;
-
-        if(this.memory.extensions.length ===0 ) {
-            interval = 5;
-        }
-
-        utils.every(interval, () => {
-            this.memory.extensions = this.center.findInRange(roomData.extensions, 1).map(s => s.id);
-        });
-
-        return this.memory.extensions.map(sId => Game.getObjectById(sId));
     }
 
     get distanceToStorage() {

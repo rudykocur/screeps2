@@ -1,4 +1,5 @@
 var _ = require("lodash");
+const profiler = require('profiler');
 
 class Timer {
     constructor() {
@@ -116,6 +117,10 @@ class Executable extends Loggable{
     constructor() {
         super();
 
+        this._init();
+    }
+
+    _init() {
         this.updateTime = null;
         this.timer = new Timer();
         this.stopwatch = new Stopwatch();
@@ -135,6 +140,8 @@ class Executable extends Loggable{
         }
     }
 }
+
+profiler.registerClass(Executable, Executable.name);
 
 module.exports = {
     Executable, Timer, NamedTimer, Stopwatch, Loggable,

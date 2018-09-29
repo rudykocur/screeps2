@@ -35,10 +35,22 @@ class CachedData {
 
         let data = this.cache[key].data;
         if(data) {
-            return _.filter(data.split(';').map(val => Game.getObjectById(val)));
+            return this._deserializeObjCollectionListLo(data);
         }
 
         return [];
+    }
+
+    _splitData(data) {
+        return data.split(';');
+    }
+
+    _deserializeObjCollectionListLo(data) {
+        return _.filter(this._splitData(data).map(val => this._gobi(val)));
+    }
+
+    _gobi(val) {
+        return Game.getObjectById(val);
     }
 
     cachedPositions(key, ttl, callback) {

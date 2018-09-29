@@ -16,21 +16,13 @@ const profiler = require('profiler');
 class CreepMoveController {
     constructor(creep) {
         this.creep = creep;
-    }
 
-    get memory() {
-        return this.creep.memory;
-    }
+        this.memory = this.creep.memory;
 
-    /**
-     * @return {MoverMemory}
-     */
-    get pathMemory() {
-        return this.memory._moverPath;
-    }
-
-    set pathMemory(val) {
-        this.memory._moverPath = val;
+        /**
+         * @type {MoverMemory}
+         */
+        this.pathMemory = this.memory._moverPath;
     }
 
     get blockCounter() {
@@ -88,21 +80,9 @@ class CreepMoveController {
             target = target.pos
         }
 
-        if(target && this.pathMemory && this.pathMemory.target) {
-            if(target.serialize() !== this.pathMemory.target) {
-                this.invalidatePath();
-            }
-        }
+        this.invalidateOnTargetChange(target);
 
-        if(!this.pathMemory) {
-            this.pathMemory = {
-                path: this.runPathCallback(pathCallback),
-                currentPos: this.creep.pos,
-                target: target ? target.serialize() : null,
-                blockCounter: 0,
-                type: 'pathfinder',
-            };
-        }
+        this.initPathMemory(target, pathCallback);
 
         if(this.creep.fatigue > 0) {
             return ERR_TIRED;
@@ -124,7 +104,42 @@ class CreepMoveController {
         }
 
         if(result === OK) {
-            if(path.length > 5) {
+            this.slicePathAfterMove(path);
+        }
+
+        return result;
+    }
+
+    initPathMemory(target, pathCallback) {
+        if(!this.pathMemory) {
+            this.memory._moverPath = this.pathMemory = {
+                path: this.runPathCallback(pathCallback),
+                currentPos: this.creep.pos,
+                target: target ? target.serialize() : null,
+                blockCounter: 0,
+                type: 'pathfinder',
+            };
+        }
+    }
+
+    invalidateOnTargetChange(target) {
+        if(target && this.pathMemory && this.pathMemory.target) {
+            if(target.serialize() !== this.pathMemory.target) {
+                this.invalidatePath();
+            }
+        }
+    }
+
+    invalidatePath() {
+        new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'red', radius: 0.7});
+        delete this.memory._moverPath;
+        this.enterStationary();
+
+        return ERR_NO_PATH;
+    }
+
+    slicePathAfterMove(path) {
+        if(path.length > 5) {
 
                 let idx = this.getIndexOnPath(path);
                 if(idx >= 0) {
@@ -134,17 +149,6 @@ class CreepMoveController {
                 }
 
             }
-        }
-
-        return result;
-    }
-
-    invalidatePath() {
-        new RoomVisual(this.creep.pos.roomName).circle(this.creep.pos, {fill:'red', radius: 0.7});
-        delete this.memory._moverPath;
-        this.enterStationary();
-
-        return ERR_NO_PATH;
     }
 
     getIndexOnPath(path) {
