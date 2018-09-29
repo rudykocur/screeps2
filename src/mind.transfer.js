@@ -62,6 +62,22 @@ class TransferMind extends mind.CreepMindBase {
     }
 
     *findNewJob() {
+        let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);
+
+        if(this.creep.memory.remoteHelper) {
+            yield this.tryClaimJob(availableCapacity, {
+                type: 'energy-pickup',
+                minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50),
+                rooms: this.homeRoomMgr.getRemoteRooms()
+            });
+
+            yield this.tryClaimJob(availableCapacity, {
+                type: 'empty-container',
+                minAmount: Math.max(availableCapacity / 2, 50),
+                rooms: this.homeRoomMgr.getRemoteRooms()
+            });
+        }
+
         if(this.creep.memory.hauler) {
             yield this.tryClaimJob(1, {
                 type: 'terminal-fill-energy'
@@ -111,8 +127,6 @@ class TransferMind extends mind.CreepMindBase {
             type: 'empty-storage-link'
         });
 
-        let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);
-
         yield this.tryClaimJob(availableCapacity, {
             type: 'energy-pickup',
             minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50)
@@ -150,10 +164,10 @@ class TransferMind extends mind.CreepMindBase {
 
     /**
      * @param {RoomManager} manager
-     * @param {{hauler}} options
+     * @param {{hauler,remoteHelper}} options
      */
     static getSpawnParams(manager, options) {
-        options = _.defaults(options || {}, {hauler: false, maxBody: false});
+        options = _.defaults(options || {}, {hauler: false, maxBody: false, remoteHelper: false});
 
         let body = [MOVE, MOVE, CARRY, CARRY];
         if(manager.room.energyCapacityAvailable > 500) {
@@ -182,6 +196,7 @@ class TransferMind extends mind.CreepMindBase {
             memo: {
                 mind: 'transfer',
                 hauler: options.hauler,
+                remoteHelper: options.remoteHelper,
             }
         };
     }

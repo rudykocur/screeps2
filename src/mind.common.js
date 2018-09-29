@@ -10,12 +10,25 @@ class CreepMindBase extends utils.Executable {
     /**
      *
      * @param {Creep} creep
-     * @param {RoomManager} roomManager
+     * @param {RoomManager|RemoteRoomHandler} roomManager
      */
     constructor(creep, roomManager) {
         super();
 
         this.roomMgr = roomManager;
+
+        /**
+         * @type {RoomManager}
+         */
+        this.homeRoomMgr = null;
+
+        if(this.roomMgr.isRemote) {
+            this.homeRoomMgr = this.roomMgr.parent;
+        }
+        else {
+            this.homeRoomMgr = this.roomMgr;
+        }
+
         this.room = this.roomMgr.room;
         this.creep = creep;
         creep.mind = this;
@@ -149,7 +162,10 @@ class CreepMindBase extends utils.Executable {
      * @param {JobBoardSearchQuery} options
      */
     findJob(options) {
-        options.room = this.room;
+        if(!options.rooms) {
+            options.room = this.room;
+        }
+
         options.mind = this;
 
         return _.first(this.roomMgr.jobManager.find(options));

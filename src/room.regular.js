@@ -44,15 +44,22 @@ class RoomManager extends roombase.RoomBase {
         this.flags = this._getFlags();
         let storageFlag = this._getStorageFlag();
 
+        /**
+         * @type {RoomData}
+         */
         this.data = this._getRoomData(storageFlag);
 
         this.links = this._getLinks();
 
+        /**
+         * @type {StorageWrapper}
+         */
         this.storage = this._getStorage(storageFlag);
 
         this.mineral = this._getMineral();
 
-        this.sources = this.mines = this._getSources(this.data.sources);
+        this.sources = this.mines = this._getMiningSites(this.data.sources, this.data.containers,
+            this.data.links, this.storage, this.data.droppedEnergy);
 
         this.meetingPoint = this._getMeetingPoint();
 
@@ -137,18 +144,12 @@ class RoomManager extends roombase.RoomBase {
         return _.sum(this.room.memory.stats.avgEnergy) / this.room.memory.stats.avgEnergy.length;
     }
 
-    getFreeEnergySource() {
-        let usedSources = this.getMinds(minds.available.harvester).map(mind => {
-            return mind.getHarvestTarget();
-        });
+    getRemoteRooms() {
+        return this.remote.handlers.map(handler => handler.room);
+    }
 
-        let sources = this.room.find(FIND_SOURCES, {
-            filter: (src) => {
-                return usedSources.indexOf(src.id) < 0;
-            }
-        });
-
-        return _.first(sources);
+    getEnergyInRemoteMines() {
+        return _.sum(this.remote.handlers.map(handler => _.sum(handler.mines, 'expectedEnergy')));
     }
 
     setSupporting(supportedRoom) {
@@ -256,15 +257,17 @@ class RoomManager extends roombase.RoomBase {
     }
 
     /**
-     *
      * @param sources
+     * @param containers
+     * @param links
+     * @param storage
      * @return {Object<string, MiningSite>}
      * @private
      */
-    _getSources(sources) {
+    _getMiningSites(sources, containers, links, storage, allEnergy) {
         let result = {};
         sources.forEach((source) => {
-            result[source.id] = new wrappers.MiningSite(source, this.data.containers, this.data.links);
+            result[source.id] = new wrappers.MiningSite(source, containers, links, storage, allEnergy);
         });
 
         return result;

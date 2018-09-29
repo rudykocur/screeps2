@@ -11,6 +11,7 @@ const jobModules = {};
     'job.pickup-energy', 'job.refill-spawns', 'job.refill-extensions', 'job.refill-tower',
     'job.harvest', 'job.harvest-mineral', 'job.empty-containers', 'job.empty-tombstones', 'job.controller-link',
     'job.empty-storage-link', 'job.terminal-fill-energy', 'job.lab-load', 'job.lab-unload',
+    'job.empty-mine',
 ].forEach(modName => {
     let mod = require(modName);
     let handler = mod.getHandler();
@@ -23,6 +24,7 @@ const jobModules = {};
  * @property type
  * @property {CreepMindBase} mind
  * @property {Room} room
+ * @property {Array<Room>} rooms
  * @property {Number} minAmount
  * @property {Function} filter
  */
@@ -62,6 +64,10 @@ class JobBoard extends utils.Executable {
             options.room = options.room.name;
         }
 
+        if(options.rooms && options.rooms.length > 0) {
+            options.rooms = options.rooms.filter(room => room).map(room => room.name);
+        }
+
         // console.log('INCOMING SEARCH', JSON.stringify(options));
 
         return _.sortByOrder(_.filter(this.memory, jobData => {
@@ -71,6 +77,10 @@ class JobBoard extends utils.Executable {
 
             // console.log('Searching 1: ', jobData.id, options.room.name, jobData.room)
             if(options.room && options.room != jobData.room) {
+                return false;
+            }
+
+            if(options.rooms && options.rooms.length > 0 && options.rooms.indexOf(jobData.room) < 0) {
                 return false;
             }
 

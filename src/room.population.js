@@ -74,6 +74,9 @@ class RoomPopulation extends utils.Executable {
             else if(this.needReinforcer()) {
                 this.spawnReinforcer(spawn);
             }
+            else if(this.needRemoteTransferers()) {
+                this.spawnRemoteTransferer(spawn);
+            }
         }
 
         if(this.freeSpawns.length > 0 && !spawn.spawning && spawn.blocking) {
@@ -302,6 +305,16 @@ class RoomPopulation extends utils.Executable {
         return this.manager.data.ramparts.length > 0 || this.manager.data.walls.length > 0;
     }
 
+    needRemoteTransferers() {
+        let count = this.manager.getCreepCount(minds.available.transfer, {remoteHelper: true});
+
+        if(count > 3) {
+            return false;
+        }
+
+        return this.manager.getEnergyInRemoteMines() > 5000;
+    }
+
     spawnHarvester(spawn, blocking) {
         let options = minds.available.harvester.getSpawnParams(this.manager, false);
         if(this.manager.creeps.length < 1) {
@@ -348,6 +361,11 @@ class RoomPopulation extends utils.Executable {
     spawnReinforcer(spawn) {
         let options = minds.available.builder.getSpawnParams(this.manager, {reinforcer: true});
         this.doSpawn(spawn, options.body, options.name, options.memo);
+    }
+
+    spawnRemoteTransferer(spawn) {
+        let options = minds.available.transfer.getSpawnParams(this.manager, {remoteHelper: true});
+        this.doSpawn(spawn, options.body, options.name+'Remote', options.memo);
     }
 
     toString() {

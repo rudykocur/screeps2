@@ -65,7 +65,8 @@ class RemoteRoomHandler extends RoomBase {
 
             this.sources = this.mines = {};
             this.data.sources.forEach((source) => {
-                this.sources[source.id] = new wrappers.MiningSite(source, this.data.containers, []);
+                this.sources[source.id] = new wrappers.MiningSite(source, this.data.containers, [],
+                    this.parent.storage, this.data.droppedEnergy);
             });
 
             this.stopwatch.lap('constructions');

@@ -18,16 +18,16 @@ class RoomData extends cache.CachedData {
     loadData(storageFlag) {
 
         this.spawns = this.cachedObjCollection('spawns', 307,
-            () => this._myStructures.filter(s => s.structureType == STRUCTURE_SPAWN));
+            () => this._myStructures.filter(s => s.structureType === STRUCTURE_SPAWN));
 
         this.extensions = this.cachedObjCollection('extensions', 311,
-            () => this._myStructures.filter(s => s.structureType == STRUCTURE_EXTENSION));
+            () => this._myStructures.filter(s => s.structureType === STRUCTURE_EXTENSION));
 
         this.containers = this.cachedObjCollection('containers', 313,
-            () => this._allStructures.filter(s => s.structureType == STRUCTURE_CONTAINER));
+            () => this._allStructures.filter(s => s.structureType === STRUCTURE_CONTAINER));
 
         this.extractor = this.cachedObj('extractor', 1000,
-            () => _.first(this._myStructures.filter(s => s.structureType == STRUCTURE_EXTRACTOR)));
+            () => _.first(this._myStructures.filter(s => s.structureType === STRUCTURE_EXTRACTOR)));
 
         this.mineral = this.cachedObj('mineral', 6047,
             () => _.first(this.room.find(FIND_MINERALS)));
@@ -39,19 +39,19 @@ class RoomData extends cache.CachedData {
         this._ramparts = null;
 
         this.walls = this.cachedObjCollection('walls', 100,
-            () => this._allStructures.filter(s => s.structureType == STRUCTURE_WALL));
+            () => this._allStructures.filter(s => s.structureType === STRUCTURE_WALL));
 
         this.links = this.cachedObjCollection('links', 523,
-            () => this._myStructures.filter(s => s.structureType == STRUCTURE_LINK));
+            () => this._myStructures.filter(s => s.structureType === STRUCTURE_LINK));
 
         this.towers = this.cachedObjCollection('towers', 337,
-            () => this._myStructures.filter(s => s.structureType == STRUCTURE_TOWER));
+            () => this._myStructures.filter(s => s.structureType === STRUCTURE_TOWER));
 
         this.labs = this.cachedObjCollection('labs', 571,
-            () => this._myStructures.filter(s => s.structureType == STRUCTURE_LAB));
+            () => this._myStructures.filter(s => s.structureType === STRUCTURE_LAB));
 
         this.lairs = this.cachedObjCollection('lairs', 5501,
-            () => this._allStructures.filter(s => s.structureType == STRUCTURE_KEEPER_LAIR));
+            () => this._allStructures.filter(s => s.structureType === STRUCTURE_KEEPER_LAIR));
 
         this.droppedEnergy = this.getDroppedEnergy(storageFlag);
 
@@ -61,7 +61,7 @@ class RoomData extends cache.CachedData {
     get roads() {
         if(!this._roads) {
             this._roads = this.cachedObjCollection('roads', 127,
-                () => this._allStructures.filter(s => s.structureType == STRUCTURE_ROAD));
+                () => this._allStructures.filter(s => s.structureType === STRUCTURE_ROAD));
         }
 
         return this._roads;
@@ -70,7 +70,7 @@ class RoomData extends cache.CachedData {
     get ramparts() {
         if(!this._ramparts) {
             this._ramparts = this.cachedObjCollection('ramparts', 109,
-                () => this._allStructures.filter(s => s.structureType == STRUCTURE_RAMPART));
+                () => this._allStructures.filter(s => s.structureType === STRUCTURE_RAMPART));
         }
 
         return this._ramparts;
@@ -79,8 +79,12 @@ class RoomData extends cache.CachedData {
     getDroppedEnergy(storageFlag) {
         return this.cachedObjCollection('resources', 5,
             () => _.filter(this.room.find(FIND_DROPPED_RESOURCES), (res) => {
-                if(res.resourceType != RESOURCE_ENERGY) {
+                if(res.resourceType !== RESOURCE_ENERGY) {
                     return false;
+                }
+
+                if(res.pos.findInRange(this.sources, 1).length > 0) {
+                    // return false;
                 }
 
                 if(!this.room.storage && storageFlag) {

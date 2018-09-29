@@ -44,6 +44,7 @@ class RoomStats extends utils.Executable {
 
         this.messages.push(`Room: ${this.manager.getRoomTitle()}`);
         this.messages.push(`Energy avg: ${this.manager.getAvgEnergyToPickup()}`);
+        this.messages.push(`Energy in remote mines: ${this.manager.getEnergyInRemoteMines()}`);
         this.messages.push(`Energy capacity: ${this.room.energyAvailable}/${this.room.energyCapacityAvailable}`);
 
         this._updateSpawnerEnergy();
@@ -98,7 +99,7 @@ class RoomStats extends utils.Executable {
 
     printDiagnostics() {
         for(let i = 0; i < this.messages.length; i++){
-            this.room.visual.text(this.messages[i], 0, i, {align: 'left'})
+            this.room.visual.text(this.messages[i], 0, i, {align: 'left', stroke: 'black'})
         }
     }
 

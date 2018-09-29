@@ -1,6 +1,7 @@
 var _ = require("lodash");
 const utils = require('utils');
 const cache = require('utils.cache');
+const maps = require('maps');
 
 const profiler = require('profiler');
 
@@ -377,16 +378,19 @@ class MiningSite extends StructureWrapper {
      * @param {Source} source
      * @param containers
      * @param links
+     * @param {StorageWrapper} storage
+     * @param allDroppedEnergy
      */
-    constructor(source, containers, links) {
+    constructor(source, containers, links, storage, allDroppedEnergy) {
         super(source.id);
 
         this.source = source;
+        this.storage = storage;
 
-        this.initWrapper(containers, links);
+        this.initWrapper(containers, links, allDroppedEnergy);
     }
 
-    initWrapper(containers, links) {
+    initWrapper(containers, links, allDroppedEnergy) {
         let data = new cache.CachedData(this.memory);
 
         /**
@@ -402,6 +406,24 @@ class MiningSite extends StructureWrapper {
         this.link = data.cachedObj('link', 100, () => {
             return _.first(this.source.pos.findInRange(links, 2));
         });
+
+        this.energy = this.source.pos.findInRange(allDroppedEnergy, 1);
+        this.energyAmount = _.sum(this.energy.map(/**Resource*/r => r.amount));
+
+        this.distanceToStorage = data.cachedValue('distanceToStorage', 1000, () => {
+            return maps.getMultiRoomPath(this.storage.target.pos, this.source.pos).length;
+        });
+
+        this.storedEnergy = this.energyAmount + (this.container && this.container.store[RESOURCE_ENERGY] || 0);
+
+        if(!this.link) {
+            this.expectedEnergyIncrease = this.distanceToStorage * 2 * 5;
+        }
+        else {
+            this.expectedEnergyIncrease = 0;
+        }
+
+        this.expectedEnergy = this.storedEnergy + this.expectedEnergyIncrease;
     }
 
     toString() {
