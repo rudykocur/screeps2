@@ -69,7 +69,7 @@ class UpgraderMind extends mind.CreepMindBase {
 
         if(this.workRoom.controller.getLinkEnergy() > 0) {
             if(!this.creep.pos.isNearTo(this.workRoom.controller.link)) {
-                this.creep.mover.moveTo(this.workRoom.controller.link);
+                this.actions.moveTo(this.workRoom.controller.link);
             }
             else {
                 this.creep.withdraw(this.workRoom.controller.link, RESOURCE_ENERGY);
@@ -83,7 +83,7 @@ class UpgraderMind extends mind.CreepMindBase {
             this.enterState(STATE_UPGRADE);
         }
         else {
-            this.creep.mover.moveTo(this.roomMgr.storage.target);
+            this.actions.moveTo(this.roomMgr.storage.target);
         }
     }
 
@@ -99,13 +99,13 @@ class UpgraderMind extends mind.CreepMindBase {
         let signText = this.workRoom.getRoomTitle();
 
         if(!target.sign || target.sign.text !== signText) {
-            this.creep.mover.moveTo(target);
+            this.actions.moveTo(target);
             this.creep.signController(target, signText);
             return;
         }
 
         if(!this.creep.pos.isEqualTo(point)) {
-            this.creep.mover.moveTo(point, {visualizePathStyle: {}});
+            this.actions.moveTo(point, {visualizePathStyle: {}});
         }
         else {
             this.creep.mover.enterStationary();

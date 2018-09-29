@@ -24,6 +24,9 @@ class CreepMindBase extends utils.Executable {
         this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
         this._fsm = null;
 
+        /**
+         * @type {CreepCommonActions}
+         */
         this.actions = new actions.CreepCommonActions(this.creep, roomManager);
     }
 
