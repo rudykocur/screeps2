@@ -34,23 +34,15 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
         if(this.workRoom.storage.getStoredEnergy() < 1000 && this.workRoom.terminal &&
             this.workRoom.terminal.get(RESOURCE_ENERGY) > 1000) {
 
-            if(this.creep.pos.isNearTo(this.workRoom.terminal)) {
-                this.creep.withdraw(this.workRoom.terminal, RESOURCE_ENERGY);
-                this.fsm.enter(STATE_REFILL);
-            }
-            else {
-                this.creep.mover.moveTo(this.workRoom.terminal);
-            }
+            this.actions.withdrawFrom(this.workRoom.terminal, RESOURCE_ENERGY, {
+                onDone: () => this.fsm.enter(STATE_REFILL)
+            });
             return;
         }
 
-        if(this.workRoom.storage.isNear(this.creep)) {
-            this.workRoom.storage.withdraw(this.creep);
-            this.fsm.enter(STATE_REFILL);
-        }
-        else {
-            this.creep.mover.moveTo(this.workRoom.storage.target);
-        }
+        this.actions.withdrawFromStorage(RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE_REFILL)
+        });
     }
 
     refillExtensions() {
@@ -81,7 +73,8 @@ class RefillExtensionsJobHandler extends job_common.JobHandlerBase {
                     this.creep.transfer(ext, RESOURCE_ENERGY);
                 }
             }
-            this.creep.mover.moveTo(this.cluster.center);
+
+            this.actions.moveTo(this.cluster.center);
         }
     }
 

@@ -152,6 +152,14 @@ class CreepCommonActions {
         }
     }
 
+    moveTo(target) {
+        if(!this.creep.pos.isEqualTo(target)) {
+            this.creep.mover.moveByPath(target, () =>{
+                return maps.getMultiRoomPath(this.creep.pos, target.pos || target, {});
+            })
+        }
+    }
+
     isEnoughStoredEnergy(minThreshold) {
         minThreshold = minThreshold || 0;
         return (this.workRoom.storage.getStoredEnergy() - minThreshold) > this.creep.carryCapacity/2;
@@ -231,7 +239,7 @@ class CreepCommonActions {
         }
 
         if(!point.inRangeTo(this.creep, 2)) {
-            this.creep.mover.moveTo(point);
+            this.moveTo(point);
         }
         else {
             let creep = this.creep;

@@ -46,7 +46,7 @@ class GameManager extends utils.Executable {
         let processManager = new procmgr.ProcessManager();
 
         for(let creep of _.values(Game.creeps)) {
-            creep.memory.isStationary = true;
+            creep.memory.attemptedToMove = false;
         }
 
         this.cleanupCreeps(jobBoard);
@@ -58,13 +58,17 @@ class GameManager extends utils.Executable {
 
         jobBoard.cleanup();
 
-        this.visualizeStationaryCreeps();
-
         utils_console.installConsoleFunctions(global);
 
         this.updateRoomsCache();
 
         processManager.run();
+
+        for(let creep of _.values(Game.creeps)) {
+            creep.memory.isStationary = !creep.memory.attemptedToMove;
+
+            this.visualizeStationaryCreep(creep);
+        }
     }
 
     initMemory() {
@@ -128,16 +132,14 @@ class GameManager extends utils.Executable {
         });
     }
 
-    visualizeStationaryCreeps() {
-        for(let creep of _.values(Game.creeps)) {
-            if(creep.memory.isStationary) {
-                creep.room.visual.rect(creep.pos.x - 0.55, creep.pos.y - 0.55, 1.1, 1.1, {
-                    stroke: "green",
-                    fill: "transparent",
-                    opacity: 0.8,
-                    strokeWidth: 0.15,
-                });
-            }
+    visualizeStationaryCreep(creep) {
+        if (creep.memory.isStationary) {
+            creep.room.visual.rect(creep.pos.x - 0.55, creep.pos.y - 0.55, 1.1, 1.1, {
+                stroke: "green",
+                fill: "transparent",
+                opacity: 0.8,
+                strokeWidth: 0.15,
+            });
         }
     }
 

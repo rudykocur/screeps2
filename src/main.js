@@ -11,11 +11,11 @@ if(!('REACTIONS_REVERSE' in global)) {
     global.REACTIONS_REVERSE = utils.reverseReactions(REACTIONS);
 }
 
-global.PROFILER_ENABLED = true;
-// global.PROFILER_ENABLED = false;
+// global.PROFILER_ENABLED = true;
+global.PROFILER_ENABLED = false;
 
 const profiler = require('profiler');
-profiler.enable();
+// profiler.enable();
 
 module.exports = {
     loop: function() {

@@ -31,7 +31,7 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         if(_.sum(this.creep.carry)) {
-            return this.dropResourcesToStorage();
+            this.actions.unloadAllResources();
         }
 
         this.actions.gotoMeetingPoint();
@@ -146,21 +146,6 @@ class TransferMind extends mind.CreepMindBase {
         yield this.tryClaimJob(1, {
             type: 'refill-extensions'
         });
-    }
-
-    dropResourcesToStorage() {
-        if(this.storage.canDeposit(this.creep)) {
-            this.storage.deposit(this.creep);
-        }
-        else {
-            this.creep.moveTo(this.storage.target);
-        }
-    }
-
-    chillAtMeetingPoint() {
-        if(!this.creep.pos.isNearTo(this.roomMgr.meetingPoint)) {
-            this.creep.moveTo(this.roomMgr.meetingPoint);
-        }
     }
 
     /**

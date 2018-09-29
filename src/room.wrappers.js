@@ -11,6 +11,8 @@ class StructureWrapper extends utils.Executable {
         this.structureId = id;
 
         this._initMemory();
+
+        this.memory = Memory.structures[this.structureId];
     }
 
     _initMemory() {
@@ -21,10 +23,6 @@ class StructureWrapper extends utils.Executable {
         if(!(this.structureId in Memory.structures)) {
             Memory.structures[this.structureId] = {};
         }
-    }
-
-    get memory() {
-        return Memory.structures[this.structureId];
     }
 }
 

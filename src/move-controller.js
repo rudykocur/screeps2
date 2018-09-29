@@ -35,6 +35,8 @@ class CreepMoveController {
             this.exitStationary();
         }
 
+        this.attemptedToMove();
+
         return result;
     }
 
@@ -60,8 +62,20 @@ class CreepMoveController {
         return path;
     }
 
-    runPathCallback(pathCallback) {
-        return pathCallback().map(this.serializeStep).join(';');
+    runPathCallback(pathCallback, target) {
+        let used = Game.cpu.getUsed();
+        let path;
+
+        try {
+            path = pathCallback();
+            return path.map(this.serializeStep).join(';');
+        }
+        finally {
+            // console.log(Game.time, 'Path to', target, 'calculated (length ', path && path.length,') in', (Game.cpu.getUsed() - used));
+            if(path && Game.rooms[target.roomName]) {
+                Game.rooms[target.roomName].visual.poly(path, {stroke: 'red', strokeWidth: 0.3, lineStyle: 'dashed'});
+            }
+        }
     }
 
     /**
@@ -96,6 +110,10 @@ class CreepMoveController {
             return this.invalidatePath();
         }
 
+        if(this.pathMemory.blockCounter <= 2) {
+            this.attemptedToMove();
+        }
+
         this._updateCurrentStep(this.pathMemory);
 
         if(result === ERR_NOT_FOUND || result ===  ERR_INVALID_ARGS) {
@@ -113,7 +131,7 @@ class CreepMoveController {
     initPathMemory(target, pathCallback) {
         if(!this.pathMemory) {
             this.memory._moverPath = this.pathMemory = {
-                path: this.runPathCallback(pathCallback),
+                path: this.runPathCallback(pathCallback, target),
                 currentPos: this.creep.pos,
                 target: target ? target.serialize() : null,
                 blockCounter: 0,
@@ -141,14 +159,14 @@ class CreepMoveController {
     slicePathAfterMove(path) {
         if(path.length > 5) {
 
-                let idx = this.getIndexOnPath(path);
-                if(idx >= 0) {
-                    let mem = this.pathMemory.path;
-                    let sliceIdx = this.nthIndex(mem, ';', idx + 1);
-                    this.pathMemory.path = mem.substr(sliceIdx+1, mem.length);
-                }
-
+            let idx = this.getIndexOnPath(path);
+            if (idx >= 0) {
+                let mem = this.pathMemory.path;
+                let sliceIdx = this.nthIndex(mem, ';', idx + 1);
+                this.pathMemory.path = mem.substr(sliceIdx + 1, mem.length);
             }
+
+        }
     }
 
     getIndexOnPath(path) {
@@ -185,12 +203,16 @@ class CreepMoveController {
     }
 
     enterStationary() {
-        this.memory.isStationary = true;
+        this.memory.attemptedToMove = false;
         delete this.memory._moverPath;
     }
 
     exitStationary() {
-        this.memory.isStationary = false;
+        this.memory.attemptedToMove = true;
+    }
+
+    attemptedToMove() {
+        this.memory.attemptedToMove = true;
     }
 }
 profiler.registerClass(CreepMoveController, CreepMoveController.name);
