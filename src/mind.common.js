@@ -1,5 +1,6 @@
 const utils = require('utils');
 const actions = require('common-actions');
+const fsm = require('fsm');
 
 const profiler = require('profiler');
 
@@ -33,8 +34,13 @@ class CreepMindBase extends utils.Executable {
         this.creep = creep;
         creep.mind = this;
 
-        this.localState = this.creep.memory.localState;
-        this.globalState = this.creep.memory.globalState = (this.creep.memory.globalState || {});
+        if(!this.creep.memory.mindStateData) {
+            this.creep.memory.mindStateData = {}
+        }
+
+        /**
+         * @type {FiniteStateMachine}
+         */
         this._fsm = null;
 
         /**
@@ -43,12 +49,10 @@ class CreepMindBase extends utils.Executable {
         this.actions = new actions.CreepCommonActions(this.creep, roomManager);
     }
 
-    setStateMachine(fsm, initalState) {
-        this._fsm = fsm;
+    setStateMachine(fsmConfig, initalState) {
+        this._fsm = new fsm.FiniteStateMachine(fsmConfig, this.creep.memory.mindStateData, initalState);
 
-        if(!this.state){
-            this.enterState(initalState);
-        }
+        this._fsm.onStateChange = () => this.creep.mover.enterStationary();
     }
 
     update() {
@@ -60,50 +64,15 @@ class CreepMindBase extends utils.Executable {
             return
         }
 
-        if(this._fsm[this.state].onTick) {
-            this._fsm[this.state].onTick(this.localState);
-        }
-    }
-
-    get state() {
-        return this.creep.memory.state;
-    }
-    set state(value) {
-        this.creep.memory.state = value;
+        this._fsm.update();
     }
 
     enterState(name, localState) {
-        this.creep.memory.state = name;
-        this.creep.memory.localState = this.localState = (localState || {});
-
         if(!this._fsm) {
             return;
         }
 
-        if(this._fsm[name].onEnter) {
-            this._fsm[name].onEnter(this.localState);
-        }
-    }
-
-    getLocalTarget(targetKey, callback) {
-        if(!this.localState[targetKey]) {
-            let target = callback();
-            if(target) {
-                this.localState[targetKey] = target.id;
-            }
-        }
-
-        let target = this.localState[targetKey];
-
-        if(target) {
-            let result = Game.getObjectById(this.localState[targetKey]);
-            if(!result) {
-                delete this.localState[targetKey];
-            }
-            else {
-                return result;
-            }
-        }
+        this._fsm.enter(name, localState);
     }
 
     /**

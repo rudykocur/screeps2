@@ -4,6 +4,7 @@ const mover = require('move-controller');
 /**
  * @typedef {Creep} Creep
  * @property {CreepMoveController} mover
+ * @property {CreepMindBase} mind
  */
 
 module.exports = {
