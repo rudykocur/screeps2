@@ -34,13 +34,9 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
     }
 
     getEnergy() {
-        if(this.roomMgr.storage.isNear(this.creep)) {
-            this.roomMgr.storage.withdraw(this.creep);
-            this.fsm.enter(STATE.RESERVE);
-        }
-        else {
-            this.creep.mover.moveTo(this.roomMgr.storage.target);
-        }
+        this.actions.withdrawFromStorage(RESOURCE_ENERGY, {
+            onDone: () => this.fsm.enter(STATE.RESERVE)
+        });
     }
 
     reserveLink() {
@@ -54,7 +50,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
             }
         }
         else {
-            this.creep.mover.moveTo(this.workRoom.storage.link);
+            this.actions.moveTo(this.workRoom.storage.link);
         }
     }
 
