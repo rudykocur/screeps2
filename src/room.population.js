@@ -41,7 +41,7 @@ class RoomPopulation extends utils.Executable {
             else if (this.manager.getCreepCount(minds.available.harvester, {mineral: false}) < 1) {
                 this.spawnHarvester(spawn, true);
             }
-            else if(this.manager.getCreepCount(minds.available.transfer) < 2) {
+            else if(this.needTransfer()) {
                 this.spawnTransfer(spawn, true);
             }
             else if(this.manager.getCreepCount(minds.available.harvester, {mineral: false}) < 2) {
@@ -279,6 +279,23 @@ class RoomPopulation extends utils.Executable {
         }
 
         return this.manager.getCreepCount(minds.available.settler) < requiredSettlers;
+    }
+
+    needTransfer() {
+        /**
+         * @type {Array<CreepMindBase>}
+         */
+        let creeps = this.manager.getMinds(minds.available.transfer);
+
+        let aliveMinds = creeps.filter(mind => mind.creep.ticksToLive > 300);
+
+        if(aliveMinds.length === 0) {
+            return true;
+        }
+
+        if(creeps.length < 2) {
+            return true;
+        }
     }
 
     needHauler() {

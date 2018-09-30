@@ -31,7 +31,10 @@ class TransferMind extends mind.CreepMindBase {
         }
 
         if(_.sum(this.creep.carry)) {
-            this.actions.unloadAllResources();
+            this.actions.unloadAllResources({
+                storage: this.storage,
+            });
+            return;
         }
 
         this.actions.gotoMeetingPoint();

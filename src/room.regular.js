@@ -169,7 +169,7 @@ class RoomManager extends roombase.RoomBase {
                 this.room.controller.activateSafeMode();
 
                 console.log(this, 'Activating SAFE MODE!!!!');
-                Game.notify(this + ': ATTACK. SAFE MODE ACTIVATED. Creeps: ' + JSON.stringify(this.enemies));
+                Game.notify(this + ': ATTACK. SAFE MODE ACTIVATED');
 
 
             }
