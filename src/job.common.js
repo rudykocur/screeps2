@@ -96,7 +96,6 @@ class JobDTO {
     }
 
     merge(data) {
-
     }
 }
 

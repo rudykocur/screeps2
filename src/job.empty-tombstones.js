@@ -34,6 +34,7 @@ class EmptyTombstoneJobDTO extends job_common.JobDTO {
     }
 
     merge(data) {
+        super.merge(data);
         data.targetId = this.targetId;
         data.available = this.available;
     }

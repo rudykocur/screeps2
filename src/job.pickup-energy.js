@@ -89,6 +89,7 @@ class EnergyJobDTO extends job_common.JobDTO {
     }
 
     merge(data) {
+        super.merge(data);
         data.available = this.available;
     }
 }
