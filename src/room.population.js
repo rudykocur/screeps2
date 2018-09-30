@@ -62,7 +62,7 @@ class RoomPopulation extends utils.Executable {
             else if(this.manager.constructionSites.length > 0 && this.manager.getCreepCount(minds.available.builder) < 1) {
                 this.spawnBuilder(spawn);
             }
-            else if(this.manager.getAvgEnergyToPickup() > 1300 && this.getSpawnCooldown('transfer') > 200) {
+            else if(this.manager.getAvgEnergyToPickup() > 1300 && this.getSpawnCooldown('transfer', this.room) > 200) {
                 this.spawnTransfer(spawn);
             }
             else if(this.needUpgrader()) {
@@ -92,12 +92,9 @@ class RoomPopulation extends utils.Executable {
 
     /**
      * @param {RoomManager|RemoteRoomHandler|RoomSiege} targetRoom
-     * @param options
+     * @param {{memo,body,name}} options
      */
     spawn(targetRoom, options) {
-        if(this.spawningBlocked) {
-            return;
-        }
 
         let spawn = this.getFreeSpawn();
 
@@ -105,12 +102,32 @@ class RoomPopulation extends utils.Executable {
             return;
         }
 
-        options.memo.roomName = targetRoom.roomName;
+        return this._doSpawn(targetRoom, spawn, options.body, options.name, options.memo, false);
+    }
 
-        let name = 'NOT SPAWNED';
+    doSpawn(spawn, body, name, memo, blocking) {
+        return this._doSpawn(this.manager, spawn, body, name, memo, blocking);
+    }
 
-        let spawnTest = spawn.spawnCreep(options.body, 'TEST CREEP NAME', {
-            memory: options.memo,
+    /**
+     *
+     * @param {RoomManager|RemoteRoomHandler}targetRoom
+     * @param {StructureSpawn} spawn
+     * @param {Array} body
+     * @param {String} name
+     * @param {Object} memo
+     * @param blocking
+     * @private
+     */
+    _doSpawn(targetRoom, spawn, body, name, memo, blocking) {
+        if(this.spawningBlocked) {
+            return;
+        }
+
+        memo.roomName = targetRoom.roomName;
+
+        let spawnTest = spawn.spawnCreep(body, 'TEST CREEP NAME', {
+            memory: memo,
             energyStructures: this.energyStructures,
             dryRun: true,
         });
@@ -118,16 +135,19 @@ class RoomPopulation extends utils.Executable {
         let result = spawnTest;
 
         if(spawnTest === OK) {
-            name = this.manager.getCreepName(options.name);
+            name = this.manager.getCreepName(name);
 
-            result = spawn.spawnCreep(options.body, name, {
-                memory: options.memo,
+            result = spawn.spawnCreep(body, name, {
+                memory: memo,
                 energyStructures: this.energyStructures,
             });
         }
 
-        if(result != OK) {
-            if(result == ERR_NOT_ENOUGH_ENERGY) {
+        spawn.blocking = !!blocking;
+        this.spawningBlocked = !!blocking;
+
+        if(result !== OK) {
+            if(result === ERR_NOT_ENOUGH_ENERGY) {
                 this.notEnoughEnergy = true;
 
                 this.room.visual.circle(spawn.pos, {
@@ -135,54 +155,20 @@ class RoomPopulation extends utils.Executable {
                     stroke: "red",
                     strokeWidth: 0.2,
                     radius: 0.8,
-                    lineStyle: 'dashed',
+                    lineStyle: (this.manager === targetRoom ? undefined : 'dashed'),
                 });
                 return;
             }
-            this.err('Failed to spawn', name, '::', options.body, '::',result);
-        }
-        else {
-            this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
-            this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + options.memo.mind] = Game.time;
-
-            this.printSummarisedSpawn(targetRoom.getRoomTitle(), name, options.body);
-
-            return name;
-        }
-    }
-
-    doSpawn(spawn, body, name, memo, blocking) {
-        if(this.spawningBlocked) {
-            return;
-        }
-
-        name = this.manager.getCreepName(name);
-
-        memo.roomName = spawn.room.name;
-
-        let result = spawn.spawnCreep(body, name, {
-            memory: memo,
-            energyStructures: this.energyStructures,
-        });
-
-        spawn.blocking = !!blocking;
-        this.spawningBlocked = !!blocking;
-
-        if(result != OK) {
-            if(result == ERR_NOT_ENOUGH_ENERGY) {
-                this.notEnoughEnergy = true;
-
-                this.room.visual.circle(spawn.pos, {fill: "transparent", stroke: "red", strokeWidth: 0.2, radius: 0.8});
-                return;
-            }
             this.err('Failed to spawn', name, '::', body, '::',result);
         }
         else {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
-            this.room.memory.lastSpawnTick[memo.mind] = Game.time;
-            this.printSummarisedSpawn(this.manager.getRoomTitle(), name, body);
+            this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + memo.mind] = Game.time;
+            this.printSummarisedSpawn(targetRoom.getRoomTitle(), name, body);
+
+            return name;
         }
     }
 
@@ -194,8 +180,13 @@ class RoomPopulation extends utils.Executable {
         this.info('Creep', name, 'created. Target room:', targetRoom, 'cost:', cost, 'parts:', bodyStr);
     }
 
-    getSpawnCooldown(mindType) {
-        return (Game.time - this.room.memory.lastSpawnTick[mindType]) || 9999;
+    getSpawnCooldown(mindType, room) {
+        let spawnKey = mindType;
+        if(room) {
+            spawnKey = room.name+'-'+mindType;
+        }
+
+        return (Game.time - this.room.memory.lastSpawnTick[spawnKey]) || 9999;
     }
 
     needBuilders() {
@@ -255,7 +246,7 @@ class RoomPopulation extends utils.Executable {
             }
         }
 
-        if(this.getSpawnCooldown('upgrader') < 200) {
+        if(this.getSpawnCooldown('upgrader', this.room) < 200) {
             return false;
         }
 
@@ -285,9 +276,9 @@ class RoomPopulation extends utils.Executable {
         /**
          * @type {Array<CreepMindBase>}
          */
-        let creeps = this.manager.getMinds(minds.available.transfer);
+        let creeps = this.manager.getMinds(minds.available.transfer, {remoteHelper: false, hauler: false});
 
-        let aliveMinds = creeps.filter(mind => mind.creep.ticksToLive > 300);
+        let aliveMinds = creeps.filter(mind => mind.creep.ticksToLive > 400);
 
         if(aliveMinds.length === 0) {
             return true;
@@ -329,7 +320,7 @@ class RoomPopulation extends utils.Executable {
             return false;
         }
 
-        return this.manager.getEnergyInRemoteMines() > 5000;
+        return this.manager.getExpectedEnergyInRemoteMines() > 5000;
     }
 
     spawnHarvester(spawn, blocking) {

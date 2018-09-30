@@ -66,7 +66,7 @@ module.exports = {
             group: 'firefly',
             mainLocation: "Serenity",
             locations: ["Ariel", "Beaumonde", "Persephone", "Poseidon", "Haven", "Canton"],
-            names: ["Badger", "Katie", "Inara", "Jayne", "Nishka", "Higgins", "Simon", "River",
+            names: ["Badger", "Katie", "Inara", "Jayne", "Higgins", "Simon", "River",
                 "Malcolm", "Zoe", "Hoban", "Shepperd Books", "Saffron", "Rance Burgess", "Warwick Harrow",
                 "Stitch Hesian", "Fess Higgins", "Adelei Nishka", "Atherton Wing"],
         },

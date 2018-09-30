@@ -19,6 +19,10 @@ class JobHandlerBase extends utils.Loggable {
         this.roomMgr = this.creep.workRoom;
         this.workRoom = this.creep.workRoom;
         this.data = jobData;
+
+        /**
+         * @type {FiniteStateMachine}
+         */
         this.fsm = null;
 
         if(!this.creep.memory.jobStateData) {
@@ -31,7 +35,9 @@ class JobHandlerBase extends utils.Loggable {
     }
 
     configureFSM(initialState, config) {
-        this.fsm = new fsmModule.FiniteStateMachine(config, this.jobData.fsm, initialState)
+        this.fsm = new fsmModule.FiniteStateMachine(config, this.jobData.fsm, initialState);
+
+        this.fsm.onStateChange = () => this.creep.mover.enterStationary();
     }
 
     get state() {

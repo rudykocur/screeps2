@@ -1,6 +1,11 @@
 var _ = require('lodash');
 const mover = require('move-controller');
 
+/**
+ * @typedef {Creep} Creep
+ * @property {CreepMoveController} mover
+ */
+
 module.exports = {
     installPrototypes() {
 

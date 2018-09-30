@@ -148,8 +148,12 @@ class RoomManager extends roombase.RoomBase {
         return this.remote.handlers.map(handler => handler.room);
     }
 
-    getEnergyInRemoteMines() {
+    getExpectedEnergyInRemoteMines() {
         return _.sum(this.remote.handlers.map(handler => _.sum(handler.mines, 'expectedEnergy')));
+    }
+
+    getActualEnergyInRemoteMines() {
+        return _.sum(this.remote.handlers.map(handler => _.sum(handler.mines, 'storedEnergy')));
     }
 
     setSupporting(supportedRoom) {

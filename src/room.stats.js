@@ -6,7 +6,7 @@ const profiler = require('profiler');
 class RoomStats extends utils.Executable {
     /**
      *
-     * @param manager
+     * @param {RoomManager} manager
      * @param {LabManager} labs
      */
     constructor(manager, labs) {
@@ -44,7 +44,7 @@ class RoomStats extends utils.Executable {
 
         this.messages.push(`Room: ${this.manager.getRoomTitle()}`);
         this.messages.push(`Energy avg: ${this.manager.getAvgEnergyToPickup()}`);
-        this.messages.push(`Energy in remote mines: ${this.manager.getEnergyInRemoteMines()}`);
+        this.messages.push(`Energy in remote mines: ${this.manager.getActualEnergyInRemoteMines()} (${this.manager.getExpectedEnergyInRemoteMines()})`);
         this.messages.push(`Energy capacity: ${this.room.energyAvailable}/${this.room.energyCapacityAvailable}`);
 
         this._updateSpawnerEnergy();

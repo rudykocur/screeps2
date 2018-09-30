@@ -7,6 +7,8 @@ class FiniteStateMachine extends utils.Executable {
         this.config = config;
         this.memory = memory;
         this.initialState = initialState;
+
+        this.onStateChange = null;
     }
 
     get state() {
@@ -36,6 +38,10 @@ class FiniteStateMachine extends utils.Executable {
 
         if(this.config[name].onEnter) {
             this.config[name].onEnter(this.localState);
+        }
+
+        if(this.onStateChange) {
+            this.onStateChange();
         }
     }
 }

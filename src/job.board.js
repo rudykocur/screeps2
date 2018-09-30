@@ -34,6 +34,7 @@ class JobBoard extends utils.Executable {
         super();
 
         this.updateTimer = new utils.Timer();
+        this.generateTimer = new utils.Timer();
 
         if(!Memory.jobBoard) {
             Memory.jobBoard = {};
@@ -154,7 +155,9 @@ class JobBoard extends utils.Executable {
         this.updateTimer.start();
 
         _.each(jobModules, mod => {
+            this.generateTimer.start();
             let jobs = mod.generateJobs(manager) || [];
+            this.generateTimer.stop();
 
             jobs.forEach(job => {
                 this.generatedJobs[job.id] = job.id;

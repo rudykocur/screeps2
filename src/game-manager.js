@@ -132,7 +132,14 @@ class GameManager extends utils.Executable {
         });
     }
 
+    /**
+     * @param {Creep} creep
+     */
     visualizeStationaryCreep(creep) {
+        if(creep.spawning) {
+            return;
+        }
+
         if (creep.memory.isStationary) {
             creep.room.visual.rect(creep.pos.x - 0.55, creep.pos.y - 0.55, 1.1, 1.1, {
                 stroke: "green",
