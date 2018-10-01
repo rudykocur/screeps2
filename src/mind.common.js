@@ -31,6 +31,10 @@ class CreepMindBase extends utils.Executable {
         }
 
         this.room = this.roomMgr.room;
+
+        /**
+         * @type {Creep}
+         */
         this.creep = creep;
         creep.mind = this;
 

@@ -46,13 +46,11 @@ class BuilderMind extends mind.CreepMindBase {
 
         if(_.sum(this.creep.carry) < this.creep.carryCapacity) {
             if(this.workRoom.storage && this.actions.isEnoughStoredEnergy(500)) {
-                this.enterState(STATE_REFILL);
-                return;
+                return this.enterState(STATE_REFILL);
             }
 
             if(this.workRoom.data.droppedEnergy.length > 0 || this.workRoom.data.containers.length > 0) {
-                this.enterState(STATE_REFILL);
-                return;
+                return this.enterState(STATE_REFILL);
             }
         }
 
@@ -83,8 +81,7 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         if(!target) {
-            this.enterState(STATE_IDLE);
-            return;
+            return this.enterState(STATE_IDLE);
         }
 
         state.refillId = target.id;
@@ -156,14 +153,13 @@ class BuilderMind extends mind.CreepMindBase {
         else {
             site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
 
-            if(!site) {
+            if(!site && this.workRoom.controller.controller.my) {
                 site = this._pickRampartOrWall();
             }
         }
 
         if(!site) {
-            this.enterState(STATE_IDLE);
-            return;
+            return this.enterState(STATE_IDLE);
         }
 
         state.buildSiteId = site.id;

@@ -14,6 +14,7 @@ if(!('REACTIONS_REVERSE' in global)) {
 global.PROFILER_ENABLED = true;
 // global.PROFILER_ENABLED = false;
 
+require('profiler');
 const profiler = require('profiler.screeps');
 profiler.enable();
 

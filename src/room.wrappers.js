@@ -243,6 +243,11 @@ class LinkWrapper extends utils.Executable {
 }
 
 class ControllerWrapper extends StructureWrapper {
+    /**
+     * @param manager
+     * @param {StructureController} ctrl
+     * @param links
+     */
     constructor(manager, ctrl, links) {
         super(ctrl.id);
 

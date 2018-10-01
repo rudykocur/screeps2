@@ -76,6 +76,9 @@ class RoomManager extends roombase.RoomBase {
 
         this.threat = this._getThreatAssesment(this.enemies);
 
+        /**
+         * @type {ControllerWrapper}
+         */
         this.controller = this._getControllerWrapper();
 
         this.towers = this._getTowers(this.data.towers);
