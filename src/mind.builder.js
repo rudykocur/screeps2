@@ -120,18 +120,30 @@ class BuilderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(target instanceof Resource && (this.creep.pickup(target) === OK)) {
-            this.enterState(STATE_BUILD);
+        let result = this._doGetEnergy(target);
+
+        if(result === OK) {
+            return this.enterState(STATE_BUILD);
         }
-        else if (target instanceof Structure && (this.creep.withdraw(target, RESOURCE_ENERGY) === OK)) {
-            this.enterState(STATE_BUILD);
-        }
-        else {
+
+        if(result === ERR_NOT_IN_RANGE) {
             this.creep.mover.moveByPath(target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, target.pos, {
                     ignoreAllLairs: this.creep.workRoom.isSKRoom,
                 });
             })
+        }
+        else {
+            this.enterState(STATE_IDLE);
+        }
+    }
+
+    _doGetEnergy(target) {
+        if(target instanceof Resource) {
+            return this.creep.pickup(target);
+        }
+        else if (target instanceof Structure) {
+            return this.creep.withdraw(target, RESOURCE_ENERGY);
         }
     }
 
