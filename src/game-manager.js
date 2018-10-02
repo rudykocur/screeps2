@@ -7,6 +7,8 @@ const maps = require('maps');
 const utils_console = require('utils.console');
 const exchange = require('room.exchange');
 const procmgr = require('process.manager');
+const stats = require('utis.stats');
+const pathCache = require('pathCache');
 
 const profiler = require('profiler');
 
@@ -40,6 +42,8 @@ class GameManager extends utils.Executable {
     update() {
         this.initMemory();
 
+        let initTime = Game.cpu.getUsed().toFixed(2);
+
         global.tickCache = new TickCache();
 
         let jobBoard = new job_board.JobBoard();
@@ -62,6 +66,8 @@ class GameManager extends utils.Executable {
 
         this.updateRoomsCache();
 
+        utils.every(121, () => pathCache.cleanupCache());
+
         processManager.run();
 
         for(let creep of _.values(Game.creeps)) {
@@ -69,6 +75,10 @@ class GameManager extends utils.Executable {
 
             this.visualizeStationaryCreep(creep);
         }
+
+        let ss = stats.countStats(initTime, managers, jobBoard);
+
+        this.showPerfStats(ss);
     }
 
     initMemory() {
@@ -147,6 +157,23 @@ class GameManager extends utils.Executable {
                 opacity: 0.8,
                 strokeWidth: 0.15,
             });
+        }
+    }
+
+    showPerfStats(stats) {
+        let mindAvg = (stats['mind.total'] / stats['mind.totalCount']).toFixed(2);
+        let messages = [
+            `Tick: ${stats['cpu.getUsed']}: jobs=${stats['jobBoard.update']}, minds=${mindAvg}, ` +
+            `rooms=${stats['manager.total']}, init=${stats['initTime']}`,
+        ];
+
+        this.printDiagnostics(messages);
+    }
+
+    printDiagnostics(messages) {
+        let visual = new RoomVisual();
+        for(let i = 0; i < messages.length; i++){
+            visual.text(messages[i], 0, 48-i, {align: 'left', stroke: 'black'})
         }
     }
 

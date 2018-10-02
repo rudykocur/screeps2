@@ -1,6 +1,7 @@
 var _ = require('lodash');
 const utils = require('utils');
 const CachedData= require('utils.cache').CachedData;
+const pathCache = require('pathCache');
 
 const profiler = require('profiler');
 
@@ -214,6 +215,11 @@ module.exports = {
             ignoreAllLairs: false,
         });
 
+        let cachedPath = pathCache.getPath(from, to);
+        if(cachedPath) {
+            return cachedPath;
+        }
+
         let fromRoom = Game.rooms[from.roomName];
         if(fromRoom && from.roomName === to.roomName) {
             return getLocalPath(fromRoom, from, to);
@@ -352,6 +358,8 @@ module.exports = {
             let vis = new RoomVisual(step.roomName);
             vis.circle(step, {});
         }
+
+        pathCache.savePath(from, to, 1000, ret.path);
 
         return ret.path;
     },

@@ -45,12 +45,13 @@ function countTimers(objects) {
 }
 
 module.exports.countStats = function(initTime, managers, jobBoard) {
-    _.defaultsDeep(Memory, {stats: {mindsCount: {}, mindsTimes: {}}});
-    Memory.stats['username'] = utils.myUsername();
+    let result = {};
 
-    Memory.stats['cpu.getUsed'] = Game.cpu.getUsed();
-    Memory.stats['cpu.limit'] = Game.cpu.limit;
-    Memory.stats['cpu.bucket'] = Game.cpu.bucket;
+    result['username'] = utils.myUsername();
+
+    result['cpu.getUsed'] = Game.cpu.getUsed().toFixed(2);
+    result['cpu.limit'] = Game.cpu.limit;
+    result['cpu.bucket'] = Game.cpu.bucket;
 
     let toStat = managers.slice();
     for(let mgr of managers) {
@@ -68,16 +69,19 @@ module.exports.countStats = function(initTime, managers, jobBoard) {
     let managersTimes = countTimers(toStat);
     let mindCounts = _.countBy(minds, mind => mind && mind.constructor.name);
 
-    Memory.stats['mind.times'] = mindTimes;
-    Memory.stats['mind.total'] = _.sum(mindTimes);
-    Memory.stats['mind.count'] = mindCounts;
-    Memory.stats['mind.avgTimes'] = _.transform(mindTimes, (result, time, name) => {
+    result['mind.times'] = mindTimes;
+    result['mind.total'] = _.sum(mindTimes).toFixed(2);
+    result['mind.count'] = mindCounts;
+    result['mind.totalCount'] = minds.length;
+    result['mind.avgTimes'] = _.transform(mindTimes, (result, time, name) => {
         result[name] = time / mindCounts[name];
     });
 
-    Memory.stats['manager.times'] = managersTimes;
-    Memory.stats['manager.total'] = _.sum(managersTimes);
+    result['manager.times'] = managersTimes;
+    result['manager.total'] = _.sum(managersTimes).toFixed(2);
 
-    Memory.stats['jobBoard.update'] = jobBoard.updateTimer.usedTime;
-    Memory.stats['initTime'] = initTime;
+    result['jobBoard.update'] = jobBoard.updateTimer.usedTime.toFixed(2);
+    result['initTime'] = initTime;
+
+    return result;
 };

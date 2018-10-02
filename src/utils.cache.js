@@ -64,6 +64,23 @@ class CachedData {
         return [];
     }
 
+    getCachedPositions(key) {
+        if(!(key in this.cache)) {
+            return null;
+        }
+
+        let data = this.cache[key].data;
+        if(data) {
+            return data.split(';').map(val => RoomPosition.unserialize(val));
+        }
+
+        return null;
+    }
+
+    setCachedPositions(key, ttl, points) {
+        this._getOrSet(key, ttl, () => points, points => points.map(p => p.serialize()).join(';'));
+    }
+
     cachedCostMatrix(key, ttl, callback) {
         this._getOrSet(key, ttl, callback, obj => obj && obj.serialize().join(','));
         return PathFinder.CostMatrix.deserialize(this.cache[key].data.split(','));

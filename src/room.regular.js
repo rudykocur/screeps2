@@ -36,7 +36,9 @@ class RoomManager extends roombase.RoomBase {
 
         this.initalizeRoom();
 
-        this.remote = new remote_manager.RemoteRoomsManager(this);
+        this.timer.count(()=> {
+            this.remote = new remote_manager.RemoteRoomsManager(this);
+        });
     }
 
     initalizeRoom() {

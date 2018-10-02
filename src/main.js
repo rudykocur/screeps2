@@ -16,7 +16,7 @@ global.PROFILER_ENABLED = true;
 
 require('profiler');
 const profiler = require('profiler.screeps');
-profiler.enable();
+// profiler.enable();
 
 module.exports = {
     loop: function() {
