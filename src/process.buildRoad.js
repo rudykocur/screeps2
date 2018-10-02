@@ -34,6 +34,7 @@ class BuildRoad extends procbase.ProcessBase {
         let path = PathFinder.search(from, {pos: to, range: options.targetRange}, {
             plainCost: 2,
             swampCost: 5,
+            maxOps: 3000,
             roomCallback: (roomName) => {
                 let room = Game.rooms[roomName];
 

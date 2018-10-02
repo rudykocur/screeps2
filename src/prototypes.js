@@ -3,8 +3,14 @@ const mover = require('move-controller');
 
 /**
  * @typedef {Creep} Creep
+ * @property {Number} carryTotal Creep current carry
  * @property {CreepMoveController} mover
  * @property {CreepMindBase} mind
+ */
+
+/**
+ * @typedef {Room} Room
+ * @property {RoomManager} manager
  */
 
 module.exports = {

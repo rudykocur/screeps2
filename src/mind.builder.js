@@ -104,7 +104,7 @@ class BuilderMind extends mind.CreepMindBase {
         if(this.workRoom && this.workRoom.storage && this.workRoom.storage.getStoredEnergy() > 3000) {
             let minAmount = 600;
             if(this.workRoom.room.storage) {
-                minAmount = 1500;
+                minAmount = 3000;
             }
 
             if(this.actions.isEnoughStoredEnergy(minAmount)) {

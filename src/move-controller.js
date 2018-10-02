@@ -72,7 +72,7 @@ class CreepMoveController {
         }
         finally {
             // console.log(Game.time, 'Path to', target, 'calculated (length ', path && path.length,') in', (Game.cpu.getUsed() - used));
-            if(path && Game.rooms[target.roomName]) {
+            if(path && target && Game.rooms[target.roomName]) {
                 Game.rooms[target.roomName].visual.poly(path, {stroke: 'red', strokeWidth: 0.3, lineStyle: 'dashed'});
             }
         }

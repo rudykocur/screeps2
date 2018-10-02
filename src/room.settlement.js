@@ -22,6 +22,10 @@ class RoomSettlement extends base.RoomBase {
             this.spawnAndGo();
         }
         else {
+            if(!this.room) {
+                return;
+            }
+
             if(!this.room.controller.my) {
                 if(this.getCreepCount(minds.available.claimer) === 0) {
                     let name = this.spawn(minds.available.claimer, {claim: true}, true);

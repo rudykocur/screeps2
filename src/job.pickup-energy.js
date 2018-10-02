@@ -72,7 +72,9 @@ class PickupEnergyJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.data.droppedEnergy.map((energy) => {
+        let minesEnergy = [].concat(...Object.values(manager.mines).map(mine => mine.energy));
+
+        return _.without(manager.data.droppedEnergy, ...minesEnergy).map((energy) => {
             return new EnergyJobDTO(energy);
         });
     }

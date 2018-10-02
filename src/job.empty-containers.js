@@ -74,9 +74,10 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
      * @return {Array<JobDTO>}
      */
     static generateJobs(manager) {
-        return manager.data.containers.map(/**StructureContainer*/cnt=> {
-            return new EmptyContainerJobDTO(cnt);
-        });
+        let minesContainers = Object.values(manager.mines).map(/**MiningSite*/mine => mine.container);
+
+        return _.without(manager.data.containers, ...minesContainers)
+            .map(/**StructureContainer*/cnt=> new EmptyContainerJobDTO(cnt));
     }
 }
 

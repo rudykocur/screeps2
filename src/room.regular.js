@@ -60,6 +60,9 @@ class RoomManager extends roombase.RoomBase {
 
         this.mineral = this._getMineral();
 
+        /**
+         * @type {Object<string, MiningSite>}
+         */
         this.sources = this.mines = this._getMiningSites(this.data.sources, this.data.containers,
             this.data.links, this.storage, this.data.droppedEnergy);
 

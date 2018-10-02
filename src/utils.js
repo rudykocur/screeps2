@@ -281,12 +281,15 @@ module.exports = {
     },
 
     debugPath(path) {
-        for(let step of path) {
+        let rooms = _.unique(path.map(pos => pos.roomName));
 
-            let visual = new RoomVisual(step.roomName);
-            visual.circle(step, {
-                fill: "yellow",
-                opacity: 0.3
+        for(let roomName of rooms) {
+            let points = path.filter(pos => pos.roomName === roomName);
+
+            new RoomVisual(roomName).poly(points, {
+                lineStyle: 'dashed',
+                stroke: 'yellow',
+                strokeWidth: 0.2,
             });
         }
     },
@@ -306,5 +309,14 @@ module.exports = {
             return 31;
         }
         return parseInt(name.replace('W', 'A').replace('E', 'B').replace('N', 'C').replace('S', 'D'), 16)
+    },
+
+    parseRoomName(roomName) {
+        let matches = roomName.match(/\w(\d+)\w(\d+)/);
+
+        return {
+            x: matches[1],
+            y: matches[2],
+        }
     }
 };

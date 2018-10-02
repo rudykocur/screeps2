@@ -97,6 +97,15 @@ class CachedRoom {
         return !this.cache.owner  && !this.cache.reservedBy;
     }
 
+    isSKRoom() {
+        let coords = utils.parseRoomName(this.name);
+
+        let x = coords.x % 10;
+        let y = coords.y % 10;
+
+        return x >= 4 && x <= 6 && y >= 4 && y <= 6;
+    }
+
     get controller() {
         return this.getStructure(STRUCTURE_CONTROLLER);
     }
@@ -153,6 +162,30 @@ function getLocalPath(room, from, to) {
     });
 
     return path.map(step => RoomPosition.asPosition(step, room.name));
+}
+
+function canMoveInRoom(roomName, options, myUser) {
+    let cache = getRoomCache(roomName);
+    if(cache) {
+
+        if(!options.allowSKRooms && cache.isSKRoom()) {
+            return false;
+        }
+
+        if(cache.isFree()) {
+            return true;
+        }
+
+        if(cache.ownedBy(myUser)) {
+            return true;
+        }
+
+        if(options.avoidHostile && cache.isOwned()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 getRoomCache = profiler.registerFN(getRoomCache, 'maps.getRoomCache');
@@ -213,6 +246,9 @@ module.exports = {
             roomCallback: null,
             ignoreLairs: [],
             ignoreAllLairs: false,
+            allowSKRooms: true,
+            debug: false,
+            visualize: true,
         });
 
         let cachedPath = pathCache.getPath(from, to);
@@ -235,50 +271,18 @@ module.exports = {
 
         let myUser = utils.myUsername();
 
-        let allowedRooms = { [ from.roomName ]: true };
-
-        let roomRoute = Game.map.findRoute(from.roomName, to.roomName, {
-            routeCallback(roomName) {
-                let cache = getRoomCache(roomName);
-                if(cache) {
-
-                    if(cache.isFree()) {
-                        return 1;
-                    }
-
-                    if(cache.ownedBy(myUser)) {
-                        return 1;
-                    }
-
-                    if(options.avoidHostile && cache.isOwned()) {
-                        return Infinity;
-                    }
-                }
-
-                return 1;
-            }
-        });
-
         sw.lap('roomRoute');
-
-        if(roomRoute === ERR_NO_PATH) {
-            console.log('WARNING - no route', from, 'to', to);
-            return null;
-        }
-
-        roomRoute.forEach(function(info) {
-            allowedRooms[info.room] = true;
-        });
-
         // let maxOps = Math.max(100, (Game.cpu.limit - Game.cpu.getUsed()) * 1000);
 
         let ret = PathFinder.search(from, to, {
-            maxOps: Math.min(_.size(allowedRooms) * 1500, 10000),
+            maxOps: 10000,
+            // maxOps: Math.min(_.size(allowedRooms) * 1500, 10000),
             // maxOps: Math.min(_.size(allowedRooms) * 1500, 10000, maxOps),
             plainCost: 2,
             swampCost:5,
             roomCallback(roomName) {
-                if (allowedRooms[roomName] === undefined) {
+
+                if(!canMoveInRoom(roomName, options, myUser)) {
                     return false;
                 }
 
@@ -293,6 +297,9 @@ module.exports = {
                         for(let struct of cache.find(FIND_STRUCTURES)) {
                             if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
                                 result.set(struct.pos.x, struct.pos.y, 0xff);
+                            }
+                            else if(struct.structureType === STRUCTURE_RAMPART && !struct.my && !struct.isPublic) {
+                                // result.set(struct.pos.x, struct.pos.y, 0xff);
                             }
                             else if (struct.structureType === STRUCTURE_ROAD) {
                                 result.set(struct.pos.x, struct.pos.y, 1);
@@ -351,12 +358,15 @@ module.exports = {
         // sw.print();
 
         if(ret.incomplete && ret.path.length < 5) {
-            console.log("INCOMPLETE PATH !!!", from, 'to', to, JSON.stringify(options), '::', JSON.stringify(ret), '::', Math.min(_.size(allowedRooms) * 1500, 10000));
+            console.log("INCOMPLETE PATH !!!", from, 'to', to, JSON.stringify(options), '::', JSON.stringify(ret));
         }
 
-        for(let step of ret.path) {
-            let vis = new RoomVisual(step.roomName);
-            vis.circle(step, {});
+        if(options.visualize) {
+
+            for (let step of ret.path) {
+                let vis = new RoomVisual(step.roomName);
+                vis.circle(step, {});
+            }
         }
 
         pathCache.savePath(from, to, 1000, ret.path);

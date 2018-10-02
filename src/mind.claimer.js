@@ -29,9 +29,10 @@ class ClaimerMind extends mind.CreepMindBase {
             this.creep.mover.moveByPath(() => {
                 let cache = maps.getRoomCache(this.creep.memory.roomName);
                 let cacheCtrl = cache.controller;
-                maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
 
-                return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
+                return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos, {
+                    allowSKRooms: false,
+                });
             });
             return;
         }

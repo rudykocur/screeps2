@@ -412,6 +412,12 @@ class MiningSite extends StructureWrapper {
             return _.first(this.source.pos.findInRange(links, 2));
         });
 
+        this.hasMiner = data.cachedValue('hasMiner', 30, () => {
+            return this.source.pos.findInRange(FIND_MY_CREEPS, 1, {
+                filter: creep => creep.memory.mind === 'harvester'
+            }).length > 0;
+        });
+
         this.energy = this.source.pos.findInRange(allDroppedEnergy, 1);
         this.energyAmount = _.sum(this.energy.map(/**Resource*/r => r.amount));
 
@@ -428,7 +434,7 @@ class MiningSite extends StructureWrapper {
             this.expectedEnergyIncrease = 0;
         }
 
-        this.expectedEnergy = this.storedEnergy + this.expectedEnergyIncrease;
+        this.expectedEnergy = this.storedEnergy + (this.hasMiner ? this.expectedEnergyIncrease : 0);
     }
 
     toString() {

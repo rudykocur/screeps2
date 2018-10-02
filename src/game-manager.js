@@ -79,6 +79,8 @@ class GameManager extends utils.Executable {
         let ss = stats.countStats(initTime, managers, jobBoard);
 
         this.showPerfStats(ss);
+
+        // this.foo();
     }
 
     initMemory() {
@@ -175,6 +177,39 @@ class GameManager extends utils.Executable {
         for(let i = 0; i < messages.length; i++){
             visual.text(messages[i], 0, 48-i, {align: 'left', stroke: 'black'})
         }
+    }
+
+    foo() {
+        // let from = new RoomPosition(10, 17, 'W31N14');
+        // // let from = new RoomPosition(9, 16, 'W31N14');
+        // // let to = new RoomPosition(20, 12, 'W32N13');
+        // let to = new RoomPosition(40, 41, 'W32N13');
+
+        // let from = new RoomPosition(10, 17, 'W31N14');
+        // let to = new RoomPosition(40, 41, 'W32N13');
+        // let to = new RoomPosition(10, 17, 'W31N14');
+        // let from = new RoomPosition(40, 41, 'W32N13');
+        let from = Game.getObjectById('5baf8c3a82ec0133f5f47e33').pos;
+        // let to = Game.getObjectById('59f1a0b382100e1594f370de').pos;
+        let to = new RoomPosition(25, 25, 'W36N19');
+
+        // let rooms = Game.map.findRoute(from.roomName, to.roomName);
+        //
+
+        let options = _.defaults({}, {
+            targetRange: 0,
+            cutoffRange: 0,
+            withTarget: false,
+        });
+
+        let path = maps.getMultiRoomPath(from, to, {
+            debug:true,
+            visualize: false,
+            allowSKRooms: false
+        });
+
+        utils.debugPath(path);
+
     }
 
     toString() {

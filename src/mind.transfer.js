@@ -68,17 +68,13 @@ class TransferMind extends mind.CreepMindBase {
         let availableCapacity = this.creep.carryCapacity - _.sum(this.creep.carry);
 
         if(this.creep.memory.remoteHelper) {
+
             yield this.tryClaimJob(availableCapacity, {
-                type: 'energy-pickup',
+                type: 'empty-mine',
                 minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50),
                 rooms: this.homeRoomMgr.getRemoteRooms()
             });
 
-            yield this.tryClaimJob(availableCapacity, {
-                type: 'empty-container',
-                minAmount: Math.max(availableCapacity / 2, 50),
-                rooms: this.homeRoomMgr.getRemoteRooms()
-            });
         }
 
         if(this.creep.memory.hauler) {
@@ -128,6 +124,11 @@ class TransferMind extends mind.CreepMindBase {
 
         yield this.tryClaimJob(1, {
             type: 'empty-storage-link'
+        });
+
+        yield this.tryClaimJob(availableCapacity, {
+            type: 'empty-mine',
+            minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50)
         });
 
         yield this.tryClaimJob(availableCapacity, {
