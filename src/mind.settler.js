@@ -38,7 +38,9 @@ class SettlerMind extends mind.CreepMindBase {
             let cache = maps.getRoomCache(this.creep.memory.roomName);
             let cacheCtrl = cache.controller;
 
-            return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos);
+            return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos, {
+                allowSKRooms: false,
+            });
         });
     }
 

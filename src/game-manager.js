@@ -188,8 +188,8 @@ class GameManager extends utils.Executable {
         // let from = new RoomPosition(10, 17, 'W31N14');
         // let to = new RoomPosition(40, 41, 'W32N13');
         // let to = new RoomPosition(10, 17, 'W31N14');
-        // let from = new RoomPosition(40, 41, 'W32N13');
-        let from = Game.getObjectById('5baf8c3a82ec0133f5f47e33').pos;
+        let from = new RoomPosition(3, 40, 'W34N18');
+        // let from = Game.getObjectById('5baf8c3a82ec0133f5f47e33').pos;
         // let to = Game.getObjectById('59f1a0b382100e1594f370de').pos;
         let to = new RoomPosition(25, 25, 'W36N19');
 
