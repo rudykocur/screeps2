@@ -86,6 +86,14 @@ class EnergyJobDTO extends job_common.JobDTO {
         super('energy-'+resource.id, JOB_TYPE, minds.available.transfer, resource.amount);
 
         this.targetId = resource.id;
+
+        let vis = resource.room.visual;
+        vis.circle(resource.pos, {
+            radius: 0.9,
+            fill: 'transparent',
+            stroke: '#F0F',
+            opacity: 0.8
+        });
     }
 
     merge(data) {

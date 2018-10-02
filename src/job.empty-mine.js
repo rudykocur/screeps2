@@ -80,7 +80,8 @@ class EmptyMiningSiteJobDTO extends job_common.JobDTO {
         site.energy.forEach(res => vis.circle(res.pos, {
             fill: 'transparent',
             stroke: 'red',
-            radius: 1,
+            radius: 1.1,
+            lineStyle: 'dashed',
             opacity: 0.8
         }))
     }

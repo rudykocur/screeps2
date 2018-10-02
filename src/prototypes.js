@@ -114,6 +114,10 @@ module.exports = {
         }
 
         if(!RoomPosition.unserialize) {
+            /**
+             * @param posStr
+             * @return {RoomPosition}
+             */
             RoomPosition.unserialize = function(posStr) {
                 let parts = posStr.split(',');
                 // let obj = {x: parts[0], y: parts[1], roomName: parts[2]};

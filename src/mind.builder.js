@@ -10,6 +10,15 @@ const STATE_REFILL = 'refill';
 const STATE_BUILD = 'build';
 const STATE_IDLE = 'idle';
 
+
+/**
+ * @typedef {Object} BuilderMindBuildState
+ * @property {String} buildSiteId
+ * @property {String} structureType
+ * @property {String} posStr
+ * @property {Boolean} [outOfRoad]
+ */
+
 class BuilderMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
@@ -145,6 +154,9 @@ class BuilderMind extends mind.CreepMindBase {
     }
 
     pickBuildTarget(state) {
+        /**
+         * @type {ConstructionSite}
+         */
         let site;
 
         if(this.creep.memory.reinforcer) {
@@ -163,6 +175,8 @@ class BuilderMind extends mind.CreepMindBase {
         }
 
         state.buildSiteId = site.id;
+        state.structureType = site.structureType;
+        state.posStr = site.pos.serialize();
     }
 
     _pickRampartOrWall() {
@@ -172,8 +186,23 @@ class BuilderMind extends mind.CreepMindBase {
         return _.min([rampart, wall], s => s.hits);
     }
 
+    /**
+     * @param {BuilderMindBuildState} state
+     */
     doBuild(state) {
         let target = Game.getObjectById(state.buildSiteId);
+
+        if(!target && state.structureType === STRUCTURE_RAMPART) {
+            let pos = RoomPosition.unserialize(state.posStr);
+
+            let target = _.first(pos.lookFor(LOOK_STRUCTURES).filter(s => s.structureType === STRUCTURE_RAMPART));
+
+            if(target) {
+                this.debug('Rampart constructed. Switching to it');
+                state.buildSiteId = target.id;
+                return;
+            }
+        }
 
         if(!target) {
             this.enterState(STATE_IDLE);

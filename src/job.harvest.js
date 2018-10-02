@@ -78,7 +78,7 @@ class HarvestJobHandler extends job_common.JobHandlerBase {
             }
         }
 
-        this.creep.moveTo(pos);
+        this.actions.moveTo(pos);
         // this.creep.mover.moveByPath(() =>{
         //     return maps.getMultiRoomPath(this.creep.pos, pos, {
         //         ignoreLairs: [state.lairId],

@@ -149,6 +149,15 @@ class RoomDefenceAnalysis extends procbase.ProcessBase {
                 room.visual.line(startPos, errPos, {color: "red", width: 0.3});
                 room.visual.circle(errPos, {opacity: 1, fill: "red", radius: 0.5});
             }
+
+            for(let border of this.state.borders) {
+                room.visual.circle(RoomPosition.unserialize(border), {
+                    radius: 0.6,
+                    opacity: 1,
+                    fill: 'red'
+                });
+            }
+
             return;
         }
 

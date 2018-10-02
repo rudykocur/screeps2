@@ -88,6 +88,14 @@ class EmptyContainerJobDTO extends job_common.JobDTO {
         super('container-'+container.id, JOB_TYPE, minds.available.transfer, _.sum(container.store));
 
         this.targetId = container.id;
+
+        let vis = container.room.visual;
+        vis.circle(container.pos, {
+            radius: 0.7,
+            fill: 'transparent',
+            stroke: 'yellow',
+            opacity: 0.8
+        });
     }
 
     merge(data) {

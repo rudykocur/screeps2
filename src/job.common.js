@@ -31,6 +31,9 @@ class JobHandlerBase extends utils.Loggable {
 
         this.creep.memory.jobStateData.fsm = this.creep.memory.jobStateData.fsm || {};
 
+        /**
+         * @type {CreepCommonActions}
+         */
         this.actions = new actions.CreepCommonActions(this.creep, this.workRoom);
     }
 
