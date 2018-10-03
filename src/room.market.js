@@ -2,6 +2,7 @@ var _ = require('lodash');
 const utils = require('utils');
 
 const profiler = require('profiler');
+const procTrade = require('process.buyMarketResources');
 
 class RoomMarket extends utils.Executable {
     /**
@@ -38,7 +39,7 @@ class RoomMarket extends utils.Executable {
         }
 
         this.importResources(exchange);
-        utils.everyMod(100, this.terminal.id, this.buyBaseMinerals.bind(this));
+        utils.every(10, this.buyBaseMinerals.bind(this));
     }
 
     /**
@@ -63,70 +64,8 @@ class RoomMarket extends utils.Executable {
             return;
         }
 
-        let orders = this.getMarketOrders(toBuy);
-
-        let bought = false;
-
-        _.each(toBuy, (maxPrice, resource) => {
-
-            if(bought) {
-                return;
-            }
-
-            let order = this.findBuyOrder(orders, resource);
-
-            if(!order) {
-                return;
-            }
-
-            let toBuy = Math.max(1000, this.resourcesMinimum - (this.terminal.store[resource] || 0));
-            toBuy = Math.min(toBuy, order.remainingAmount);
-
-            let result = Game.market.deal(order.id, toBuy, this.manager.roomName);
-
-            if(result === OK) {
-                this.important(`Bought ${toBuy} of ${resource} for ${order.price}. Energy cost: ${order.energyCost}`);
-                bought = true;
-            }
-        });
-    }
-
-    findBuyOrder(orders, resource) {
-        for(let order of orders) {
-            if(order.resourceType !== resource) {
-                continue;
-            }
-
-            return order;
-        }
-    }
-
-    getMarketOrders(maxPrices) {
-        let orders = Game.market.getAllOrders({type: ORDER_SELL});
-        orders.forEach(order => {
-            if(!order.roomName) {
-                return;
-            }
-
-            order.distance = Game.map.getRoomLinearDistance(this.manager.roomName, order.roomName, true);
-            order.energyCost = Game.market.calcTransactionCost(
-                order.remainingAmount, this.manager.roomName, order.roomName)
-        });
-        orders = orders.filter(o => {
-            if(!o.energyCost || o.energyCost > 15000) {
-                return false;
-            }
-
-            if(o.distance > 60) {
-                return false;
-            }
-
-            return o.price < maxPrices[o.resourceType];
-        });
-
-        orders = _.sortBy(orders, ['price', 'remainingAmount']);
-
-        return orders;
+        this.manager.processManager.addProcess(procTrade.BuyMarketResources.factory(
+            this.manager, toBuy));
     }
 
     getResourcesTotal() {
@@ -212,7 +151,7 @@ class RoomMarket extends utils.Executable {
     }
 
     toString() {
-        return `[RoomMarket for ${this.manager.roomName}]`;
+        return `[RoomMarket for ${this.manager.getRoomTitle()}]`;
     }
 }
 
