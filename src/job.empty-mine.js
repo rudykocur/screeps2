@@ -80,7 +80,7 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
                     this.fsm.enter(STATE_DEPOSIT);
                 }
                 else {
-                    this.unclaim();
+                    this.completeJob();
                 }
             }
         }

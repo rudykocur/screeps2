@@ -316,7 +316,9 @@ class RoomPopulation extends utils.Executable {
     needRemoteTransferers() {
         let count = this.manager.getCreepCount(minds.available.transfer, {remoteHelper: true});
 
-        if(count > 3) {
+        let maxCount = (this.manager.room.controller.level > 6) ? 6 : 3;
+
+        if(count > maxCount) {
             return false;
         }
 

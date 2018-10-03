@@ -336,6 +336,10 @@ module.exports = {
                         if(creep.room == room && creep.memory.isStationary){
                             matrix.set(creep.pos.x, creep.pos.y, 0xFF);
                         }
+                    });
+
+                    room.find(FIND_HOSTILE_CREEPS).forEach(creep => {
+                        matrix.set(creep.pos.x, creep.pos.y, 0xFF);
                     })
                 }
 
