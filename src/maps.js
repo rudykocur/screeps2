@@ -24,7 +24,7 @@ function getCacheForRoom(roomName) {
 
     Memory.cache.rooms[roomName] = (Memory.cache.rooms[roomName] || {});
 
-    _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, data: [], lastUpdateTime: 0});
+    _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, dataJSON: '[]', lastUpdateTime: 0});
 
     return Memory.cache.rooms[roomName];
 }
@@ -42,6 +42,7 @@ function scanRoom(room) {
     room.find(FIND_STRUCTURES).forEach(struct => {
         let obj = _.pick(struct, ['pos', 'structureType', 'id']);
         obj._typeId = FIND_STRUCTURES;
+        obj.pos = obj.pos.serialize();
         result.push(obj);
     });
 
@@ -49,6 +50,7 @@ function scanRoom(room) {
         room.find(type).forEach(src => {
             let obj = _.pick(src, ['pos', 'id']);
             obj._typeId = type;
+            obj.pos = obj.pos.serialize();
             result.push(obj);
         });
     }
@@ -66,7 +68,10 @@ class CachedRoom {
     initCache(roomName) {
         this.cache = getCacheForRoom(roomName);
         this.cache.lastAccessTime = Game.time;
-        this.cache.data = this.cache.data.map(hydrate);
+
+        this.cacheData = JSON.parse(this.cache.dataJSON);
+        this.cacheData = this.cacheData.map(hydrate);
+
     }
 
     get cacheAge() {
@@ -115,11 +120,11 @@ class CachedRoom {
 }
 
     find(type) {
-        return this.cache.data.filter(obj => obj._typeId === type || (!obj._typeId && type === FIND_STRUCTURES));
+        return this.cacheData.filter(obj => obj._typeId === type || (!obj._typeId && type === FIND_STRUCTURES));
     }
 
     findStructures(structType) {
-        return _.filter(this.cache.data, 'structureType', structType);
+        return _.filter(this.cacheData, 'structureType', structType);
     }
 
     getStructure(structType) {
@@ -136,7 +141,8 @@ function getRoomCache(roomName) {
             return null;
         }
 
-        return new CachedRoom(roomName);
+        let res = new CachedRoom(roomName);
+        return res;
     });
 }
 
@@ -388,7 +394,7 @@ module.exports = {
 
             let usedStart = Game.cpu.getUsed();
 
-            cache.data = scanRoom(room);
+            cache.dataJSON = JSON.stringify(scanRoom(room));
             cache.owner = null;
             cache.reservedBy = null;
             cache.safeModeUntill = null;
