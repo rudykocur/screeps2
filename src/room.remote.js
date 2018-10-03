@@ -301,7 +301,7 @@ class RemoteRoomHandler extends RoomBase {
     }
 
     toString() {
-        return '[Remote handler for ' + (this.getRoomTitle() || this.room || this.roomName) + ']';
+        return '[Remote handler for ' + (this.getRoomLink() || this.room || this.roomName) + ']';
     }
 }
 

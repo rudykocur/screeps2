@@ -86,7 +86,7 @@ module.exports = {
         // },
         {
             group: 'witcher',
-            mainLocation: "Kaer Moren",
+            mainLocation: "Kaer Morhen",
             locations: ["Wyzima", "Cintra", "Vengerberg", "Mahakam", "Kaedwen", "Kovir", "Redania",
                 "Temeria", "Aedirn", "Nilfgaard", "Skellige", "Novigrad"],
             names: ["Geralt", "Yen", "Ciri", "Triss", "Regis", "Cahir", "Jaskier", "Płotka",

@@ -336,7 +336,7 @@ class RoomManager extends roombase.RoomBase {
     }
 
     toString() {
-        return `[RoomManager ${this.getRoomTitle() || this.room}]`;
+        return `[RoomManager ${this.getRoomLink() || this.room}]`;
     }
 }
 

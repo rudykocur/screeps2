@@ -14,6 +14,12 @@ const STATE = {
 };
 
 class LabManager extends utils.Executable {
+
+    /**
+     * @param {RoomManager} manager
+     * @param labs
+     * @param terminal
+     */
     constructor(manager, labs, terminal) {
         super();
 
@@ -521,7 +527,7 @@ class LabManager extends utils.Executable {
     }
 
     toString() {
-        return `[LabManager for ${this.manager.roomName}]`;
+        return `[LabManager for ${this.manager.getRoomLink()}]`;
     }
 }
 

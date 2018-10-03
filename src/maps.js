@@ -412,7 +412,7 @@ module.exports = {
             let usedEnd = Game.cpu.getUsed();
 
             if(ttl > 0) {
-                let roomName = room.manager && room.manager.getRoomTitle() || room.name;
+                let roomName = room.manager && room.manager.getRoomLink() || utils.getRoomLink(room.name, room.name);
                 console.log(`[maps] updated cache for room ${roomName} in ${usedEnd - usedStart}`);
             }
         }

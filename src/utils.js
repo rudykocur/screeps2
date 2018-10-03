@@ -318,5 +318,9 @@ module.exports = {
             x: matches[1],
             y: matches[2],
         }
+    },
+
+    getRoomLink(roomName, linkTitle) {
+        return `<a href="#!/room/${Game.shard.name}/${roomName}" style="color: inherit; font-style: italic; ;">${linkTitle}</a>`
     }
 };

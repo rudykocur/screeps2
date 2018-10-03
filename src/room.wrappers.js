@@ -54,7 +54,7 @@ class FlagStorageWrapper extends utils.Executable {
     }
 
     deposit(fromCreep) {
-        fromCreep.drop(RESOURCE_ENERGY);
+        return fromCreep.drop(RESOURCE_ENERGY);
     }
 
     withdraw(toCreep) {

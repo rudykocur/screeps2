@@ -47,6 +47,14 @@ class RoomBase extends utils.Executable {
         return this.name;
     }
 
+    getRoomLink() {
+        if(!this.name) {
+            return null;
+        }
+
+        return utils.getRoomLink(this.roomName, this.name);
+    }
+
     get memory() {
         return Memory.rooms[this.roomName];
     }

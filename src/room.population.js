@@ -166,7 +166,7 @@ class RoomPopulation extends utils.Executable {
             this.freeSpawns.splice(this.freeSpawns.indexOf(spawn), 1);
 
             this.room.memory.lastSpawnTick[targetRoom.roomName + '-' + memo.mind] = Game.time;
-            this.printSummarisedSpawn(targetRoom.getRoomTitle(), name, body);
+            this.printSummarisedSpawn(targetRoom.getRoomLink(), name, body);
 
             return name;
         }
@@ -379,7 +379,7 @@ class RoomPopulation extends utils.Executable {
     }
 
     toString() {
-        return `[Spawner ${this.manager.getRoomTitle()}]`;
+        return `[Spawner ${this.manager.getRoomLink()}]`;
     }
 }
 

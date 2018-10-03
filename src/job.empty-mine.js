@@ -91,7 +91,7 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
 
     unloadInit() {
         if(this.creep.carryTotal === 0) {
-            return this.fsm.enter(STATE_GOTO_MINE);
+            return this.fsm.fastSwitch(STATE_GOTO_MINE);
         }
 
         this._doUnload(() => this.fsm.enter(STATE_GOTO_MINE))

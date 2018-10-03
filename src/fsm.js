@@ -44,6 +44,11 @@ class FiniteStateMachine extends utils.Executable {
             this.onStateChange();
         }
     }
+
+    fastSwitch(name, localState) {
+        this.enter(name, localState);
+        this.update();
+    }
 }
 
 module.exports = {

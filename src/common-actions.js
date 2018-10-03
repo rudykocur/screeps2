@@ -221,6 +221,19 @@ class CreepCommonActions {
             return false;
         }
 
+        /**
+         * @type {Room}
+         */
+        let room = Game.rooms[pos.roomName];
+        if(room) {
+            let mgr = room.manager;
+            if(mgr && mgr.storage) {
+                if(mgr.storage.target.pos.isEqualTo(pos)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 

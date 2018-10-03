@@ -151,7 +151,7 @@ class RoomMarket extends utils.Executable {
     }
 
     toString() {
-        return `[RoomMarket for ${this.manager.getRoomTitle()}]`;
+        return `[RoomMarket for ${this.manager.getRoomLink()}]`;
     }
 }
 

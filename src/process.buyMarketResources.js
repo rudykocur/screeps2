@@ -105,7 +105,7 @@ class BuyMarketResources extends procbase.ProcessBase {
     }
 
     toString() {
-        return `[BuyMarketResources for ${this.manager.getRoomTitle()}]`;
+        return `[BuyMarketResources for ${this.manager.getRoomLink()}]`;
     }
 }
 
