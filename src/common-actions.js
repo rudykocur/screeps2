@@ -6,6 +6,10 @@ const profiler = require('profiler');
 
 class CreepCommonActions {
 
+    /**
+     * @param creep
+     * @param {RoomManager} roomManager
+     */
     constructor(creep, roomManager) {
         // this.mind = mind;
         this.creep = creep;
@@ -29,6 +33,7 @@ class CreepCommonActions {
      * @param [options.onTick] callback invoked in each tick
      * @param [options.storage] Storage where unload to
      * @param [options.pathOptions] Additional options passed to path calculation
+     * @param [options.pathCallback] Additional options passed to path calculation
      */
     unloadAllResources(options) {
         options = _.defaults(options || {}, {
@@ -36,16 +41,15 @@ class CreepCommonActions {
             onTick: () => {},
             storage: this.workRoom.storage,
             pathOptions: {},
+            pathCallback: () =>{
+                return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, options.pathOptions);
+            }
         });
 
         options.onTick();
 
-
-
         if(!options.storage.canDeposit(this.creep)) {
-            this.creep.mover.moveByPath(options.storage.target, () =>{
-                return maps.getMultiRoomPath(this.creep.pos, options.storage.target.pos, options.pathOptions);
-            })
+            this.creep.mover.moveByPath(options.storage.target, options.pathCallback)
         }
         else {
             let toUnload = _.keys(_.pick(this.creep.carry, amount => amount > 0));
@@ -156,6 +160,15 @@ class CreepCommonActions {
         if(!this.creep.pos.isEqualTo(target)) {
             this.creep.mover.moveByPath(target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, target.pos || target, {});
+            })
+        }
+    }
+
+    moveByPath(source, target) {
+        if(!this.creep.pos.isEqualTo(target)) {
+
+            this.creep.mover.moveByPath(target, () =>{
+                return this.workRoom.routeManager.findPath(source, target, this.creep.pos);
             })
         }
     }

@@ -33,6 +33,18 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
 
     }
 
+    /**
+     * @return {StorageWrapper}
+     */
+    getStorage() {
+        if(this.roomMgr.isRemote) {
+            return this.roomMgr.parent.storage;
+        }
+        else {
+            return this.roomMgr.storage;
+        }
+    }
+
     getEnergy() {
         /**
          * @type {Room}
@@ -59,7 +71,7 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
             return this.fsm.enter(STATE_DEPOSIT);
         }
 
-        if(mine.source.pos.inRangeTo(this.creep, 2)) {
+        if(mine.source.pos.inRangeTo(this.creep, 5)) {
             let target = _.first(mine.energy);
 
             if(target) {
@@ -85,7 +97,12 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
             }
         }
         else {
-            this.actions.moveTo(mine.container || mine.source);
+            if(mine.container) {
+                this.actions.moveByPath(this.getStorage().target, mine.travelToObject);
+            }
+            else {
+                this.actions.moveTo(mine.source);
+            }
         }
     }
 
@@ -102,22 +119,23 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
     }
 
     _doUnload(onDone) {
-        let storage;
-
-        if(this.roomMgr.isRemote) {
-            storage = this.roomMgr.parent.storage;
-        }
-        else {
-            storage = this.roomMgr.storage;
-        }
+        let storage = this.getStorage();
 
         this.actions.unloadAllResources({
             storage: storage,
             onTick: () => this.actions.repairRoad(),
             onDone: onDone,
-            pathOptions: {
-                ignoreAllLairs: this.creep.workRoom.isSKRoom,
-            }
+
+            pathCallback: () => {
+                let jobRoom = Game.rooms[this.data.roomName];
+                if(!jobRoom) {
+                    return maps.getMultiRoomPath(this.creep.pos, storage.target.pos);
+                }
+                let jobRoomManager = jobRoom.manager;
+                let mine = jobRoomManager.mines[this.data.targetId];
+
+                return this.roomMgr.routeManager.findPath(mine.travelToObject, storage.target, this.creep.pos);
+            },
         });
     }
 
@@ -141,22 +159,6 @@ class EmptyMiningSiteJobDTO extends job_common.JobDTO {
 
         this.targetId = site.structureId;
         this.roomName = site.source.pos.roomName;
-
-        let vis = site.source.room.visual;
-        vis.circle(site.source.pos, {
-                radius: 2,
-                fill: 'transparent',
-                stroke: site.hasMiner ? 'blue' : 'red',
-                opacity: 0.8
-            });
-
-        site.energy.forEach(res => vis.circle(res.pos, {
-            fill: 'transparent',
-            stroke: 'red',
-            radius: 1.1,
-            lineStyle: 'dashed',
-            opacity: 0.8
-        }))
     }
 
     merge(data) {

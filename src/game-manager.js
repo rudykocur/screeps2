@@ -8,7 +8,7 @@ const utils_console = require('utils.console');
 const exchange = require('room.exchange');
 const procmgr = require('process.manager');
 const stats = require('utis.stats');
-const pathCache = require('pathCache');
+const router = require('route.manager');
 
 const profiler = require('profiler');
 
@@ -42,12 +42,15 @@ class GameManager extends utils.Executable {
     update() {
         this.initMemory();
 
+        maps.pathTimer.reset();
+
         let initTime = Game.cpu.getUsed().toFixed(2);
 
         global.tickCache = new TickCache();
 
         let jobBoard = new job_board.JobBoard();
         let processManager = new procmgr.ProcessManager();
+        let routeManager = new router.RouteManager();
 
         for(let creep of _.values(Game.creeps)) {
             creep.memory.attemptedToMove = false;
@@ -56,7 +59,7 @@ class GameManager extends utils.Executable {
         this.cleanupCreeps(jobBoard);
         this.fillTickCache(tickCache);
 
-        let managers = this.runRoomManagers(jobBoard, processManager);
+        let managers = this.runRoomManagers(jobBoard, processManager, routeManager);
 
         this.runMinds(managers);
 
@@ -65,8 +68,6 @@ class GameManager extends utils.Executable {
         utils_console.installConsoleFunctions(global);
 
         this.updateRoomsCache();
-
-        utils.every(121, () => pathCache.cleanupCache());
 
         processManager.run();
 
@@ -78,9 +79,20 @@ class GameManager extends utils.Executable {
 
         let ss = stats.countStats(initTime, managers, jobBoard);
 
-        this.showPerfStats(ss);
+
 
         // this.foo();
+
+        // routeManager.registerRoute(Game.getObjectById('5bb5bf263aba4a6c79cd8377'),
+        //     Game.getObjectById('5bb5f8efde5656770081e26a'));
+
+        // routeManager.findPath(Game.flags['Flag88'],
+        //     Game.getObjectById('5bb883375862ef199a13b92c'), Game.flags['FAKEPOS'].pos, true);
+
+        // routeManager.findPath(Game.getObjectById('5bb208d5dd1bc83d07acd8a1'),
+        //     Game.getObjectById('5bb1d51f05ce520fc1a6fa4f'), Game.flags['FAKEPOS'].pos, true);
+
+        this.showPerfStats(ss, maps.pathTimer);
     }
 
     initMemory() {
@@ -123,8 +135,8 @@ class GameManager extends utils.Executable {
         });
     }
 
-    runRoomManagers(jobBoard, processManager) {
-        let managers = rooms.getHandlers(jobBoard, processManager);
+    runRoomManagers(jobBoard, processManager, routeManager) {
+        let managers = rooms.getHandlers(jobBoard, processManager, routeManager);
 
         let exch = new exchange.InterRoomExchange(managers);
         exch.run();
@@ -162,11 +174,12 @@ class GameManager extends utils.Executable {
         }
     }
 
-    showPerfStats(stats) {
+    showPerfStats(stats, timer) {
         let mindAvg = (stats['mind.total'] / stats['mind.totalCount']).toFixed(2);
         let messages = [
             `Tick: ${stats['cpu.getUsed']}: jobs=${stats['jobBoard.update']}, minds=${mindAvg}, ` +
             `rooms=${stats['manager.total']}, init=${stats['initTime']}`,
+            `Path timer: ${timer}`,
         ];
 
         this.printDiagnostics(messages);

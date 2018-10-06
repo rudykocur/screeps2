@@ -393,6 +393,8 @@ class MiningSite extends StructureWrapper {
         this.storage = storage;
 
         this.initWrapper(containers, links, allDroppedEnergy);
+
+        this.visualize(this.source.room.visual);
     }
 
     initWrapper(containers, links, allDroppedEnergy) {
@@ -435,6 +437,39 @@ class MiningSite extends StructureWrapper {
         }
 
         this.expectedEnergy = this.storedEnergy + (this.hasMiner ? this.expectedEnergyIncrease : 0);
+
+        this.travelToObject = this.container || this.source;
+    }
+
+
+    /**
+     * @param {RoomManager|RemoteRoomHandler} manager
+     */
+    update(manager) {
+        if(manager.routeManager) {
+            manager.routeManager.registerRoute((manager.parent || manager).storage.target, this.travelToObject);
+        }
+    }
+
+    /**
+     * @param {RoomVisual} visual
+     */
+    visualize(visual) {
+
+        visual.circle(this.source.pos, {
+                radius: 2,
+                fill: 'transparent',
+                stroke: this.hasMiner ? (this.link ? 'green':'blue') : 'red',
+                opacity: 0.8
+            });
+
+        this.energy.forEach(res => visual.circle(res.pos, {
+            fill: 'transparent',
+            stroke: 'red',
+            radius: 1.1,
+            lineStyle: 'dashed',
+            opacity: 0.8
+        }))
     }
 
     toString() {

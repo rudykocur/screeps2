@@ -52,7 +52,7 @@ function setRoomsNames(managers) {
 
 
 module.exports = {
-    getHandlers(jobBoard, procMgr) {
+    getHandlers(jobBoard, procMgr, routeManager) {
         let managers = [];
         _.each(Game.rooms, room => {
             if(!room.controller || !room.controller.my) {
@@ -63,7 +63,7 @@ module.exports = {
                 return;
             }
 
-            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard, procMgr)), room);
+            safeCtor(() => managers.push(new roomTypes.regular(room, jobBoard, procMgr, routeManager)), room);
         });
 
         setRoomsNames(managers);

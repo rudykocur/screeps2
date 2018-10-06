@@ -123,7 +123,11 @@ class TowerMind extends utils.Executable {
         let target = Game.getObjectById(this.fsm.localState.healId);
 
         if(!target || target.hits == target.hitsMax) {
-            this.fsm.enter(STATE_IDLE);
+            return this.fsm.enter(STATE_IDLE);
+        }
+
+        if(target.pos.roomName !== this.roomMgr.room.name) {
+            return this.fsm.enter(STATE_IDLE);
         }
 
         this.tower.heal(target);

@@ -30,6 +30,7 @@ class RemoteRoomHandler extends RoomBase {
 
         this.parent = parentManager;
         this.jobManager = parentManager.jobManager;
+        this.routeManager = parentManager.routeManager;
 
         this.isRemote = true;
 
@@ -44,9 +45,13 @@ class RemoteRoomHandler extends RoomBase {
         this.stopwatch.lap('init');
 
         this.enemies = [];
+        this.structuresToUpdate = [];
 
         if(this.room) {
             this.room.manager = this;
+
+            this.flags = _.filter(Game.flags, 'pos.roomName', this.roomName);
+
             this.controller = new wrappers.ControllerWrapper(this, this.room.controller);
 
             this.stopwatch.lap('controller');
@@ -79,6 +84,8 @@ class RemoteRoomHandler extends RoomBase {
                 });
 
             this.stopwatch.lap('hostile structrues');
+
+            this.structuresToUpdate.push(...Object.values(this.mines));
         }
 
         this.threat = new threat.ThreatAssesment(this.enemies);
@@ -187,6 +194,10 @@ class RemoteRoomHandler extends RoomBase {
             this.timer.stop();
 
             this.jobManager.run(this);
+
+            this.structuresToUpdate.forEach(struct => {
+                struct.run(this);
+            });
         }
 
         // for(let mind of this.minds) {

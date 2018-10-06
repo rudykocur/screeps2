@@ -24,14 +24,16 @@ class RoomManager extends roombase.RoomBase {
      * @param {Room} room
      * @param {JobBoard} jobManager
      * @param {ProcessManager} procMgr
+     * @param {RouteManager} routeManager
      */
-    constructor(room, jobManager, procMgr) {
+    constructor(room, jobManager, procMgr, routeManager) {
         super(room.name);
 
         this.initMemory();
 
         this.jobManager = jobManager;
         this.processManager = procMgr;
+        this.routeManager = routeManager;
         this.isSupporting = false;
 
         this.initalizeRoom();
@@ -106,6 +108,10 @@ class RoomManager extends roombase.RoomBase {
         if(!this.room.storage && !storageFlag) {
             this.err('No storage flag! (blue/blue)');
         }
+
+        this.structuresToUpdate = [this.storage];
+        this.structuresToUpdate.push(...Object.values(this.links));
+        this.structuresToUpdate.push(...Object.values(this.mines));
     }
 
     initMemory() {
@@ -198,11 +204,10 @@ class RoomManager extends roombase.RoomBase {
         this.timer.count(()=> {
             this.market.run(exchange);
             this.architect.run();
-            this.storage.run();
-            this.links.forEach(link => {
-                link.run();
-            });
 
+            this.structuresToUpdate.forEach(struct => {
+                struct.run(this);
+            });
 
             this.stats.run();
         });

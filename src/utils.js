@@ -10,6 +10,7 @@ class Timer {
 
     start() {
         this.usedTimeStart = Game.cpu.getUsed();
+        return this;
     }
 
     count(callback) {
@@ -21,12 +22,27 @@ class Timer {
     stop() {
         this.counts += 1;
         this.usedTime += Game.cpu.getUsed() - this.usedTimeStart;
+
+        return this.usedTime;
     }
 }
 
 class NamedTimer {
-    constructor() {
+    constructor(names) {
         this.timers = {};
+        this.defaultTimers = names;
+
+        if(names) {
+            names.forEach(name => this.timers[name] = new Timer())
+        }
+    }
+
+    reset() {
+        this.timers = {};
+
+        if(this.defaultTimers) {
+            this.defaultTimers.forEach(name => this.timers[name] = new Timer())
+        }
     }
 
     start(name) {
@@ -34,10 +50,13 @@ class NamedTimer {
             this.timers[name] = new Timer();
         }
         this.timers[name].start();
+
+        return this;
     }
 
     stop(name) {
         this.timers[name].stop();
+        return this;
     }
 
     toString() {
