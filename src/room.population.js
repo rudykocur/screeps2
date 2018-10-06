@@ -246,7 +246,13 @@ class RoomPopulation extends utils.Executable {
             }
         }
 
-        if(this.getSpawnCooldown('upgrader', this.room) < 200) {
+        let spawnCooldown = 200;
+
+        if(!this.manager.room.storage && this.manager.storage.getStoredEnergy() > 5000) {
+            spawnCooldown = 40;
+        }
+
+        if(this.getSpawnCooldown('upgrader', this.room) < spawnCooldown) {
             return false;
         }
 
