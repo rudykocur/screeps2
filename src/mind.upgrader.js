@@ -88,7 +88,7 @@ class UpgraderMind extends mind.CreepMindBase {
     }
 
     doUpgrade() {
-        let point = this.workRoom.controller.getStandingPosition();
+        let point = this.workRoom.controller.getStandingPosition(this.creep);
 
         let target = this.room.controller;
 

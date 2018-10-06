@@ -60,7 +60,7 @@ class DefenderMind extends mind.CreepMindBase {
                 }
             }
 
-            let pos = this.workRoom.controller.getStandingPosition();
+            let pos = this.workRoom.controller.getStandingPosition(this.creep);
 
             if(!this.creep.pos.isEqualTo(pos)) {
                 this.creep.mover.moveTo(pos);

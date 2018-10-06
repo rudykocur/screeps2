@@ -254,11 +254,26 @@ class ControllerWrapper extends StructureWrapper {
         this.controller = ctrl;
         this.manager = manager;
 
+        this.reservedPoints = {};
+
         this.initWrapper(manager, links);
+    }
+
+    loadReservedPoints() {
+        this.reservedPoints = {};
+        _.each(this.memory.reservations, (data, pointStr) => {
+            this.reservedPoints[data.creepId] = RoomPosition.unserialize(pointStr);
+        });
     }
 
     initWrapper(manager, links) {
         let data = new cache.CachedData(this.memory);
+
+        if(!('reservations' in this.memory)) {
+            this.memory.reservations = {};
+        }
+
+        this.loadReservedPoints();
 
         let pos = this.controller.pos;
 
@@ -300,6 +315,8 @@ class ControllerWrapper extends StructureWrapper {
             return withoutRoads.concat(nearRoad);
         });
 
+        this.freePoints = this.points.filter(point => !(point.serialize() in this.memory.reservations));
+
         this.points.slice(-10).forEach((point, i) => {
             this.manager.room.visual.circle(point);
             this.manager.room.visual.text(""+i, point, {color: 'white', stroke: 'black', font: 0.8});
@@ -330,8 +347,32 @@ class ControllerWrapper extends StructureWrapper {
         return this.link.energyCapacity - this.link.energy;
     }
 
-    getStandingPosition() {
-        return this.points.pop();
+    /**
+     * @param {Creep} creep
+     */
+    getStandingPosition(creep) {
+        let point;
+
+        if(creep.id in this.reservedPoints) {
+            point = this.reservedPoints[creep.id];
+        }
+        else {
+            point = this.freePoints.pop();
+        }
+
+        this.memory.reservations[point.serialize()] = {
+            creepId: creep.id,
+            expiration: Game.time + 2,
+        };
+
+        return point;
+    }
+
+    update() {
+        this.memory.reservations = _.omit(this.memory.reservations, (data) => data.expiration < Game.time);
+
+        this.loadReservedPoints();
+
     }
 }
 

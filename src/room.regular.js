@@ -109,7 +109,7 @@ class RoomManager extends roombase.RoomBase {
             this.err('No storage flag! (blue/blue)');
         }
 
-        this.structuresToUpdate = [this.storage];
+        this.structuresToUpdate = [this.storage, this.controller];
         this.structuresToUpdate.push(...Object.values(this.links));
         this.structuresToUpdate.push(...Object.values(this.mines));
     }

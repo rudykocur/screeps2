@@ -30,7 +30,7 @@ function countTimers(objects) {
             return;
         }
 
-        let time = obj.timer.usedTime;
+        let time = obj.timer._usedTime;
         let mind = obj.constructor.name;
 
         if(!times[mind]) {
