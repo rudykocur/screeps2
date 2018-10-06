@@ -31,6 +31,11 @@ function damageMapForTower(towerPos) {
         });
     }
 
+    result.push({
+        damage: 600,
+        pos: towerPos,
+    });
+
     return result;
 }
 
@@ -140,34 +145,46 @@ module.exports = {
         utils.debugPath(path.path);
     },
 
-    debugFun3() {
-        let roomName = 'W37N58';
-        // let roomName = 'W35N59';
-        let towers = maps.getRoomCache(roomName).findStructures(STRUCTURE_TOWER);
+    debugFun3(roomName) {
+        let timer = new utils.Timer().start();
 
-        let matrix = {};
+        let data = maps.getRoomCache(roomName);
+        let towers = data.findStructures(STRUCTURE_TOWER);
+
+        let matrixes = [];
 
         for(let tower of towers) {
             let dmgMap = damageMapForTower(tower.pos);
 
+            let towerMatrix = new utils.DataMatrix();
+            matrixes.push(towerMatrix);
+
             for(let dmg of dmgMap) {
-                let key = `${dmg.pos.x}-${dmg.pos.y}`;
-                matrix[key] = dmg.damage + (matrix[key] || 0);
+                towerMatrix.set(dmg.pos.x, dmg.pos.y, dmg.damage);
             }
+
+            utils.iterRoomPoints((x, y) => {
+                towerMatrix.set(x, y, towerMatrix.get(x, y) || 150);
+            });
         }
+
+        let finalMatrix = new utils.DataMatrix();
+
+        utils.iterRoomPoints((x, y) => {
+            let totalDmg = 0;
+            for(let matrix of matrixes) {
+                totalDmg += matrix.get(x, y);
+            }
+
+            finalMatrix.set(x, y, totalDmg);
+        });
 
         let visual = new RoomVisual(roomName);
 
-        for(let x = 0; x < 50; x++) {
-            for(let y = 0; y < 50; y++) {
-                let dmg = matrix[x+'-'+y];
+        utils.iterRoomPoints((x, y) => {
+            visual.text(finalMatrix.get(x, y), x, y, {font: 0.3});
+        });
 
-                if(!dmg) {
-                    dmg = 150 * towers.length;
-                }
-
-                visual.text(dmg, x, y, {font: 0.3});
-            }
-        }
+        console.log('DebugFun3 done in', timer.stop());
     },
 };

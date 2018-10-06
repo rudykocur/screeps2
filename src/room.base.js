@@ -48,11 +48,7 @@ class RoomBase extends utils.Executable {
     }
 
     getRoomLink() {
-        if(!this.name) {
-            return null;
-        }
-
-        return utils.getRoomLink(this.roomName, this.name);
+        return utils.getRoomLink(this.roomName, this.name || this.roomName);
     }
 
     get memory() {
@@ -84,8 +80,49 @@ class RoomBase extends utils.Executable {
     }
 }
 
+
+class RemotelySupportedRoom extends RoomBase {
+    constructor(roomName, regularRooms) {
+        super(roomName);
+
+        this.managers = regularRooms;
+    }
+
+    setSupportedManagersRange(maxRange) {
+        this.managers = this.managers
+            .filter(mgr => Game.map.getRoomLinearDistance(mgr.roomName, this.roomName) <= maxRange);
+    }
+
+    getSpawner(nearest) {
+        let managers = _.sortBy(this.managers, mgr => Game.map.getRoomLinearDistance(mgr.roomName, this.roomName));
+        managers = managers.filter(m => m.room.controller.level > 3);
+
+        for(let mgr of managers) {
+            let spawn = mgr.spawner.getFreeSpawn();
+
+            if (spawn) {
+                return mgr;
+            }
+
+            if(nearest) {
+                break;
+            }
+        }
+    }
+
+    spawn(mind, options, nearest) {
+        let manager = this.getSpawner(nearest);
+
+        if(manager) {
+            return manager.spawner.spawn(this, mind.getSpawnParams(manager, options));
+
+        }
+    }
+}
+
 profiler.registerClass(RoomBase, RoomBase.name);
+profiler.registerClass(RemotelySupportedRoom, RemotelySupportedRoom.name);
 
 module.exports = {
-    RoomBase
+    RoomBase, RemotelySupportedRoom
 };

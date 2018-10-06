@@ -67,6 +67,13 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
+    isRoomScout(flag) {
+        return flag.color === COLOR_WHITE && flag.secondaryColor === COLOR_GREY;
+    },
+
+    /**
+     * @param {Flag} flag
+     */
     isIdleRoom(flag) {
         return flag.color === COLOR_PURPLE && flag.secondaryColor === COLOR_WHITE;
     },

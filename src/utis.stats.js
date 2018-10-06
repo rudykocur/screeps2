@@ -80,8 +80,8 @@ module.exports.countStats = function(initTime, managers, jobBoard) {
     result['manager.times'] = managersTimes;
     result['manager.total'] = _.sum(managersTimes).toFixed(2);
 
-    result['jobBoard.update'] = jobBoard.updateTimer.usedTime.toFixed(2);
-    result['jobBoard.find'] = jobBoard.findTimer.usedTime.toFixed(2);
+    result['jobBoard.update'] = jobBoard.updateTimer.usedTime;
+    result['jobBoard.find'] = jobBoard.findTimer.usedTime;
     result['jobBoard.findCount'] = jobBoard.findTimer.counts;
     result['initTime'] = initTime;
 

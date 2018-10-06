@@ -3,9 +3,14 @@ const profiler = require('profiler');
 
 class Timer {
     constructor() {
-        this.usedTime = 0;
+        this._usedTime = 0;
         this.usedTimeStart = 0;
         this.counts = 0;
+    }
+
+    get usedTime() {
+        // return this._usedTime;
+        return Number(this._usedTime).toFixed(2);
     }
 
     start() {
@@ -21,7 +26,7 @@ class Timer {
 
     stop() {
         this.counts += 1;
-        this.usedTime += Game.cpu.getUsed() - this.usedTimeStart;
+        this._usedTime += Game.cpu.getUsed() - this.usedTimeStart;
 
         return this.usedTime;
     }
@@ -63,8 +68,8 @@ class NamedTimer {
         let times = [];
         let total = 0;
         _.each(this.timers, (timer, name) => {
-            total += timer.usedTime;
-            times.push(`${name} (x${timer.counts})=${timer.usedTime.toFixed(2)}`);
+            total += timer._usedTime;
+            times.push(`${name} (x${timer.counts})=${timer.usedTime}`);
         });
         return `TOTAL: ${total.toFixed(2)}; `+times.join(', ');
     }
@@ -160,10 +165,42 @@ class Executable extends Loggable{
     }
 }
 
+let DataMatrix = function() {
+    this._bits = new Uint16Array(2500);
+};
+
+DataMatrix.prototype.set = function(xx, yy, val) {
+    xx = xx|0;
+    yy = yy|0;
+    this._bits[xx * 50 + yy] = Math.min(Math.max(0, val), 32767);
+};
+
+DataMatrix.prototype.get = function(xx, yy) {
+    xx = xx|0;
+    yy = yy|0;
+    return this._bits[xx * 50 + yy];
+};
+
+DataMatrix.prototype.clone = function() {
+    let newMatrix = new DataMatrix;
+    newMatrix._bits = new Uint16Array(this._bits);
+    return newMatrix;
+};
+
+DataMatrix.prototype.serialize = function() {
+    return Array.prototype.slice.apply(new Uint32Array(this._bits.buffer));
+};
+
+DataMatrix.deserialize = function(data) {
+    let instance = Object.create(DataMatrix.prototype);
+    instance._bits = new Uint16Array(new Uint32Array(data).buffer);
+    return instance;
+};
+
 profiler.registerClass(Executable, Executable.name);
 
 module.exports = {
-    Executable, Timer, NamedTimer, Stopwatch, Loggable,
+    Executable, Timer, NamedTimer, Stopwatch, Loggable, DataMatrix,
 
     throttle(ticks, callback) {
         return () => {
@@ -171,7 +208,6 @@ module.exports = {
                 callback();
             }
         }
-
     },
 
     every(ticks, callback) {
@@ -242,6 +278,14 @@ module.exports = {
         }
 
         return result;
+    },
+
+    iterRoomPoints: function(callback) {
+        for(let x = 0; x < 50; x++) {
+            for(let y = 0; y < 50; y++) {
+                callback(x, y);
+            }
+        }
     },
 
     /**

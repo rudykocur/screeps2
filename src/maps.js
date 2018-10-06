@@ -134,6 +134,11 @@ class CachedRoom {
         return `[CachedRoom ${this.name}]`;
     }
 }
+
+/**
+ * @param roomName
+ * @return {CachedRoom}
+ */
 function getRoomCache(roomName) {
     return tickCache.get('maps-roomCache-'+roomName, () => {
         if(!hasCacheForRoom(roomName)) {
@@ -318,6 +323,10 @@ generateCostMatrix = profiler.registerFN(generateCostMatrix, 'maps.generateCostM
 
 
 module.exports = {
+
+    /**
+     * @return {CachedRoom}
+     */
     getRoomCache,
 
     pathTimer,
@@ -447,7 +456,7 @@ module.exports = {
 
         if(currentTTL > ttl) {
 
-            let usedStart = Game.cpu.getUsed();
+            let timer = new utils.Timer().start();
 
             cache.dataJSON = JSON.stringify(scanRoom(room));
             cache.owner = null;
@@ -464,11 +473,9 @@ module.exports = {
 
             cache.lastUpdateTime = Game.time + utils.roomNameToInt(room.name) % 21;
 
-            let usedEnd = Game.cpu.getUsed();
-
             if(ttl > 0) {
                 let roomName = room.manager && room.manager.getRoomLink() || utils.getRoomLink(room.name, room.name);
-                console.log(`[maps] updated cache for room ${roomName} in ${usedEnd - usedStart}`);
+                console.log(`[maps] updated cache for room ${roomName} in ${timer.stop()}`);
             }
         }
     }
