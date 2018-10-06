@@ -35,12 +35,17 @@ class JobBoard extends utils.Executable {
 
         this.updateTimer = new utils.Timer();
         this.generateTimer = new utils.Timer();
+        this.findTimer = new utils.Timer();
 
         if(!Memory.jobBoard) {
             Memory.jobBoard = {};
         }
 
         this.generatedJobs = {};
+
+        this.findTimer.count(() => {
+
+        });
     }
 
     get memory() {
@@ -71,39 +76,43 @@ class JobBoard extends utils.Executable {
 
         // console.log('INCOMING SEARCH', JSON.stringify(options));
 
-        return _.sortByOrder(_.filter(this.memory, jobData => {
-            if(jobData.deleted) {
-                return false;
-            }
+        this.findTimer.start();
+        try {
+            return _.sortByOrder(_.filter(this.memory, jobData => {
+                if (jobData.deleted) {
+                    return false;
+                }
 
-            // console.log('Searching 1: ', jobData.id, options.room.name, jobData.room)
-            if(options.room && options.room != jobData.room) {
-                return false;
-            }
+                if (options.room && options.room != jobData.room) {
+                    return false;
+                }
 
-            if(options.rooms && options.rooms.length > 0 && options.rooms.indexOf(jobData.room) < 0) {
-                return false;
-            }
+                if (options.rooms && options.rooms.length > 0 && options.rooms.indexOf(jobData.room) < 0) {
+                    return false;
+                }
 
-            if(options.mind && options.mind != jobData.mind) {
-                return false;
-            }
+                if (options.mind && options.mind != jobData.mind) {
+                    return false;
+                }
 
-            if(options.type && options.type != jobData.type) {
-                return false;
-            }
+                if (options.type && options.type != jobData.type) {
+                    return false;
+                }
 
-            // console.log('Searching: ', jobData.id, jobData.available - _.sum(jobData.claims), options.minAmount);
-            if(jobData.available - _.sum(jobData.claims) < options.minAmount) {
-                return false;
-            }
+                if (jobData.available - _.sum(jobData.claims) < options.minAmount) {
+                    return false;
+                }
 
-            if(options.filter && !options.filter(jobData)) {
-                return false;
-            }
+                if (options.filter && !options.filter(jobData)) {
+                    return false;
+                }
 
-            return true;
-        }), ['available'], ['desc']);
+                return true;
+            }), ['available'], ['desc']);
+        }
+        finally {
+            this.findTimer.stop();
+        }
     }
 
     claim(creep, jobData, claimAmount) {

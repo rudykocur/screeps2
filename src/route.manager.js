@@ -117,6 +117,11 @@ class RouteManager extends utils.Loggable {
 
         let stepsInCurrentRoom = allRouteSteps.filter(step => currentPos.roomName === step.roomName);
 
+        if(stepsInCurrentRoom.length === 0) {
+            this.warn('Creep in room where this path does not cross', currentPos, '::', this.getCacheKey(from, to));
+            return maps.getMultiRoomPath(currentPos, to.pos);
+        }
+
         let startTargets = stepsInCurrentRoom.map(step => {return {pos: step}});
 
         let stepsNearCurrentPos = stepsInCurrentRoom.filter(step => currentPos.isNearTo(step));

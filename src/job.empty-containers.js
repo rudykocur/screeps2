@@ -8,6 +8,7 @@ const profiler = require('profiler');
 const JOB_TYPE = 'empty-container';
 
 const STATE = {
+    UNLOAD_INIT: 'unload-init',
     PICKUP: 'pickup',
     DEPOSIT: 'deposit',
 };
@@ -17,7 +18,10 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
     constructor(creep, jobData) {
         super(creep, jobData);
 
-        this.configureFSM(STATE.PICKUP, {
+        this.configureFSM(STATE.UNLOAD_INIT, {
+            [STATE.UNLOAD_INIT]: {
+                onTick: this.unloadInit.bind(this),
+            },
             [STATE.PICKUP]: {
                 onTick: this.pickupFromContainer.bind(this)
             },
@@ -49,7 +53,19 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         }
     }
 
+    unloadInit() {
+        if(this.creep.carryTotal === 0) {
+            return this.fsm.fastSwitch(STATE.PICKUP);
+        }
+
+        this._doUnload(() => this.fsm.enter(STATE.PICKUP))
+    }
+
     depositEnergy() {
+        this._doUnload(() => this.completeJob())
+    }
+
+    _doUnload(onDone) {
         let storage;
 
         if(this.roomMgr.isRemote) {
@@ -62,7 +78,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         this.actions.unloadAllResources({
             storage: storage,
             onTick: () => this.actions.repairRoad(),
-            onDone: () => this.completeJob(),
+            onDone: () => onDone(),
             pathOptions: {
                 ignoreAllLairs: this.creep.workRoom.isSKRoom,
             }

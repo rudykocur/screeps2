@@ -177,7 +177,7 @@ class GameManager extends utils.Executable {
     showPerfStats(stats, timer) {
         let mindAvg = (stats['mind.total'] / stats['mind.totalCount']).toFixed(2);
         let messages = [
-            `Tick: ${stats['cpu.getUsed']}: jobs=${stats['jobBoard.update']}, minds=${mindAvg}, ` +
+            `Tick: ${stats['cpu.getUsed']}: jobs=${stats['jobBoard.update']}, jobFind=${stats['jobBoard.find']}x${stats['jobBoard.findCount']}, minds=${mindAvg}, ` +
             `rooms=${stats['manager.total']}, init=${stats['initTime']}`,
             `Path timer: ${timer}`,
         ];
