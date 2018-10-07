@@ -54,9 +54,20 @@ class BuildRoad extends procbase.ProcessBase {
                             costs.set(site.pos.x, site.pos.y, 1);
                         }
                     });
+
+                    room.find(FIND_HOSTILE_STRUCTURES).forEach(/**Structure|StructureRampart*/struct => {
+                        if(struct.structureType === STRUCTURE_RAMPART && !struct.isPublic) {
+                            costs.set(struct.pos.x, struct.pos.y, 0xFF);
+                        }
+                    });
+
                     let /**RoomManager*/ mgr = room.manager;
                     if(!mgr) {
                         this.err('No manager for room', room);
+                        return costs;
+                    }
+
+                    if(!mgr.data) {
                         return costs;
                     }
 

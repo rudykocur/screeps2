@@ -287,16 +287,17 @@ class BreachMind extends mind.CreepMindBase {
     static getSpawnParams(manager, options) {
         options = _.defaults(options || {}, {withBoosts: true});
 
-        let body = Memory.siegeCreep.body;
+        let body = Memory.siegeCreep && Memory.siegeCreep.body;
 
         let boosts;
-        if(options.withBoosts) {
+        if(body && options.withBoosts) {
             boosts = Memory.siegeCreep.boosts;
         }
         else {
-            body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
-                MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,
-                RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,HEAL,HEAL,HEAL,HEAL];
+            // body = [TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+            //     MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,RANGED_ATTACK,
+            //     RANGED_ATTACK,RANGED_ATTACK,RANGED_ATTACK,HEAL,HEAL,HEAL,HEAL];
+            body = bb.build([ATTACK, MOVE], manager.room.energyCapacityAvailable);
             // boosts = Memory.siegeCreep.boosts
             boosts = [];
         }

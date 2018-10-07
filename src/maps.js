@@ -38,8 +38,15 @@ function hasCacheForRoom(roomName) {
 function scanRoom(room) {
     let result = [];
 
-    room.find(FIND_STRUCTURES).forEach(struct => {
-        let obj = _.pick(struct, ['pos', 'structureType', 'id']);
+    room.find(FIND_STRUCTURES).forEach(/**Structure*/struct => {
+        let attrs = ['pos', 'structureType', 'id'];
+
+        if(struct.structureType === STRUCTURE_RAMPART) {
+            attrs.push('my');
+            attrs.push('isPublic');
+        }
+
+        let obj = _.pick(struct, attrs);
         obj._typeId = FIND_STRUCTURES;
         obj.pos = obj.pos.serialize();
         result.push(obj);
@@ -169,8 +176,8 @@ function generateCostMatrix(roomName, data, timer, options) {
                 if(OBSTACLE_OBJECT_TYPES.indexOf(struct.structureType)>=0) {
                     result.set(struct.pos.x, struct.pos.y, 0xff);
                 }
-                else if(struct.structureType === STRUCTURE_RAMPART && !struct.my && !struct.isPublic) {
-                    // result.set(struct.pos.x, struct.pos.y, 0xff);
+                else if(struct.structureType === STRUCTURE_RAMPART && struct.my === false && struct.isPublic === false) {
+                    result.set(struct.pos.x, struct.pos.y, 0xff);
                 }
                 else if (struct.structureType === STRUCTURE_ROAD) {
                     result.set(struct.pos.x, struct.pos.y, 1);
@@ -314,6 +321,7 @@ generateCostMatrix = profiler.registerFN(generateCostMatrix, 'maps.generateCostM
  * @property {Boolean} avoidHostile
  * @property roomCallback
  * @property ignoreLairs
+ * @property maxOps
  * @property {Boolean} ignoreAllLairs
  * @property {Boolean} allowSKRooms
  * @property {Boolean} debug
@@ -390,6 +398,7 @@ module.exports = {
             debug: false,
             visualize: true,
             targets: null,
+            maxOps: 10000,
         });
 
         let fromRoom = Game.rooms[from.roomName];
@@ -408,7 +417,7 @@ module.exports = {
         let myUser = utils.myUsername();
 
         let ret = PathFinder.search(from, options.targets || to, {
-            maxOps: 10000,
+            maxOps: options.maxOps,
             plainCost: 2,
             swampCost:5,
             roomCallback(roomName) {

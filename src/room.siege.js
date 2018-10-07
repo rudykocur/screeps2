@@ -92,7 +92,7 @@ class RoomSiege extends base.RoomBase {
             this.memory.hasCombatCreeps = this.threat.getCombatCreeps().length > 0;
         }
 
-        if(this.willNeedBreacher()) {
+        if(this.willNeedBreacher() && Memory.siegeCreep) {
             this.supportRoom.labs.loadBoosts(Memory.siegeCreep.boosts);
         }
 
@@ -139,7 +139,7 @@ class RoomSiege extends base.RoomBase {
             return false;
         }
 
-        if(!this.supportRoom.labs.areBoostsReady()) {
+        if(Memory.siegeCreep && !this.supportRoom.labs.areBoostsReady()) {
             return false;
         }
 
@@ -215,7 +215,7 @@ class RoomSiege extends base.RoomBase {
     }
 
     toString() {
-        return `[RoomSiege for ${this.roomName}]`;
+        return `[RoomSiege for ${this.getRoomLink()}]`;
     }
 
 }

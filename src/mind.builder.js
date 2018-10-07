@@ -86,7 +86,9 @@ class BuilderMind extends mind.CreepMindBase {
             }
         }
         else {
-            target = this.creep.pos.findClosestByPath(this.workRoom.data.droppedEnergy);
+            target = this.creep.pos.findClosestByPath(this.workRoom.data.droppedEnergy, {
+                filter: /**Resource*/r => r.amount > 30
+            });
 
             if(!target) {
                 target = this.creep.pos.findClosestByPath(this.workRoom.data.containers, {

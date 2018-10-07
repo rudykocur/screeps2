@@ -106,7 +106,7 @@ class RouteManager extends utils.Loggable {
 
         if(!route) {
             timer.stop('load');
-            this.err('Invalid route', this.getCacheKey(from, to));
+            this.err('Invalid route', this.getCacheKey(from, to), 'current pos=', currentPos);
             return maps.getMultiRoomPath(from.pos, to.pos);
         }
 

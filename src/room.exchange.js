@@ -53,12 +53,12 @@ class InterRoomExchange extends utils.Executable {
             if(status === OK) {
                 remaining -= toTransfer;
                 available.amount -= toTransfer;
-                this.info(`Transferred ${toTransfer}x ${available.resource} from ` +
-                            `${available.manager.roomName} to ${target.roomName}`);
+                this.important(`Transferred ${toTransfer}x ${available.resource} from ` +
+                            `${available.manager.getRoomLink()} to ${target.getRoomLink()}`);
             }
             else {
                 this.warn(`Unable to send ${toTransfer}x ${available.resource} from ` +
-                            `${available.manager.roomName} to ${target.roomName} - ${status}`);
+                            `${available.manager.getRoomLink()} to ${target.getRoomLink()} - ${status}`);
             }
 
             if(remaining <= 0) {
