@@ -79,6 +79,10 @@ class TransferMind extends mind.CreepMindBase {
 
         if(this.creep.memory.hauler) {
             yield this.tryClaimJob(1, {
+                type: 'terminal-empty-energy'
+            });
+
+            yield this.tryClaimJob(1, {
                 type: 'terminal-fill-energy'
             });
 
@@ -144,6 +148,10 @@ class TransferMind extends mind.CreepMindBase {
         yield this.tryClaimJob(availableCapacity, {
             type: 'empty-container',
             minAmount: Math.max(availableCapacity / 2, 50)
+        });
+
+        yield this.tryClaimJob(1, {
+            type: 'terminal-empty-energy'
         });
 
         yield this.tryClaimJob(1, {

@@ -47,6 +47,11 @@ class RoomMarket extends utils.Executable {
      */
     importResources(exchange) {
         let wanted = this.getWantedResources();
+        let total = this.getResourcesTotal();
+
+        if(total[RESOURCE_ENERGY] < 20000) {
+            wanted[RESOURCE_ENERGY] = 5000;
+        }
 
         _.each(wanted, (amount, resource) => {
             exchange.requestResources(this.manager, resource, amount);
@@ -71,7 +76,7 @@ class RoomMarket extends utils.Executable {
     getResourcesTotal() {
         let result = {};
 
-        for(let resource of _.without(RESOURCES_ALL, RESOURCE_ENERGY)) {
+        for(let resource of _.without(RESOURCES_ALL)) {
             result[resource] = 0;
             for(let struct of [this.terminal, this.storage]) {
                 result[resource] += struct.get(resource);
