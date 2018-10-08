@@ -48,6 +48,10 @@ class TerminalFillEnergyJobHandler extends job_common.JobHandlerBase {
         let terminal = manager.room.terminal;
         let storage = manager.room.storage;
 
+        if(!manager.room.controller.my) {
+            return jobs;
+        }
+
         if(!terminal || !storage) {
             return jobs;
         }

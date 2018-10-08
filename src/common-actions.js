@@ -78,6 +78,11 @@ class CreepCommonActions {
 
         let storage = this.workRoom.storage;
 
+        if(!storage) {
+            console.log('WARNING - NO STORAGE', this.creep, '::', this.creep.pos, '::', this.workRoom);
+            return options.onDone();
+        }
+
         if(!storage.isNear(this.creep)) {
             this.creep.mover.moveByPath(storage.target, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, storage.target.pos, {});
