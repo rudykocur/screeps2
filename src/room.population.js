@@ -238,9 +238,17 @@ class RoomPopulation extends utils.Executable {
             return false;
         }
 
+        let upgradersCount = this.manager.getCreepCount(minds.available.upgrader);
+
+        let maxUpgraders = this.manager.controller.getMaxStandingPositions();
+
+        if(upgradersCount >= maxUpgraders) {
+            return false;
+        }
+
         if(this.manager.room.controller.level === 7) {
             if(this.manager.storage.getStoredEnergy() < 150000) {
-                if (this.manager.getCreepCount(minds.available.upgrader) >= 2) {
+                if (upgradersCount >= 2) {
                     return false;
                 }
             }

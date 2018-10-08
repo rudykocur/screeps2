@@ -347,6 +347,10 @@ class ControllerWrapper extends StructureWrapper {
         return this.link.energyCapacity - this.link.energy;
     }
 
+    getMaxStandingPositions() {
+        return this.points.length;
+    }
+
     /**
      * @param {Creep} creep
      */
