@@ -107,6 +107,10 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
             return [];
         }
 
+        if(manager.storage.link.cooldown >= 6) {
+            return [];
+        }
+
         let needed = manager.controller.getNeededEnergyInLink();
         if(needed > 200) {
             return [new ControllerLinkJobDTO(manager)];

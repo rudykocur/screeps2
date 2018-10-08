@@ -91,7 +91,9 @@ class StorageWrapper extends StructureWrapper {
         if(!this.target.pos) {this.warn('WHY NO POS? 222', this.target);}
         // if(!this.target.pos) {this.warn('WHY NO POS?', this.target, '::', this.target.pos);}
 
-
+        /**
+         * @type {StructureLink}
+         */
         this.link = data.cachedObj('link', 500, () => {
             return _.first(this.target.pos.findInRange(links, 3));
         });

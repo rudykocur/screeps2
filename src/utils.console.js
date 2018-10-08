@@ -1,4 +1,6 @@
 var _ = require('lodash');
+const regularRoom = require('room.regular');
+const utils = require('utils')
 
 function help() {
     console.log(`Available commands:`);
@@ -41,7 +43,27 @@ function setSiegeCreep(body, boosts) {
 setSiegeCreep.description = 'Sets blueprint for siege creep.';
 setSiegeCreep.signature = 'setSiegeCreep(body, boosts)';
 
-let commands = [help, setBuyPrice, setSellPrice, setSiegeCreep];
+function showRooms() {
+    console.log('Room handlers:');
+
+    _(Game.rooms)
+        .map(room => room.manager)
+        .filter(mgr => (mgr instanceof regularRoom.RoomManager))
+        .sortBy(mgr => mgr.getRoomTitle())
+        .forEach(/**RoomManager*/mgr => {
+
+            let remotes = _(mgr.remote.handlers)
+                .sortBy(remote => remote.getRoomTitle())
+                .map(remote => utils.getRoomLink(remote.roomName, remote.getRoomTitle()));
+
+            console.log('Room:', utils.getRoomLink(mgr.roomName, mgr.getRoomTitle()), 'remotes:', remotes);
+        }).value()
+}
+
+showRooms.description = 'Print all rooms with remotes';
+showRooms.signature = 'showRooms()';
+
+let commands = [help, setBuyPrice, setSellPrice, setSiegeCreep, showRooms];
 
 module.exports = {
     installConsoleFunctions(target) {

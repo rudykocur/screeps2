@@ -2,6 +2,7 @@ var _ = require("lodash");
 const maps = require('maps');
 const base = require('room.base');
 const minds = require('mind');
+const utils = require('utils');
 
 const profiler = require('profiler');
 
@@ -33,6 +34,12 @@ class RoomScout extends base.RemotelySupportedRoom {
                 }
             }
         }
+
+        utils.every(100, () => {
+            this.getCreeps(minds.available.scout).forEach(/**CreepMindBase*/mind => {
+                mind.creep.notifyWhenAttacked(false);
+            })
+        })
     }
 
     toString() {

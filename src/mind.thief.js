@@ -51,7 +51,7 @@ class ThiefMind extends mind.CreepMindBase {
             this.enterState(STATE_DEPOSIT);
         }
 
-        let target = this.creep.room.storage;
+        let target = this.workRoom.room.storage;
 
         if(this.creep.withdraw(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
             this.creep.mover.moveByPath(target, () =>{
@@ -73,6 +73,7 @@ class ThiefMind extends mind.CreepMindBase {
 
         this.actions.unloadAllResources({
             storage: this.roomMgr.parent.storage,
+            onDone: () => this.enterState(STATE_STEAL),
         });
 
     }

@@ -58,6 +58,10 @@ class EmptyMiningSiteJobHandler extends job_common.JobHandlerBase {
 
         let mgr = room.manager;
 
+        if(!mgr) {
+            return this.completeJob();
+        }
+
         if(!(this.data.targetId in mgr.mines)) {
             let obj = Game.getObjectById(this.data.targetId);
             this.debug('Invalid mine id', mgr, '::', this.data.targetId,
