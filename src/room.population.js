@@ -65,6 +65,9 @@ class RoomPopulation extends utils.Executable {
             else if(this.manager.getAvgEnergyToPickup() > 1300 && this.getSpawnCooldown('transfer', this.room) > 200) {
                 this.spawnTransfer(spawn);
             }
+            else if(this.needRemoteTransferers()) {
+                this.spawnRemoteTransferer(spawn);
+            }
             else if(this.needUpgrader()) {
                 this.spawnUpgrader(spawn)
             }
@@ -73,9 +76,6 @@ class RoomPopulation extends utils.Executable {
             }
             else if(this.needReinforcer()) {
                 this.spawnReinforcer(spawn);
-            }
-            else if(this.needRemoteTransferers()) {
-                this.spawnRemoteTransferer(spawn);
             }
         }
 
@@ -330,7 +330,14 @@ class RoomPopulation extends utils.Executable {
     needRemoteTransferers() {
         let count = this.manager.getCreepCount(minds.available.transfer, {remoteHelper: true});
 
-        let maxCount = (this.manager.room.controller.level > 6) ? 6 : 3;
+        let maxCount;
+
+        if(this.manager.room.controller.level <= 6) {
+            maxCount = 3;
+        }
+        else {
+            maxCount = this.manager.getExpectedEnergyInRemoteMines() > 13000 ? 9 : 6;
+        }
 
         if(count > maxCount) {
             return false;
