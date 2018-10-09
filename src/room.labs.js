@@ -382,10 +382,10 @@ class LabManager extends utils.Executable {
 
     getTargets() {
         if(this.labs.length === 3) {
-            return [
-                {resource: RESOURCE_HYDROXIDE, amount: 6000},
-                {resource: RESOURCE_GHODIUM, amount: 6000},
-            ];
+            return _.shuffle([
+                {resource: RESOURCE_HYDROXIDE, amount: 12000},
+                {resource: RESOURCE_GHODIUM, amount: 12000},
+            ]);
         }
 
         return _.shuffle([

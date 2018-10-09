@@ -366,6 +366,10 @@ class ControllerWrapper extends StructureWrapper {
             point = this.freePoints.pop();
         }
 
+        if(!point) {
+            return null;
+        }
+
         this.memory.reservations[point.serialize()] = {
             creepId: creep.id,
             expiration: Game.time + 2,
