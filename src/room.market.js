@@ -49,7 +49,7 @@ class RoomMarket extends utils.Executable {
         let wanted = this.getWantedResources();
         let total = this.getResourcesTotal();
 
-        if(total[RESOURCE_ENERGY] < 20000) {
+        if(total[RESOURCE_ENERGY] < 15000) {
             wanted[RESOURCE_ENERGY] = 5000;
         }
 
