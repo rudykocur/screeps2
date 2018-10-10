@@ -31,7 +31,7 @@ class CreepMoveController {
 
     moveTo(target, options) {
         let result = this.creep.moveTo(target, options);
-        if(result == OK) {
+        if(result === OK) {
             this.exitStationary();
         }
 

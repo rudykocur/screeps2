@@ -9,6 +9,7 @@ const exchange = require('room.exchange');
 const procmgr = require('process.manager');
 const stats = require('utis.stats');
 const router = require('route.manager');
+const acts = require('acts');
 
 const profiler = require('profiler');
 
@@ -52,6 +53,8 @@ class GameManager extends utils.Executable {
         let processManager = new procmgr.ProcessManager();
         let routeManager = new router.RouteManager();
 
+        let act = new acts.FastRCLAct();
+
         for(let creep of _.values(Game.creeps)) {
             creep.memory.attemptedToMove = false;
         }
@@ -62,6 +65,8 @@ class GameManager extends utils.Executable {
         let managers = this.runRoomManagers(jobBoard, processManager, routeManager);
 
         this.runMinds(managers);
+
+        act.run(managers);
 
         jobBoard.cleanup();
 
