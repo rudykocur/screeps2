@@ -70,6 +70,10 @@ class JobBoard extends utils.Executable {
             options.room = options.room.name;
         }
 
+        if(options.rooms && options.rooms.length === 0) {
+            console.log('ERRRR: Invalid search query: no rooms: ' + JSON.stringify(options))
+        }
+
         if(options.rooms && options.rooms.length > 0) {
             options.rooms = options.rooms.filter(room => room).map(room => room.name);
         }
@@ -87,7 +91,7 @@ class JobBoard extends utils.Executable {
                     return false;
                 }
 
-                if (options.rooms && options.rooms.length > 0 && options.rooms.indexOf(jobData.room) < 0) {
+                if (options.rooms &&  options.rooms.indexOf(jobData.room) < 0) {
                     return false;
                 }
 

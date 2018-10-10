@@ -48,8 +48,12 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         }
         else {
             this.creep.withdraw(container, _.findKey(container.store));
-            this.unclaim();
-            this.fsm.enter(STATE.DEPOSIT);
+
+            if(_.size(container.store) <= 1) {
+                this.unclaim();
+                this.fsm.enter(STATE.DEPOSIT);
+            }
+
         }
     }
 
