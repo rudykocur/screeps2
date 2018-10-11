@@ -28,6 +28,7 @@ class FastRCLAct extends Act {
 
         this.minStorageEnergy = 20000;
         this.minTerminalEnergy = 20000;
+        this.lowThresholdTerminalEnergy = 60000;
     }
 
     /**
@@ -47,6 +48,11 @@ class FastRCLAct extends Act {
          * @type {RoomManager}
          */
         let toSupport = this.pickRoomToSupport(qualified);
+
+        if(toSupport.room.terminal.store[RESOURCE_ENERGY] > this.lowThresholdTerminalEnergy) {
+            return;
+        }
+
         /**
          * @type {Array<RoomManager>}
          */

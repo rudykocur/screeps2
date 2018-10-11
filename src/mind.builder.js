@@ -171,7 +171,18 @@ class BuilderMind extends mind.CreepMindBase {
             site = this._pickRampartOrWall();
         }
         else {
-            site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
+            let terrain = new Room.Terrain(this.workRoom.roomName);
+
+            let swampSites = this.workRoom.constructionSites
+                .filter(site => terrain.get(site.pos.x, site.pos.y) === TERRAIN_MASK_SWAMP);
+
+            if(swampSites.length > 0) {
+                site = this.creep.pos.findClosestByRange(swampSites)
+            }
+
+            if(!site) {
+                site = this.creep.pos.findClosestByRange(this.workRoom.constructionSites);
+            }
 
             if(!site && this.workRoom.controller.controller.my) {
                 site = this._pickRampartOrWall();

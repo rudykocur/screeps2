@@ -11,6 +11,13 @@ module.exports = {
     /**
      * @param {Flag} flag
      */
+    isStorageSite(flag) {
+        return flag.color === COLOR_BLUE && flag.secondaryColor === COLOR_YELLOW;
+    },
+
+    /**
+     * @param {Flag} flag
+     */
     isMeetingPoint(flag) {
         return flag.color === COLOR_GREEN && flag.secondaryColor === COLOR_GREEN;
     },

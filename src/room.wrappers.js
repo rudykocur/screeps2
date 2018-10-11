@@ -299,7 +299,13 @@ class ControllerWrapper extends StructureWrapper {
                     return false;
                 }
 
-                return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y).length === 0;
+                if(manager.room.lookForAt(LOOK_CONSTRUCTION_SITES, item.x, item.y).length > 0) {
+                    return false;
+                }
+
+                return manager.room.lookForAt(LOOK_STRUCTURES, item.x, item.y)
+                    .filter(struct => struct.structureType !== STRUCTURE_RAMPART)
+                    .length === 0;
             }).map(item => RoomPosition.asPosition(item, manager.room.name));
 
             let sorted = _.sortBy(points, p => pos.getRangeTo(p)*-1);

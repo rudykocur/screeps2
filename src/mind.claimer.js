@@ -87,10 +87,14 @@ class ClaimerMind extends mind.CreepMindBase {
     static getSpawnParams(manager, options) {
         options = options || {};
 
-        let body = [CLAIM, MOVE];
+        let body = [CLAIM, MOVE, MOVE, MOVE];
 
         if(manager.room.energyCapacityAvailable >= 1300) {
             body = [CLAIM, CLAIM, MOVE, MOVE];
+        }
+
+        if(manager.room.energyCapacityAvailable >= 1500) {
+            body = [CLAIM, CLAIM, MOVE, MOVE, MOVE, MOVE, MOVE];
         }
 
         if(options.claim) {

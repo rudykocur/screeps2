@@ -56,6 +56,7 @@ class RoomStats extends utils.Executable {
 
         let flags = [
             [COLOR_BLUE, COLOR_BLUE, 'storage'],
+            [COLOR_BLUE, COLOR_YELLOW, 'storage site'],
             [COLOR_GREEN, COLOR_GREEN, 'meeting point'],
             [COLOR_YELLOW, COLOR_YELLOW, 'extension'],
             [COLOR_YELLOW, COLOR_BROWN, 'link'],

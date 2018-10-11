@@ -150,6 +150,10 @@ class RoomArchitect extends utils.Executable {
     }
 
     buildStorage(room) {
+        if(this.flagsToSites(room, flags.isStorageSite, STRUCTURE_STORAGE)) {
+            return;
+        }
+
         let pos = this.manager.storage.target.pos;
         let around = utils.getPositionsAround(pos);
 
@@ -223,11 +227,16 @@ class RoomArchitect extends utils.Executable {
     }
 
     flagsToSites(room, flagCallback, constructionSiteType) {
+        let placedAny = false;
+
         for(let flag of this.manager.flags.filter(flagCallback)) {
             if(OK === room.createConstructionSite(flag.pos, constructionSiteType)) {
                 flag.remove();
+                placedAny = true;
             }
         }
+
+        return placedAny;
     }
 
     /**

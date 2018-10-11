@@ -256,7 +256,7 @@ class RoomPopulation extends utils.Executable {
 
         let spawnCooldown = 200;
 
-        if(!this.manager.room.controller.level <= 3 && this.manager.storage.getStoredEnergy() > 7000) {
+        if(!this.manager.room.controller.level <= 3 && this.manager.storage.getStoredEnergy() > 5000) {
             spawnCooldown = 40;
         }
 

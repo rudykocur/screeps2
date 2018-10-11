@@ -198,35 +198,44 @@ class GameManager extends utils.Executable {
     }
 
     foo() {
-        // let from = new RoomPosition(10, 17, 'W31N14');
-        // // let from = new RoomPosition(9, 16, 'W31N14');
-        // // let to = new RoomPosition(20, 12, 'W32N13');
-        // let to = new RoomPosition(40, 41, 'W32N13');
+        let lz = require('lz-string');
 
-        // let from = new RoomPosition(10, 17, 'W31N14');
-        // let to = new RoomPosition(40, 41, 'W32N13');
-        // let to = new RoomPosition(10, 17, 'W31N14');
-        let from = new RoomPosition(3, 40, 'W34N18');
-        // let from = Game.getObjectById('5baf8c3a82ec0133f5f47e33').pos;
-        // let to = Game.getObjectById('59f1a0b382100e1594f370de').pos;
-        let to = new RoomPosition(25, 25, 'W36N19');
+        let data = JSON.stringify(Memory.cache.rooms);
 
-        // let rooms = Game.map.findRoute(from.roomName, to.roomName);
+        let t1 = Game.cpu.getUsed();
+        let compressed = lz.compress(data);
+        let t2 = Game.cpu.getUsed();
+
+        console.log('COMPRESS', compressed.length, '::', data.length, '::', t2-t1);
+        // // let from = new RoomPosition(10, 17, 'W31N14');
+        // // // let from = new RoomPosition(9, 16, 'W31N14');
+        // // // let to = new RoomPosition(20, 12, 'W32N13');
+        // // let to = new RoomPosition(40, 41, 'W32N13');
         //
-
-        let options = _.defaults({}, {
-            targetRange: 0,
-            cutoffRange: 0,
-            withTarget: false,
-        });
-
-        let path = maps.getMultiRoomPath(from, to, {
-            debug:true,
-            visualize: false,
-            allowSKRooms: false
-        });
-
-        utils.debugPath(path);
+        // // let from = new RoomPosition(10, 17, 'W31N14');
+        // // let to = new RoomPosition(40, 41, 'W32N13');
+        // // let to = new RoomPosition(10, 17, 'W31N14');
+        // let from = new RoomPosition(3, 40, 'W34N18');
+        // // let from = Game.getObjectById('5baf8c3a82ec0133f5f47e33').pos;
+        // // let to = Game.getObjectById('59f1a0b382100e1594f370de').pos;
+        // let to = new RoomPosition(25, 25, 'W36N19');
+        //
+        // // let rooms = Game.map.findRoute(from.roomName, to.roomName);
+        // //
+        //
+        // let options = _.defaults({}, {
+        //     targetRange: 0,
+        //     cutoffRange: 0,
+        //     withTarget: false,
+        // });
+        //
+        // let path = maps.getMultiRoomPath(from, to, {
+        //     debug:true,
+        //     visualize: false,
+        //     allowSKRooms: false
+        // });
+        //
+        // utils.debugPath(path);
 
     }
 
