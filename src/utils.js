@@ -168,7 +168,7 @@ class Executable extends Loggable{
         }
         catch(e) {
             console.log('Executable failed:', this, '::', e, 'Stack trace:', e.stack);
-            Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 5);
+            Game.notify(`Executable failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 30);
         }
     }
 }

@@ -106,6 +106,7 @@ class FastRCLAct extends Act {
             };
 
             this.important('Will now support room', mgr, 'at level', mgr.room.controller.level);
+            Game.notify(`${this} Will now support room ${mgr} at level ${mgr.room.controller.level}`);
         }
 
         let room = Game.rooms[this.memory.supportingRoom.roomName];
