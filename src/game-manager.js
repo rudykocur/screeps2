@@ -4,6 +4,7 @@ const rooms = require("rooms");
 const utils = require('utils');
 const job_board = require('job.board');
 const maps = require('maps');
+const roomCache = require('cache.rooms');
 const utils_console = require('utils.console');
 const exchange = require('room.exchange');
 const procmgr = require('process.manager');
@@ -46,7 +47,7 @@ class GameManager extends utils.Executable {
         global.manager = this;
 
         maps.pathTimer.reset();
-        maps.cacheInitTimer.reset();
+        roomCache.cacheInitTimer.reset();
 
         let initTime = Game.cpu.getUsed().toFixed(2);
 
@@ -100,7 +101,7 @@ class GameManager extends utils.Executable {
         // routeManager.findPath(Game.getObjectById('5bb208d5dd1bc83d07acd8a1'),
         //     Game.getObjectById('5bb1d51f05ce520fc1a6fa4f'), Game.flags['FAKEPOS'].pos, true);
 
-        this.showPerfStats(ss, maps.pathTimer, maps.cacheInitTimer);
+        this.showPerfStats(ss, maps.pathTimer, roomCache.cacheInitTimer);
     }
 
     initMemory() {

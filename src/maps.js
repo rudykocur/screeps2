@@ -3,189 +3,11 @@ const utils = require('utils');
 const CachedData= require('utils.cache').CachedData;
 const lz = require('lz-string');
 
+const roomCache = require('cache.rooms');
+
+const getRoomCache = roomCache.getRoomCache;
+
 const profiler = require('profiler');
-
-function hydrate(item) {
-    if(_.isString(item.pos)) {
-        item.pos = RoomPosition.unserialize(item.pos);
-    }
-    else {
-        item.pos = RoomPosition.asPosition(item.pos);
-    }
-    return item;
-}
-
-function getCacheForRoom(roomName) {
-    if(!Memory.cache) {
-        Memory.cache = {}
-    }
-
-    _.defaults(Memory.cache, {rooms: {}});
-
-    Memory.cache.rooms[roomName] = (Memory.cache.rooms[roomName] || {});
-
-    // _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, dataZIP: null, lastUpdateTime: 0});
-    _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, dataJSON: '[]', lastUpdateTime: 0});
-
-    return Memory.cache.rooms[roomName];
-}
-
-function hasCacheForRoom(roomName) {
-    return !!_.get(Memory, ['cache', 'rooms', roomName]);
-}
-
-// let cacheInitTimer = new utils.Timer();
-let cacheInitTimer = new utils.NamedTimer();
-
-/**
- * @param {Room} room
- */
-function scanRoom(room) {
-    let result = [];
-
-    room.find(FIND_STRUCTURES).forEach(/**Structure*/struct => {
-        let attrs = ['pos', 'structureType', 'id'];
-
-        if(struct.structureType === STRUCTURE_RAMPART) {
-            attrs.push('my');
-            attrs.push('isPublic');
-        }
-
-        let obj = _.pick(struct, attrs);
-        obj._typeId = FIND_STRUCTURES;
-        obj.pos = obj.pos.serialize();
-        result.push(obj);
-    });
-
-    for(let type of [FIND_SOURCES, FIND_MINERALS]) {
-        room.find(type).forEach(src => {
-            let obj = _.pick(src, ['pos', 'id']);
-            obj._typeId = type;
-            obj.pos = obj.pos.serialize();
-            result.push(obj);
-        });
-    }
-
-    return result;
-}
-
-class CachedRoom {
-    constructor(roomName) {
-        this.name = roomName;
-
-        this.initCache(roomName);
-    }
-
-    initCache(roomName) {
-        // console.log('ROOM NAME', roomName);
-
-        this.cache = getCacheForRoom(roomName);
-        this.cache.lastAccessTime = Game.time;
-
-        // if(this.cache.dataZIP) {
-        //     let json = lz.decompressFromUTF16(this.cache.dataZIP);
-
-            // console.log('FF', roomName, json, '::', this.cache.dataZIP.length);
-            // this.cacheData = JSON.parse(json);
-
-            // if(this.cache.dataJSON) {
-            //     delete this.cache.dataJSON;
-            //     console.log('DROPPED JSON FOR', roomName);
-            // }
-        // }
-        // else {
-            this.cacheData = JSON.parse(this.cache.dataJSON);
-        // }
-
-
-        this.cacheData = this.cacheData.map(hydrate);
-
-        // if(!this.cache.dataZIP) {
-        //     this.cache.dataZIP = lz.compress(this.cache.dataJSON);
-        //     console.log('ZIPPED CACHE FOR', roomName);
-        // }
-
-    }
-
-    get cacheAge() {
-        return Game.time - this.cache.lastUpdateTime
-    }
-
-    belongsToUser(username) {
-        return this.cache.owner == username || this.cache.reservedBy == username;
-    }
-
-    ownedBy(username) {
-        return this.cache.owner == username;
-    }
-
-    ownedByEnemy() {
-        return this.isOwned() && !this.ownedBy(utils.myUsername());
-    }
-
-    ownedByMe() {
-        return this.ownedBy(utils.myUsername());
-    }
-
-    isOwned() {
-        return !!this.cache.owner;
-    }
-
-    isFree() {
-        return !this.cache.owner  && !this.cache.reservedBy;
-    }
-
-    isSKRoom() {
-        let coords = utils.parseRoomName(this.name);
-
-        let x = coords.x % 10;
-        let y = coords.y % 10;
-
-        return x >= 4 && x <= 6 && y >= 4 && y <= 6;
-    }
-
-    get controller() {
-        return this.getStructure(STRUCTURE_CONTROLLER);
-    }
-
-    getSafeModeUntill() {
-        return this.cache.safeModeUntill;
-}
-
-    find(type) {
-        return this.cacheData.filter(obj => obj._typeId === type || (!obj._typeId && type === FIND_STRUCTURES));
-    }
-
-    findStructures(structType) {
-        return _.filter(this.cacheData, 'structureType', structType);
-    }
-
-    getStructure(structType) {
-        return _.first(this.findStructures(structType));
-    }
-
-    toString() {
-        return `[CachedRoom ${this.name}]`;
-    }
-}
-
-/**
- * @param roomName
- * @return {CachedRoom}
- */
-function getRoomCache(roomName, isPathfinding) {
-    return tickCache.get('maps-roomCache-'+roomName, () => {
-        if(!hasCacheForRoom(roomName)) {
-            return null;
-        }
-
-        let timerName = isPathfinding ? 'pathfinding' : 'other';
-        cacheInitTimer.start(timerName);
-        let res = new CachedRoom(roomName);
-        cacheInitTimer.stop(timerName);
-        return res;
-    });
-}
 
 /**
  * @param {String} roomName
@@ -343,7 +165,6 @@ function canMoveInRoom(roomName, options, myUser) {
     return true;
 }
 
-getRoomCache = profiler.registerFN(getRoomCache, 'maps.getRoomCache');
 generateCostMatrix = profiler.registerFN(generateCostMatrix, 'maps.generateCostMatrix');
 
 /**
@@ -367,7 +188,7 @@ module.exports = {
      */
     getRoomCache,
 
-    pathTimer, cacheInitTimer,
+    pathTimer,
 
     getCostMatrix(roomName, costs) {
         let cache = getRoomCache(roomName, true);
@@ -392,7 +213,7 @@ module.exports = {
     },
 
     blockHostileRooms(roomName, costMatrix) {
-        if(!hasCacheForRoom(roomName)) {
+        if(!roomCache.hasCacheForRoom(roomName)) {
             return costMatrix;
         }
 
@@ -487,40 +308,8 @@ module.exports = {
         return ret.path;
     },
 
-    updateRoomCache(room, ttl) {
-        ttl = ttl || 0;
-
-        let cache = getCacheForRoom(room.name);
-        let currentTTL = Game.time - cache.lastUpdateTime;
-
-        if(currentTTL > ttl) {
-
-            let timer = new utils.Timer().start();
-
-            cache.dataJSON = JSON.stringify(scanRoom(room));
-            // cache.dataZIP = lz.compressToUTF16(JSON.stringify(scanRoom(room)));
-            cache.owner = null;
-            cache.reservedBy = null;
-            cache.safeModeUntill = null;
-
-            if(room.controller) {
-                cache.owner = room.controller.owner ? room.controller.owner.username : null;
-                cache.reservedBy = room.controller.reservation ? room.controller.reservation.username : null;
-                if(room.controller.safeMode > 0) {
-                    cache.safeModeUntill = room.controller.safeMode + Game.time;
-                }
-            }
-
-            cache.lastUpdateTime = Game.time + utils.roomNameToInt(room.name) % 21;
-
-            if(ttl > 0) {
-                let roomName = room.manager && room.manager.getRoomLink() || utils.getRoomLink(room.name, room.name);
-                console.log(`[maps] updated cache for room ${roomName} in ${timer.stop()}`);
-            }
-        }
-    }
+    updateRoomCache: roomCache.updateRoomCache,
 };
 
 module.exports.getMultiRoomPath = profiler.registerFN(module.exports.getMultiRoomPath, 'maps.getMultiRoomPath');
 getLocalPath = profiler.registerFN(getLocalPath, 'maps.getLocalPath');
-profiler.registerClass(CachedRoom, CachedRoom.name);
