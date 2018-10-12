@@ -69,10 +69,12 @@ class TransferMind extends mind.CreepMindBase {
 
         if(this.creep.memory.remoteHelper) {
 
+            let mgr = this.roomMgr.isRemote ? this.roomMgr.parent : this.roomMgr;
+
             yield this.tryClaimJob(availableCapacity, {
                 type: 'empty-mine',
                 minAmount: Math.max(Math.min(availableCapacity / 2, 250), 50),
-                rooms: this.homeRoomMgr.getRemoteRooms()
+                rooms: mgr.getRemoteRooms()
             });
 
         }

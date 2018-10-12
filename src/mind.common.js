@@ -18,18 +18,6 @@ class CreepMindBase extends utils.Executable {
 
         this.roomMgr = roomManager;
 
-        /**
-         * @type {RoomManager}
-         */
-        this.homeRoomMgr = null;
-
-        if(this.roomMgr.isRemote) {
-            this.homeRoomMgr = this.roomMgr.parent;
-        }
-        else {
-            this.homeRoomMgr = this.roomMgr;
-        }
-
         this.room = this.roomMgr.room;
 
         /**

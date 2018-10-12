@@ -64,6 +64,10 @@ module.exports = {
         return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_WHITE;
     },
 
+    isTerminal(flag) {
+        return flag.color === COLOR_YELLOW && flag.secondaryColor === COLOR_ORANGE;
+    },
+
     /**
      * @param {Flag} flag
      */

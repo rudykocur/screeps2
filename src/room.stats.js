@@ -32,6 +32,7 @@ class RoomStats extends utils.Executable {
             [COLOR_BROWN]: 'brown',
             [COLOR_RED]: 'red',
             [COLOR_WHITE]: 'white',
+            [COLOR_ORANGE]: 'orange',
         };
     }
 
@@ -63,6 +64,7 @@ class RoomStats extends utils.Executable {
             [COLOR_YELLOW, COLOR_RED, 'tower'],
             [COLOR_YELLOW, COLOR_PURPLE, 'spawn'],
             [COLOR_YELLOW, COLOR_WHITE, 'lab'],
+            [COLOR_YELLOW, COLOR_ORANGE, 'terminal'],
             [COLOR_RED, COLOR_WHITE, 'claim room'],
             [COLOR_RED, COLOR_GREEN, 'attack room'],
             [COLOR_PURPLE, COLOR_WHITE, 'idle room'],

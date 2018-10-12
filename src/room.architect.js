@@ -27,6 +27,7 @@ class RoomArchitect extends utils.Executable {
         let availableExtractors = this.getMaxStructuresCount(STRUCTURE_EXTRACTOR);
         let availableLabs = this.getMaxStructuresCount(STRUCTURE_LAB);
         let availableLinks = this.getMaxStructuresCount(STRUCTURE_LINK);
+        let availableTerminals = this.getMaxStructuresCount(STRUCTURE_TERMINAL);
 
         if(this.manager.data.extensions.length < availableExtensions) {
             utils.every(15, () => this.buildExtensions(this.manager.room));
@@ -50,6 +51,10 @@ class RoomArchitect extends utils.Executable {
 
         if(availableStorages > 0 && !this.manager.room.storage) {
             utils.every(25, () => this.buildStorage(this.manager.room));
+        }
+
+        if(availableTerminals > 0 && !this.manager.room.terminal) {
+            utils.every(71, () => this.buildTerminal(this.manager.room));
         }
 
         if(availableExtractors > 0 && !this.manager.data.extractor) {
@@ -147,6 +152,10 @@ class RoomArchitect extends utils.Executable {
 
     buildLabs(room) {
         this.flagsToSites(room, flags.isLab, STRUCTURE_LAB);
+    }
+
+    buildTerminal(room) {
+        this.flagsToSites(room, flags.isTerminal, STRUCTURE_TERMINAL);
     }
 
     buildStorage(room) {
