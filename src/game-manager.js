@@ -43,7 +43,10 @@ class GameManager extends utils.Executable {
     update() {
         this.initMemory();
 
+        global.manager = this;
+
         maps.pathTimer.reset();
+        maps.cacheInitTimer.reset();
 
         let initTime = Game.cpu.getUsed().toFixed(2);
 
@@ -97,7 +100,7 @@ class GameManager extends utils.Executable {
         // routeManager.findPath(Game.getObjectById('5bb208d5dd1bc83d07acd8a1'),
         //     Game.getObjectById('5bb1d51f05ce520fc1a6fa4f'), Game.flags['FAKEPOS'].pos, true);
 
-        this.showPerfStats(ss, maps.pathTimer);
+        this.showPerfStats(ss, maps.pathTimer, maps.cacheInitTimer);
     }
 
     initMemory() {
@@ -179,12 +182,13 @@ class GameManager extends utils.Executable {
         }
     }
 
-    showPerfStats(stats, timer) {
+    showPerfStats(stats, timer, cacheTimer) {
         let mindAvg = (stats['mind.total'] / stats['mind.totalCount']).toFixed(2);
         let messages = [
             `Tick: ${stats['cpu.getUsed']}: jobs=${stats['jobBoard.update']}, jobFind=${stats['jobBoard.find']}x${stats['jobBoard.findCount']}, minds=${mindAvg}, ` +
             `rooms=${stats['manager.total']}, init=${stats['initTime']}`,
             `Path timer: ${timer}`,
+            `Cache timer: ${cacheTimer}`,
         ];
 
         this.printDiagnostics(messages);
@@ -237,6 +241,23 @@ class GameManager extends utils.Executable {
         //
         // utils.debugPath(path);
 
+    }
+
+    foo2(ticks) {
+        let unused = _.filter(Memory.cache.rooms,
+                data => (Game.time - data.lastAccessTime) > ticks);
+
+        let used = _.filter(Memory.cache.rooms,
+                data => (Game.time - data.lastAccessTime) <= ticks);
+
+        let usedData = _.sum(used, data => data.dataJSON.length);
+        let unusedData = _.sum(unused, data => data.dataJSON.length);
+
+        this.debug(`USED/UNUSED IN LAST ${ticks} - used: ${used.length} (${usedData} b), 
+            unused: ${unused.length} (${unusedData} b)
+            out of total: ${_.size(Memory.cache.rooms)}
+            Used: ${_.sortBy(used.map(data=>Game.rooms[data.roomName]&&Game.rooms[data.roomName].manager||data.roomName))}
+            Unused: ${_.sortBy(unused.map(data=>data.roomName))}`);
     }
 
     toString() {

@@ -68,8 +68,16 @@ class RoomStats extends utils.Executable {
             [COLOR_PURPLE, COLOR_WHITE, 'idle room'],
         ];
 
+        let actFlags = [
+            [COLOR_BROWN, COLOR_YELLOW, 'fast RCL'],
+        ];
+
         flags.forEach((flagInfo, i) => {
             this.printFlagInfo(new RoomPosition(48, 1 + i, ''), ...flagInfo);
+        });
+
+        actFlags.forEach((flagInfo, i) => {
+            this.printFlagInfo(new RoomPosition(48, 48 - i, ''), ...flagInfo);
         });
     }
 

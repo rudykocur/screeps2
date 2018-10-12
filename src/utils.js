@@ -3,6 +3,10 @@ const profiler = require('profiler');
 
 class Timer {
     constructor() {
+        this.reset();
+    }
+
+    reset() {
         this._usedTime = 0;
         this.usedTimeStart = 0;
         this.counts = 0;
@@ -29,6 +33,10 @@ class Timer {
         this._usedTime += Game.cpu.getUsed() - this.usedTimeStart;
 
         return this.usedTime;
+    }
+
+    toString() {
+        return `(x${this.counts})=${this.usedTime}`;
     }
 }
 

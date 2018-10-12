@@ -16,24 +16,28 @@ class RoomScout extends base.RemotelySupportedRoom {
     }
 
     update() {
-        /**
-         * @type {CachedRoom}
-         */
-        let cache = maps.getRoomCache(this.roomName);
 
-        if(cache) {
-            // do something with cache
-        }
+        utils.every(50, () => {
+            /**
+             * @type {CachedRoom}
+             */
+            let cache = maps.getRoomCache(this.roomName);
 
-        if(!cache || cache.cacheAge > 10000) {
-            if(this.getCreepCount(minds.available.scout) === 0) {
-                let res = this.spawn(minds.available.scout);
+            if(cache) {
+                // do something with cache
+            }
 
-                if(res) {
-                    this.important('Send scout for refresh', res);
+            if(!cache || cache.cacheAge > 10000) {
+                if(this.getCreepCount(minds.available.scout) === 0) {
+                    let res = this.spawn(minds.available.scout);
+
+                    if(res) {
+                        this.important('Send scout for refresh', res);
+                    }
                 }
             }
-        }
+        });
+
 
         utils.every(100, () => {
             this.getCreeps(minds.available.scout).forEach(/**CreepMindBase*/mind => {

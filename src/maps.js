@@ -1,6 +1,7 @@
 var _ = require('lodash');
 const utils = require('utils');
 const CachedData= require('utils.cache').CachedData;
+const lz = require('lz-string');
 
 const profiler = require('profiler');
 
@@ -23,6 +24,7 @@ function getCacheForRoom(roomName) {
 
     Memory.cache.rooms[roomName] = (Memory.cache.rooms[roomName] || {});
 
+    // _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, dataZIP: null, lastUpdateTime: 0});
     _.defaults(Memory.cache.rooms[roomName], {roomName: roomName, dataJSON: '[]', lastUpdateTime: 0});
 
     return Memory.cache.rooms[roomName];
@@ -31,6 +33,9 @@ function getCacheForRoom(roomName) {
 function hasCacheForRoom(roomName) {
     return !!_.get(Memory, ['cache', 'rooms', roomName]);
 }
+
+// let cacheInitTimer = new utils.Timer();
+let cacheInitTimer = new utils.NamedTimer();
 
 /**
  * @param {Room} room
@@ -72,11 +77,33 @@ class CachedRoom {
     }
 
     initCache(roomName) {
+        // console.log('ROOM NAME', roomName);
+
         this.cache = getCacheForRoom(roomName);
         this.cache.lastAccessTime = Game.time;
 
-        this.cacheData = JSON.parse(this.cache.dataJSON);
+        // if(this.cache.dataZIP) {
+        //     let json = lz.decompressFromUTF16(this.cache.dataZIP);
+
+            // console.log('FF', roomName, json, '::', this.cache.dataZIP.length);
+            // this.cacheData = JSON.parse(json);
+
+            // if(this.cache.dataJSON) {
+            //     delete this.cache.dataJSON;
+            //     console.log('DROPPED JSON FOR', roomName);
+            // }
+        // }
+        // else {
+            this.cacheData = JSON.parse(this.cache.dataJSON);
+        // }
+
+
         this.cacheData = this.cacheData.map(hydrate);
+
+        // if(!this.cache.dataZIP) {
+        //     this.cache.dataZIP = lz.compress(this.cache.dataJSON);
+        //     console.log('ZIPPED CACHE FOR', roomName);
+        // }
 
     }
 
@@ -146,13 +173,16 @@ class CachedRoom {
  * @param roomName
  * @return {CachedRoom}
  */
-function getRoomCache(roomName) {
+function getRoomCache(roomName, isPathfinding) {
     return tickCache.get('maps-roomCache-'+roomName, () => {
         if(!hasCacheForRoom(roomName)) {
             return null;
         }
 
+        let timerName = isPathfinding ? 'pathfinding' : 'other';
+        cacheInitTimer.start(timerName);
         let res = new CachedRoom(roomName);
+        cacheInitTimer.stop(timerName);
         return res;
     });
 }
@@ -169,7 +199,7 @@ function generateCostMatrix(roomName, data, timer, options) {
     let matrix = data.cachedCostMatrix('cm-'+roomName, 500, () => {
         let result = new PathFinder.CostMatrix;
 
-        let cache = getRoomCache(roomName);
+        let cache = getRoomCache(roomName, true);
         if(cache) {
 
             for(let struct of cache.find(FIND_STRUCTURES)) {
@@ -290,7 +320,7 @@ function getLocalPath(room, from, to, options) {
 }
 
 function canMoveInRoom(roomName, options, myUser) {
-    let cache = getRoomCache(roomName);
+    let cache = getRoomCache(roomName, true);
     if(cache) {
 
         if(!options.allowSKRooms && cache.isSKRoom()) {
@@ -337,10 +367,10 @@ module.exports = {
      */
     getRoomCache,
 
-    pathTimer,
+    pathTimer, cacheInitTimer,
 
     getCostMatrix(roomName, costs) {
-        let cache = getRoomCache(roomName);
+        let cache = getRoomCache(roomName, true);
 
         if(!costs) {
             costs = new PathFinder.CostMatrix;
@@ -368,7 +398,7 @@ module.exports = {
 
         let myUser = utils.myUsername();
 
-        let cachedRoom = module.exports.getRoomCache(roomName);
+        let cachedRoom = module.exports.getRoomCache(roomName, true);
 
         if(cachedRoom.isFree()) {
             return costMatrix;
@@ -468,6 +498,7 @@ module.exports = {
             let timer = new utils.Timer().start();
 
             cache.dataJSON = JSON.stringify(scanRoom(room));
+            // cache.dataZIP = lz.compressToUTF16(JSON.stringify(scanRoom(room)));
             cache.owner = null;
             cache.reservedBy = null;
             cache.safeModeUntill = null;

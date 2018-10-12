@@ -183,11 +183,14 @@ class RemoteRoomHandler extends RoomBase {
                 }
                 else if (this.data.droppedEnergy.length > 0 && this.getCreepCount(minds.available.transfer) < 2) {
                     this.spawnMind(minds.available.transfer);
+                    // this.spawnRemoteTransferer();
                 }
                 else if (_.sum(this.data.droppedEnergy, 'amount') > 2000 &&
                     this.getSpawnCooldown(minds.available.transfer) > 200 &&
                     this.getCreepCount(minds.available.transfer) < 5) {
+
                     this.spawnMind(minds.available.transfer);
+                    // this.spawnRemoteTransferer();
                 }
             }
 
@@ -232,6 +235,18 @@ class RemoteRoomHandler extends RoomBase {
         }
 
         return true;
+    }
+
+    spawnRemoteTransferer() {
+        let spawn = this.spawner.getFreeSpawn();
+
+        let mind = minds.available.transfer;
+
+        if(spawn) {
+            let spawnParams = mind.getSpawnParams(this.parent, {remoteHelper: true});
+            spawnParams.name = spawnParams.name+'Remote2';
+            return this.spawner.spawn(this.parent, spawnParams);
+        }
     }
 
     spawnMind(mind, options) {

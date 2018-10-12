@@ -1,6 +1,7 @@
 var _ = require('lodash');
 
 const utils = require('utils');
+const flags = require('utils.flags');
 
 const profiler = require('profiler');
 
@@ -17,7 +18,6 @@ class Act extends utils.Executable {
         }
 
         this.memory = Memory.acts[name];
-
     }
 }
 
@@ -35,7 +35,7 @@ class FastRCLAct extends Act {
      * @param {Array<RoomManager>} managers
      */
     update(managers) {
-        utils.every(21, () => this.aidRoom(managers));
+        utils.every(23, () => this.aidRoom(managers));
     }
 
     /**
@@ -48,6 +48,11 @@ class FastRCLAct extends Act {
          * @type {RoomManager}
          */
         let toSupport = this.pickRoomToSupport(qualified);
+
+        if(!toSupport) {
+            return;
+        }
+
 
         if(toSupport.room.terminal.store[RESOURCE_ENERGY] > this.lowThresholdTerminalEnergy) {
             return;
@@ -88,9 +93,38 @@ class FastRCLAct extends Act {
      * @param {Array<RoomManager>} managers
      */
     pickRoomToSupport(managers) {
-        return _.first(managers.filter(mgr => mgr.room && mgr.room.name === 'W36N19'));
+        if(!this.memory.supportingRoom) {
+            let toSupport = managers.filter(mgr => mgr.room && mgr.flags && mgr.flags.filter(flags.isFastRCLAct).length > 0);
 
-        // managers.filter(mgr => mgr.room.controller.level >= 6)
+            toSupport = _.sortByOrder(toSupport, ['room.controller.level', 'room.controller.progress'], ['asc', 'desc']);
+
+            let mgr = _.first(toSupport);
+
+            this.memory.supportingRoom = {
+                roomName: mgr.room.name,
+                rcl: mgr.room.controller.level,
+            };
+
+            this.important('Will now support room', mgr, 'at level', mgr.room.controller.level);
+        }
+
+        let room = Game.rooms[this.memory.supportingRoom.roomName];
+
+        if(!room) {
+            this.warn(Game.time, 'No room', this.memory.supportingRoom.roomName, '::', JSON.stringify(this.memory));
+            return null;
+        }
+
+        let roomManager = room.manager;
+
+        if(roomManager.room.controller.level !== this.memory.supportingRoom.rcl) {
+            this.important('Supported room upgraded! Changing support ...');
+            delete this.memory.supportingRoom;
+
+            return null;
+        }
+
+        return roomManager;
     }
 
     toString() {

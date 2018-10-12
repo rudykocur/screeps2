@@ -84,4 +84,8 @@ module.exports = {
     isIdleRoom(flag) {
         return flag.color === COLOR_PURPLE && flag.secondaryColor === COLOR_WHITE;
     },
+
+    isFastRCLAct(flag) {
+        return flag.color === COLOR_BROWN && flag.secondaryColor === COLOR_YELLOW;
+    },
 };

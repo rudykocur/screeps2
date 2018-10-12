@@ -20,6 +20,10 @@ class JobHandlerBase extends utils.Loggable {
          * @type {RoomManager}
          */
         this.roomMgr = this.creep.workRoom;
+
+        /**
+         * @type {RoomManager}
+         */
         this.workRoom = this.creep.workRoom;
         this.data = jobData;
 

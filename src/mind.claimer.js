@@ -9,6 +9,12 @@ const STATE = {
     RESERVE: 'reserve'
 };
 
+/**
+ * @typedef {Object} ClaimerMindState
+ * @property {RoomPosition} controllerPos
+ * @property {String} controllerPosStr
+ */
+
 class ClaimerMind extends mind.CreepMindBase {
     constructor(creep, roomManager) {
         super(creep, roomManager);
@@ -18,19 +24,33 @@ class ClaimerMind extends mind.CreepMindBase {
                 onTick: () => {}
             },
             [STATE.RESERVE]: {
+                onEnter: this.prepareState.bind(this),
                 onTick: this.reserveController.bind(this)
             }
         }, STATE.RESERVE);
     }
 
+    /**
+     * @param {ClaimerMindState} state
+     */
+    prepareState(state) {
+        let cache = maps.getRoomCache(this.creep.memory.roomName);
+        let cacheCtrl = cache.controller;
+
+        state.controllerPos = cacheCtrl.pos;
+        state.controllerPosStr = cacheCtrl.pos.serialize();
+    }
+
+    /**
+     * @param {ClaimerMindState} state
+     */
     reserveController(state) {
+
+        state.controllerPos = RoomPosition.unserialize(RoomPosition.prototype.serialize.call(state.controllerPos));
 
         if(this.creep.memory.claim && this.creep.memory.roomName != this.creep.pos.roomName) {
             this.creep.mover.moveByPath(() => {
-                let cache = maps.getRoomCache(this.creep.memory.roomName);
-                let cacheCtrl = cache.controller;
-
-                return maps.getMultiRoomPath(this.creep.pos, cacheCtrl.pos, {
+                return maps.getMultiRoomPath(this.creep.pos, state.controllerPos, {
                     allowSKRooms: false,
                 });
             });
@@ -70,11 +90,8 @@ class ClaimerMind extends mind.CreepMindBase {
             }
         }
         else {
-            let cache = maps.getRoomCache(this.creep.memory.roomName);
-            let target = cache.controller;
-
-            this.creep.mover.moveByPath(target, () =>{
-                return maps.getMultiRoomPath(this.creep.pos, target.pos, {
+            this.creep.mover.moveByPath(state.controllerPos, () =>{
+                return maps.getMultiRoomPath(this.creep.pos, state.controllerPos, {
                     avoidHostile: false,
                 });
             })

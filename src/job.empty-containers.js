@@ -39,6 +39,11 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
             return;
         }
 
+        if (this.creep.carryMax) {
+            this.unclaim();
+            return this.fsm.enter(STATE.DEPOSIT);
+        }
+
         if(!this.creep.pos.isNearTo(container)) {
             this.creep.mover.moveByPath(container, () =>{
                 return maps.getMultiRoomPath(this.creep.pos, container.pos, {
@@ -49,7 +54,7 @@ class EmptyContainerJobHandler extends job_common.JobHandlerBase {
         else {
             this.creep.withdraw(container, _.findKey(container.store));
 
-            if(_.size(container.store) <= 1) {
+            if(_.size(container.store) <= 1 || this.creep.carryMax) {
                 this.unclaim();
                 this.fsm.enter(STATE.DEPOSIT);
             }

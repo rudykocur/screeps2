@@ -389,14 +389,14 @@ class LabManager extends utils.Executable {
         }
 
         return _.shuffle([
-            {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 6000},
-            {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 6000},
-            {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 6000},
-            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 6000},
-            {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 6000},
+            {resource: RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, amount: 12000},
+            {resource: RESOURCE_CATALYZED_GHODIUM_ALKALIDE, amount: 12000},
+            {resource: RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, amount: 12000},
+            {resource: RESOURCE_CATALYZED_UTRIUM_ACID, amount: 12000},
+            {resource: RESOURCE_CATALYZED_KEANIUM_ALKALIDE, amount: 12000},
         ]).concat([
-            {resource: RESOURCE_HYDROXIDE, amount: 6000},
-            {resource: RESOURCE_GHODIUM, amount: 6000},
+            {resource: RESOURCE_HYDROXIDE, amount: 12000},
+            {resource: RESOURCE_GHODIUM, amount: 12000},
         ]);
     }
 

@@ -82,7 +82,9 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         let from = this.workRoom.storage.link;
         let to = this.workRoom.controller.link;
 
-        let result = from.transferEnergy(to);
+        let energyToSend = Math.min(from.energy, to.energyCapacity - to.energy);
+
+        let result = from.transferEnergy(to, energyToSend);
 
         if(result === OK) {
             this.completeJob();
@@ -90,7 +92,7 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         else {
             if(result !== ERR_TIRED) {
                 this.completeJob();
-                this.err(this.workRoom, 'energy send failed', result);
+                this.err(this.workRoom, 'energy send failed', result, '::', energyToSend);
             }
             else {
                 this.workRoom.room.visual.circle(from.pos, {stroke: "red"});

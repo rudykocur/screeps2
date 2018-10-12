@@ -174,6 +174,7 @@ class BuilderMind extends mind.CreepMindBase {
             let terrain = new Room.Terrain(this.workRoom.roomName);
 
             let swampSites = this.workRoom.constructionSites
+                .filter(site => site.structureType === STRUCTURE_ROAD)
                 .filter(site => terrain.get(site.pos.x, site.pos.y) === TERRAIN_MASK_SWAMP);
 
             if(swampSites.length > 0) {
