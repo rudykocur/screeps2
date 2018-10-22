@@ -14,8 +14,8 @@ class UpgraderMind extends mind.CreepMindBase {
 
         let fsm = {
             [STATE_REFILL]: {
-                onEnter: () => {},
-                onTick: ()=> this.doRefill(),
+                onEnter: this.pickRefillTarget.bind(this),
+                onTick: this.doRefill.bind(this),
             },
             [STATE_UPGRADE]: {
                 onEnter: () => {},
@@ -56,7 +56,13 @@ class UpgraderMind extends mind.CreepMindBase {
         return (this.roomMgr.storage.getStoredEnergy() - reservedEnergy) > this.creep.carryCapacity/2;
     }
 
-    doRefill() {
+    pickRefillTarget(state) {
+        if(this.workRoom.controller.getLinkEnergy() > 0) {
+            state.source = 'link';
+        }
+    }
+
+    doRefill(state) {
         if(!this.isEnoughStoredEnergy()) {
             this.enterState(STATE_IDLE);
             return;
@@ -67,7 +73,13 @@ class UpgraderMind extends mind.CreepMindBase {
             return;
         }
 
-        if(this.workRoom.controller.getLinkEnergy() > 0) {
+        if(state.source === 'link') {
+
+            if(this.workRoom.controller.getLinkEnergy() === 0) {
+                state.source = 'storage';
+                return;
+            }
+
             if(!this.creep.pos.isNearTo(this.workRoom.controller.link)) {
                 this.actions.moveTo(this.workRoom.controller.link);
             }

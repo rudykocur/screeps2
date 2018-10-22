@@ -283,6 +283,8 @@ class CreepCommonActions {
     }
 }
 
+profiler.registerClass(CreepCommonActions, CreepCommonActions.name);
+
 module.exports = {
     CreepCommonActions
 };

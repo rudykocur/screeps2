@@ -160,6 +160,16 @@ class Executable extends Loggable{
 
     update() {}
 
+    safeRun(callback) {
+        try{
+            callback();
+        }
+        catch(e) {
+            console.log('Executable safeRun failed:', this, '::', e, 'Stack trace:', e.stack);
+            Game.notify(`Executable safeRun failed: ${this} :: ${e}. Stack trace: ${e.stack}`, 30);
+        }
+    }
+
     run(...args) {
         try{
             let tStart = Game.cpu.getUsed();

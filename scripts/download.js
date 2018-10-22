@@ -4,9 +4,14 @@ const fs = require('fs');
 const cred = require('../screepsConfig');
 
 // All options are optional
-const api = new ScreepsAPI(cred);
+const api = new ScreepsAPI({
+  protocol: 'https',
+  hostname: 'screeps.com',
+  port: 443,
+  path: '/'
+});
 
-api.auth().then(() => {
+api.auth(cred.login, cred.password).then(() => {
     console.log('AUTH OK');
 
     api.socket.connect().then(() => {

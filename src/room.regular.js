@@ -93,6 +93,10 @@ class RoomManager extends roombase.RoomBase {
         this.extensionsClusters = this.getExtensionsClusters();
 
         this.architect = new room_architect.RoomArchitect(this);
+
+        /**
+         * @type {RoomPopulation}
+         */
         this.spawner = this._getSpawner();
 
         this.labs  = this._getLabManager();

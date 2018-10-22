@@ -31,6 +31,18 @@ class FastRCLAct extends Act {
         this.lowThresholdTerminalEnergy = 60000;
     }
 
+    preManagersUpdate() {
+        this.safeRun(() => {
+            let mgr = this.getSupportedRoom();
+
+            if(!mgr) {
+                return;
+            }
+
+            mgr.spawner.unlimitedUpgraders = true;
+        })
+    }
+
     /**
      * @param {Array<RoomManager>} managers
      */
@@ -53,8 +65,13 @@ class FastRCLAct extends Act {
             return;
         }
 
+        let threshold = this.lowThresholdTerminalEnergy;
+        if(toSupport.room.controller.level > 6) {
+            threshold = 90000;
+        }
 
-        if(toSupport.room.terminal.store[RESOURCE_ENERGY] > this.lowThresholdTerminalEnergy) {
+
+        if(toSupport.room.terminal.store[RESOURCE_ENERGY] > threshold) {
             return;
         }
 
@@ -107,6 +124,17 @@ class FastRCLAct extends Act {
 
             this.important('Will now support room', mgr, 'at level', mgr.room.controller.level);
             Game.notify(`${this} Will now support room ${mgr} at level ${mgr.room.controller.level}`);
+        }
+
+        return this.getSupportedRoom();
+    }
+
+    /**
+     * @return {RoomManager}
+     */
+    getSupportedRoom() {
+        if(!this.memory.supportingRoom) {
+            return null
         }
 
         let room = Game.rooms[this.memory.supportingRoom.roomName];

@@ -170,6 +170,8 @@ class RemoteRoomHandler extends RoomBase {
                 this.trySpawnClaimer();
             }
 
+            this.routeManager.registerRoute(this.parent.storage.target, this.room.controller);
+
             if(this.canSpawnWorkers()) {
 
                 if(this.shouldSpawnThief()) {

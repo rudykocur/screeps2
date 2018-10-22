@@ -66,7 +66,11 @@ class GameManager extends utils.Executable {
         this.cleanupCreeps(jobBoard);
         this.fillTickCache(tickCache);
 
-        let managers = this.runRoomManagers(jobBoard, processManager, routeManager);
+        let managers = rooms.getHandlers(jobBoard, processManager, routeManager);
+
+        act.preManagersUpdate();
+
+        this.runRoomManagers(managers);
 
         this.runMinds(managers);
 
@@ -144,17 +148,13 @@ class GameManager extends utils.Executable {
         });
     }
 
-    runRoomManagers(jobBoard, processManager, routeManager) {
-        let managers = rooms.getHandlers(jobBoard, processManager, routeManager);
-
+    runRoomManagers(managers) {
         let exch = new exchange.InterRoomExchange(managers);
         exch.run();
 
         for(let manager of managers) {
             manager.run(exch);
         }
-
-        return managers;
     }
 
     runMinds(managers) {

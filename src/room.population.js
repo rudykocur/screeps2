@@ -29,6 +29,8 @@ class RoomPopulation extends utils.Executable {
 
         this.notEnoughEnergy = false;
         this.spawningBlocked = false;
+
+        this.unlimitedUpgraders = false;
     }
 
     update() {
@@ -246,7 +248,7 @@ class RoomPopulation extends utils.Executable {
             return false;
         }
 
-        if(this.manager.room.controller.level === 7) {
+        if(this.manager.room.controller.level === 7 && !this.unlimitedUpgraders) {
             if(this.manager.storage.getStoredEnergy() < 150000) {
                 if (upgradersCount >= 2) {
                     return false;
@@ -256,7 +258,9 @@ class RoomPopulation extends utils.Executable {
 
         let spawnCooldown = 200;
 
-        if(!this.manager.room.controller.level <= 3 && this.manager.storage.getStoredEnergy() > 5000) {
+        if((!this.manager.room.controller.level <= 3 && this.manager.storage.getStoredEnergy() > 5000)
+            || this.unlimitedUpgraders) {
+
             spawnCooldown = 40;
         }
 
@@ -316,7 +320,9 @@ class RoomPopulation extends utils.Executable {
     needReinforcer() {
         let reinforcers = this.manager.getMinds(minds.available.builder).filter(mind => mind.creep.memory.reinforcer).length;
 
-        if(reinforcers > 0) {
+        let maxReinforcers = this.manager.room.controller.level <= 6 ? 1 : 2;
+
+        if(reinforcers >= maxReinforcers) {
             return false;
         }
 

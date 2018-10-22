@@ -75,6 +75,10 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
         }
         else {
             this.err(this.workRoom, 'energy transfer failed', result, '::', toTransfer);
+
+            if(result === ERR_FULL) {
+                this.completeJob();
+            }
         }
     }
 
