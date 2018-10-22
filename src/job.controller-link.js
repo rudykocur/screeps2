@@ -67,7 +67,13 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
 
         let needed = this.workRoom.controller.getNeededEnergyInLink();
         let has = this.workRoom.storage.link.energy;
-        let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY], has);
+        let hasCapacity = this.workRoom.storage.link.energyCapacity - has;
+        let toTransfer = Math.min(needed, this.creep.carry[RESOURCE_ENERGY], has, hasCapacity);
+
+        if(has >= needed) {
+            return this.fsm.fastSwitch(STATE.SEND);
+        }
+
         let result = this.creep.transfer(this.workRoom.storage.link.link, RESOURCE_ENERGY, toTransfer);
 
         if(result === OK || toTransfer === 0) {
@@ -127,8 +133,15 @@ class ControllerLinkJobHandler extends job_common.JobHandlerBase {
 }
 
 class ControllerLinkJobDTO extends job_common.JobDTO {
+    /**
+     * @param {RoomManager} manager
+     */
     constructor(manager) {
         super('controller-link-'+manager.roomName, JOB_TYPE, minds.available.transfer);
+
+        manager.room.visual.line(manager.storage.link.pos, manager.controller.link.pos, {
+            color: 'yellow', style: 'dashed'
+        })
     }
 }
 
